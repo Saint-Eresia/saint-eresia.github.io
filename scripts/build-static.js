@@ -2,7 +2,11 @@
 // Les données proviennent du même store que le serveur : content/ reste la source du texte.
 const fs = require('node:fs');
 const path = require('node:path');
-const { state } = require('../server/repositories/store');
+const { novels: baseNovels, patches } = require('../server/data/demo-data');
+const { applyImportedContent } = require('../server/data/content-merge');
+
+// Pas de store ici : le build n'a besoin ni des comptes ni de bcrypt.
+const state = { novels: applyImportedContent(structuredClone(baseNovels)), patches };
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'dist');
