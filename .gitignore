@@ -7,16 +7,24 @@ coverage/
 .DS_Store
 .vercel/
 
-# Captured legacy mirror; representative files live in _legacy_backup/.
-api/
-backend/
-css/
-js/
-metadata/
-pages/
+# Miroir statique d'origine, à la racine uniquement : la barre initiale évite d'attraper public/css et public/js.
+/api/
+/backend/
+/css/
+/js/
+/metadata/
+/pages/
 
 # Généré par npm run content:import à partir de content/
 server/data/content.json
 
 # Site statique généré par npm run build:static
 dist/
+
+# Miroir d'origine archivé : volumineux et jamais servi, on ne versionne que styles.dark.css
+_legacy_backup/api/
+_legacy_backup/backend/
+_legacy_backup/css/
+_legacy_backup/js/
+_legacy_backup/metadata/
+_legacy_backup/pages/

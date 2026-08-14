@@ -1,0 +1,6 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const main=document.querySelector('#main');
+  const token=new URLSearchParams(location.search).get('token')||'';
+  main.innerHTML=`<div class="auth-wrap"><section class="auth-card"><p class="eyebrow">Saint Eresia</p><h1>Nouveau mot de passe</h1><form class="form-stack" id="reset-form"><div class="field"><label for="password-new">Mot de passe</label><input class="input" id="password-new" name="password" type="password" minlength="10" required autocomplete="new-password"></div><div class="form-message"></div><button class="btn btn-primary">Mettre à jour</button></form></section></div>`;
+  document.querySelector('#reset-form').onsubmit=async(event)=>{event.preventDefault();const message=document.querySelector('.form-message');try{const response=await fetch('/api/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,password:new FormData(event.currentTarget).get('password')})});const data=await response.json();if(!response.ok)throw new Error(data.error||'Lien invalide.');message.className='form-message success';message.textContent=data.message;setTimeout(()=>location.assign('/login.html'),700);}catch(error){message.textContent=error.message;}};
+});
