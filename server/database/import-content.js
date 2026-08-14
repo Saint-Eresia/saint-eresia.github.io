@@ -68,7 +68,9 @@ function parseLocation(novelSlug, relative) {
   return null;
 }
 
+// Tout ce qui commence par _ est ignoré : modèles, brouillons et notes de travail.
 const walk = (dir, base = dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+  if (entry.name.startsWith('_')) return [];
   const full = path.join(dir, entry.name);
   if (entry.isDirectory()) return walk(full, base);
   return /\.(md|txt)$/i.test(entry.name) ? [path.relative(base, full)] : [];
@@ -78,7 +80,7 @@ function run() {
   if (!fs.existsSync(ROOT)) { console.error(`Dossier introuvable : ${ROOT}`); process.exitCode = 1; return; }
   const sections = [];
   const problems = [];
-  for (const novelSlug of fs.readdirSync(ROOT).filter((name) => fs.statSync(path.join(ROOT, name)).isDirectory())) {
+  for (const novelSlug of fs.readdirSync(ROOT).filter((name) => !name.startsWith('_') && fs.statSync(path.join(ROOT, name)).isDirectory())) {
     for (const relative of walk(path.join(ROOT, novelSlug))) {
       const location = parseLocation(novelSlug, relative);
       if (!location) { problems.push(`${novelSlug}/${relative} — nom de fichier hors convention, ignoré`); continue; }
