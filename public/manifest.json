@@ -1,0 +1,11 @@
+{
+  "name": "Saint Eresia — Light Novels & Visual Novel Patches",
+  "short_name": "Saint Eresia",
+  "description": "Plateforme francophone de Light Novels, Web Novels et patchs français pour Visual Novels.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#fbf9f7",
+  "theme_color": "#c81e45",
+  "lang": "fr",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

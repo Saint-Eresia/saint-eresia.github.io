@@ -1,0 +1,42 @@
+{
+  "name": "saint-eresia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plateforme francophone de Light Novels, Web Novels et patchs français de Visual Novels.",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js",
+    "db:migrate": "node server/database/migrate.js",
+    "db:seed": "node server/database/seed.js",
+    "content:import": "node server/database/import-content.js",
+    "test": "node --test server/tests/*.test.js",
+    "check": "node --check server/app.js && node --test server/tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/s3-request-presigner": "^3.864.0",
+    "bcrypt": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-session": "^1.18.2",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3",
+    "sanitize-html": "^2.17.0",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
+  }
+}
