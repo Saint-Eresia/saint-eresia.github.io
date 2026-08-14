@@ -17,3 +17,6 @@ pages/
 
 # Généré par npm run content:import à partir de content/
 server/data/content.json
+
+# Site statique généré par npm run build:static
+dist/
