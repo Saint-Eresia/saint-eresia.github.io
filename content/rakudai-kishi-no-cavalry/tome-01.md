@@ -1,17 +1,16 @@
 ---
 titre: 
-statut: Brouillon
-traducteur: Saint Eresia
-date: 
+statut: Publié
+traducteur: Novel De Glace
+date: 17-05-2019
 ---
 
-## Rakudai Kishi no Cavalry
 
-## Tome 1
 
 Traduit en anglais par Baka-Tsuki
 
 Traduit en français par Novel de Glace
+Harmonisé par Mekki (Saint-Eresia)
 
 Version 1.0 (17-05-2019)
 
