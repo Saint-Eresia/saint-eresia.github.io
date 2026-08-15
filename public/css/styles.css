@@ -96,6 +96,12 @@ main{min-height:calc(100vh - var(--header))}
 .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:hsl(var(--muted-fg));font-size:12.5px}
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;background:hsl(var(--primary-soft));color:hsl(var(--primary-dark));font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .badge.success{background:hsl(var(--success-soft));color:hsl(var(--success))}
+/* Bloc d'arc narratif : c'est un intertitre de récit, pas un simple tome — d'où le sommaire
+   plus affirmé et les tomes listés directement dessous. */
+.volume.arc-group > summary{font-weight:700;font-size:1.05em}
+.volume.arc-group > summary .meta{margin-left:8px;font-weight:400}
+/* Nom d'arc narratif : trop long pour la casse forcée et l'interlettrage des autres badges. */
+.badge.arc{text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;background:hsl(var(--card-soft));color:hsl(var(--muted-fg))}
 .badge.warning{background:hsl(var(--warning-soft));color:hsl(var(--warning))}
 .rating{color:hsl(var(--warning));font-weight:700}
 .list{display:grid;gap:10px}
@@ -374,6 +380,8 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--
 .chapter-row strong{display:block;margin-bottom:3px}
 .chapter-row small{display:block;color:hsl(var(--muted-fg))}
 .note-block{margin:0 0 16px;padding:12px 16px;border-left:3px solid hsl(var(--primary));border-radius:var(--radius-sm);background:hsl(var(--card-soft));font-size:14px;color:hsl(var(--muted-fg))}
+/* Conseil de lecture (où commencer, ce que couvre l'anime) : distinct de la note de traduction. */
+.note-block.note-reading{border-left-color:hsl(var(--success))}
 
 /* Captures d'écran d'un patch : défilement horizontal */
 .shots{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}

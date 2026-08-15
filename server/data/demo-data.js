@@ -8,6 +8,13 @@ const novelSpecs = [
     originalTitle: '落第騎士の英雄譚', alternativeTitles: ['A Tale of Worst One', 'Chivalry of a Failed Knight'],
     author: 'Riku Misora', artist: 'Won', sourceLanguage: 'Anglais', translator: 'Saint Eresia', genres: ['Action', 'Fantasy', 'École'], tags: ['Combat', 'Romance'],
     workStatus: 'Terminé', translationStatus: 'En cours', publishedAt: '2013-07-01', readingUnit: 'volume', volumeCount: 19,
+    // Découpage en arcs narratifs : chaque tome hérite du nom de l'arc qui le couvre.
+    arcs: [
+      { name: 'Arc du Tournoi de Sélection', from: 1, to: 3 },
+      { name: 'Arc du Festival des Sept Étoiles', from: 4, to: 9 },
+      { name: 'Arc de l’Empire Vermillion (arc final)', from: 10, to: 19 }
+    ],
+    readingNote: 'L’anime couvre les tomes 1 à 3, soit l’intégralité de l’arc du Tournoi de Sélection. Si vous l’avez vu, vous pouvez commencer directement au tome 4, au début de l’arc du Festival des Sept Étoiles.',
     synopsis: 'Light novel de Riku Misora illustré par Won, publié chez SB Creative (GA Bunko). Récit d’action situé dans une académie de chevaliers-mages.'
   },
   {
@@ -38,10 +45,12 @@ const novels = novelSpecs.map((spec, index) => {
       : Array.from({ length: spec.chaptersPerVolume || 3 }, (_, c) => ({
           number: c + 1, slug: `${spec.slug}-v${number}-ch${c + 1}`, title: ''
         }));
+    const arc = (spec.arcs || []).find((entry) => number >= entry.from && number <= entry.to);
     return {
       id: index * 100 + number,
       number,
       title: '',
+      arc: arc ? arc.name : '',
       slug: `${spec.slug}-volume-${number}`,
       summary: '',
       chapters: sections.map((section) => ({
@@ -67,6 +76,7 @@ const novels = novelSpecs.map((spec, index) => {
     genres: spec.genres, tags: spec.tags,
     workStatus: spec.workStatus, translationStatus: spec.translationStatus,
     translationNote: spec.translationNote || '',
+    readingNote: spec.readingNote || '',
     synopsis: spec.synopsis,
     publishedAt: spec.publishedAt, updatedAt: '2026-08-14',
     rating: 0, ratingsCount: 0, views: 0, favorites: 0, warnings: [],
