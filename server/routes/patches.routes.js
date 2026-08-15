@@ -13,7 +13,14 @@ const LIST_FIELDS = { alternativeTitles: 10, systems: 8, requirements: 15, instr
 // Axes d'avancement suivis par l'équipe. `progress` en est toujours la moyenne : ne jamais l'éditer directement.
 const AXES = ['translation', 'images', 'technical', 'proofreading'];
 const emptyAxes = () => Object.fromEntries(AXES.map((axis) => [axis, 0]));
-const overall = (axes) => Math.round(AXES.reduce((total, axis) => total + (axes[axis] || 0), 0) / AXES.length);
+// Un axe à null est « sans objet » : un patch sans image à retoucher ne doit pas être
+// plafonné à 75 % par un axe qui ne le concerne pas. Il sort donc aussi de la moyenne.
+const applies = (value) => value !== null && value !== undefined;
+const overall = (axes) => {
+  const values = AXES.map((axis) => axes[axis]).filter(applies);
+  if (!values.length) return 0;
+  return Math.round(values.reduce((total, value) => total + (value || 0), 0) / values.length);
+};
 const today = () => new Date().toISOString().slice(0, 10);
 const allVersions = () => state.patches.flatMap((patch) => patch.versions || []);
 const findPatch = (id) => state.patches.find((patch) => patch.id === Number(id) && !patch.deletedAt);
@@ -35,6 +42,8 @@ function applyFields(item, body, { isCreate = false } = {}) {
     const axes = { ...emptyAxes(), ...item.axes };
     for (const axis of AXES) {
       if (source[axis] === undefined) continue;
+      // null ou chaîne vide : l'axe est déclaré sans objet pour ce patch.
+      if (source[axis] === null || source[axis] === '') { axes[axis] = null; continue; }
       const value = cleanInt(source[axis], 0, 100);
       if (value === null) return `L'avancement « ${axis} » doit être un nombre entre 0 et 100.`;
       axes[axis] = value;

@@ -81,9 +81,9 @@ const patches = [
     developer: '5pb. / MAGES.', publisher: 'MAGES.', engine: 'MAGES. (Science Adventure)',
     platform: 'Windows', systems: ['Windows'], gameVersion: 'Steam ou GOG',
     originalLanguage: 'Japonais', patchLanguage: 'Français', team: 'Saint Eresia',
-    type: 'Traduction complète', status: 'Bêta',
-    axes: { translation: 100, images: 18, technical: 100, proofreading: 60 },
-    progress: 70, currentVersion: '', updatedAt: '2026-08-12',
+    type: 'Traduction complète', status: 'Terminé',
+    axes: { translation: 100, images: 100, technical: 100, proofreading: 100 },
+    progress: 100, currentVersion: 'V1', updatedAt: '2026-08-15',
     fileSize: '~300 Mo', downloads: 0, rating: 0,
     synopsis: 'Traduction française de CHAOS;CHILD, réalisée à partir du patch anglais de Committee of Zero. Le patch ne contient aucun fichier du jeu original.',
     requirements: [
@@ -97,13 +97,13 @@ const patches = [
       'Si le patch anglais Committee of Zero est déjà installé, ses fichiers sont simplement remplacés.'
     ],
     warnings: ['Ce téléchargement ne contient pas le jeu original.'],
-    changelog: ['Scripts, dialogues et texte système traduits', 'Police accentuée et sous-titres des vidéos intégrés', 'Menus et CG en cours de reprise'],
+    changelog: ['Scripts, dialogues et texte système traduits', 'Police accentuée et sous-titres des vidéos intégrés', 'Menus et CG traduits'],
     checksum: '', cover: '/assets/VN/chaoschild.webp',
     repository: 'https://github.com/jabberwockyfool/Chaos-Child-FR',
     gamebanana: 'https://gamebanana.com/mods/698264',
     downloadUrl: 'https://github.com/jabberwockyfool/Chaos-Child-FR/releases',
     steamAppId: '970570', screenshots: [],
-    versions: [{ id: 1, version: 'Dernière version', size: '~300 Mo', releasedAt: '2026-08-12', status: 'active', url: 'https://github.com/jabberwockyfool/Chaos-Child-FR/releases' }]
+    versions: [{ id: 1, version: 'V1', size: '~300 Mo', releasedAt: '2026-08-15', status: 'active', url: 'https://github.com/jabberwockyfool/Chaos-Child-FR/releases' }]
   },
   {
     id: 2, slug: 'rance-01-fr', title: 'Rance 01 : La quête pour Hikari — Patch FR',
@@ -112,11 +112,12 @@ const patches = [
     developer: 'AliceSoft', publisher: 'AliceSoft', engine: 'AliceSoft System',
     platform: 'Windows', systems: ['Windows'], gameVersion: 'Édition Windows',
     originalLanguage: 'Japonais', patchLanguage: 'Français', team: 'Saint Eresia',
-    type: 'Traduction complète', status: 'En développement',
-    axes: { translation: 0, images: 0, technical: 0, proofreading: 0 },
-    progress: 0, currentVersion: '', updatedAt: '2026-08-14',
+    type: 'Traduction complète', status: 'Terminé',
+    // images : null = sans objet, ce patch n'a aucune image à retoucher.
+    axes: { translation: 100, images: null, technical: 100, proofreading: 100 },
+    progress: 100, currentVersion: 'V1', updatedAt: '2026-08-15',
     fileSize: '', downloads: 0, rating: 0,
-    synopsis: 'Traduction française du remake de Rance 01, développé par AliceSoft. Projet en cours de démarrage.',
+    synopsis: 'Traduction française du remake de Rance 01, développé par AliceSoft.',
     requirements: ['Posséder légalement le jeu original'],
     instructions: ['Les étapes d’installation seront publiées avec la première version du patch.'],
     warnings: ['Ce téléchargement ne contient pas le jeu original.', 'Œuvre réservée à un public adulte.'],

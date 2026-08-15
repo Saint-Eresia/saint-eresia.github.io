@@ -42,6 +42,23 @@ test('les axes d’avancement bornent et recalculent la progression globale', as
   assert.equal(updated.body.progress, 63, 'moyenne de 100, 0, 100 et 50, arrondie au supérieur');
 });
 
+test('un axe sans objet sort de la moyenne au lieu de plafonner la progression', async () => {
+  const { admin, csrf } = await signIn();
+  const created = await admin.post('/api/patches').set('x-csrf-token', csrf)
+    .send({ rightsConfirmed: true, title: 'Patch sans image' }).expect(201);
+
+  const updated = await admin.patch(`/api/patches/${created.body.id}`).set('x-csrf-token', csrf)
+    .send({ translation: 100, images: null, technical: 100, proofreading: 100 }).expect(200);
+  assert.equal(updated.body.axes.images, null, 'l’axe déclaré sans objet reste null');
+  assert.equal(updated.body.progress, 100, 'la moyenne ne porte que sur les trois axes applicables');
+
+  // L'axe redevient chiffrable dès qu'on lui donne une valeur.
+  const back = await admin.patch(`/api/patches/${created.body.id}`).set('x-csrf-token', csrf)
+    .send({ images: 0 }).expect(200);
+  assert.equal(back.body.axes.images, 0);
+  assert.equal(back.body.progress, 75, 'moyenne de 100, 0, 100 et 100');
+});
+
 test('un statut invalide est refusé sans altérer la fiche', async () => {
   const { admin, csrf } = await signIn();
   const created = await admin.post('/api/patches').set('x-csrf-token', csrf)
