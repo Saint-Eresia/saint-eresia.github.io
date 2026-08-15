@@ -21,7 +21,17 @@ function splitFrontMatter(raw) {
   return { meta, body: text.slice(match[0].length).trim() };
 }
 
-const inline = (text) => cleanText(text, 20000)
+// On échappe les chevrons au lieu de les supprimer : « YUKI.N > » doit rester lisible.
+const escapeHtml = (text) => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// Les liens passent avant les emphases : le libellé peut contenir *italique*, pas l'URL.
+// Le `!` d'une illustration est exclu, celle-ci est traitée comme un bloc plus bas.
+const link = (whole, label, url) => {
+  if (!/^(https?:\/\/|\/)/i.test(url)) return whole;
+  const external = /^https?:/i.test(url) ? ' target="_blank" rel="noopener noreferrer"' : '';
+  return `<a href="${url}"${external}>${label}</a>`;
+};
+const inline = (text) => escapeHtml(String(text || '').trim().slice(0, 20000))
+  .replace(/(?<!!)\[([^\]]+)\]\(([^)\s]+)\)/g, link)
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   .replace(/\*(.+?)\*/g, '<em>$1</em>');
 
@@ -36,6 +46,7 @@ function toHtml(body) {
     if (block.startsWith('### ')) return `<h3>${inline(block.slice(4))}</h3>`;
     if (block.startsWith('## ')) return `<h2>${inline(block.slice(3))}</h2>`;
     if (block.split('\n').every((line) => line.startsWith('> '))) {
+      // Dans un chapitre, une citation est un message affiché à l'écran : toujours encadrée.
       return `<blockquote>${inline(block.split('\n').map((l) => l.slice(2)).join(' '))}</blockquote>`;
     }
     if (block.split('\n').every((line) => /^[-*] /.test(line))) {

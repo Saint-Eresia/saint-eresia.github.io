@@ -205,28 +205,75 @@
     bindUserActions();
   }
 
+  // Carrousel des captures : défilement automatique, mise en pause au survol, et agrandissement au clic.
+  function setupShots(urls) {
+    const rail = $('#shots');
+    if (!rail || !urls.length) return;
+    const dots = $$('#shot-dots button');
+    let current = 0, timer = null;
+    const goTo = (index, smooth = true) => {
+      current = (index + urls.length) % urls.length;
+      const target = rail.children[current];
+      if (target) rail.scrollTo({ left: target.offsetLeft - rail.offsetLeft, behavior: smooth ? 'smooth' : 'auto' });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
+    };
+    const start = () => { if (urls.length > 1) timer = setInterval(() => goTo(current + 1), 5000); };
+    const stop = () => { clearInterval(timer); timer = null; };
+    dots.forEach((dot) => dot.onclick = () => { stop(); goTo(Number(dot.dataset.go)); start(); });
+    rail.addEventListener('mouseenter', stop);
+    rail.addEventListener('mouseleave', start);
+    rail.addEventListener('focusin', stop);
+    start();
+
+    // Vue agrandie : clic pour zoomer, flèches pour naviguer, Échap pour fermer.
+    const box = document.createElement('div');
+    box.className = 'lightbox';
+    box.innerHTML = `<button class="lb-close" type="button" aria-label="Fermer">✕</button><button class="lb-nav lb-prev" type="button" aria-label="Capture précédente">‹</button><img alt=""><button class="lb-nav lb-next" type="button" aria-label="Capture suivante">›</button>`;
+    document.body.appendChild(box);
+    const image = box.querySelector('img');
+    let shown = 0;
+    const show = (index) => { shown = (index + urls.length) % urls.length; image.src = urls[shown]; image.classList.remove('zoomed'); };
+    const open = (index) => { show(index); box.classList.add('open'); stop(); document.body.style.overflow = 'hidden'; };
+    const close = () => { box.classList.remove('open'); document.body.style.overflow = ''; start(); };
+    $$('#shots .shot').forEach((button) => button.onclick = () => open(Number(button.dataset.index)));
+    box.querySelector('.lb-close').onclick = close;
+    box.querySelector('.lb-prev').onclick = (event) => { event.stopPropagation(); show(shown - 1); };
+    box.querySelector('.lb-next').onclick = (event) => { event.stopPropagation(); show(shown + 1); };
+    image.onclick = (event) => { event.stopPropagation(); image.classList.toggle('zoomed'); };
+    box.onclick = close;
+    document.addEventListener('keydown', (event) => {
+      if (!box.classList.contains('open')) return;
+      if (event.key === 'Escape') close();
+      if (event.key === 'ArrowLeft') show(shown - 1);
+      if (event.key === 'ArrowRight') show(shown + 1);
+    });
+  }
   async function renderPatch() {
     const patch = await api(`/api/patches/${encodeURIComponent(params.get('slug') || '')}`);
     const shots = (patch.screenshots || []).filter(Boolean);
     const links = [
-      { url: patch.repository, label: 'Dépôt du projet', icon: 'github' },
-      { url: patch.gamebanana, label: 'GameBanana', icon: 'gamebanana' },
-      { url: patch.vndbUrl, label: 'Fiche VNDB', icon: 'site' }
+      { url: patch.repository, label: 'Dépôt du projet' },
+      { url: patch.gamebanana, label: 'GameBanana' },
+      { url: patch.vndbUrl, label: 'Fiche VNDB' }
     ].filter((link) => link.url);
     const shotsBlock = `<section class="section"><div class="container">
       <div class="block-title"><h2>Captures</h2></div>
-      ${shots.length
-        ? `<div class="shots">${shots.map((url) => `<img src="${esc(url)}" alt="" loading="lazy">`).join('')}</div>`
-        : `<div class="empty">Les captures du patch s’afficheront ici.</div>`}
+      ${shots.length ? `<div class="shots-wrap">
+        <div class="shots" id="shots">${shots.map((url, index) => `<button class="shot" type="button" data-index="${index}" aria-label="Agrandir la capture ${index + 1}"><img src="${esc(url)}" alt="" loading="lazy"></button>`).join('')}</div>
+        ${shots.length > 1 ? `<div class="shot-dots" id="shot-dots">${shots.map((_, index) => `<button type="button" class="${index ? '' : 'active'}" data-go="${index}" aria-label="Aller à la capture ${index + 1}"></button>`).join('')}</div>` : ``}
+      </div>` : `<div class="empty">Les captures du patch s’afficheront ici.</div>`}
     </div></section>`;
+    const steamBlock = patch.steamAppId ? `<section class="section" style="padding-top:0"><div class="container">
+      <iframe class="steam-widget" src="https://store.steampowered.com/widget/${esc(patch.steamAppId)}/" title="Acheter ${esc(patch.title)} sur Steam" loading="lazy"></iframe>
+    </div></section>` : ``;
     const linksBlock = `<section class="section" style="padding-top:0"><div class="container">
       <div class="block-title"><h2>Liens</h2></div>
       ${links.length
         ? `<div class="link-row">${links.map((link) => `<a class="btn" href="${esc(link.url)}" rel="noopener noreferrer">${esc(link.label)}</a>`).join('')}</div>`
         : `<div class="empty">Dépôt du projet, page GameBanana et fiche VNDB s’afficheront ici.</div>`}
     </div></section>`;
-    $('#main').innerHTML = `<section class="detail-hero"><div class="container detail-grid"><img class="detail-cover" src="${esc(patch.cover)}" alt="${esc(patch.title)}"><div class="detail-info"><div class="breadcrumbs"><a href="/patchs.html">Patchs VN</a> / ${esc(patch.title)}</div>${badge('Patch VN')}<h1>${esc(patch.title)}</h1><p class="meta">${patch.currentVersion ? `<span>Version ${esc(patch.currentVersion)}</span><span>·</span>` : ``}<span>${esc(patch.status)}</span><span>·</span><span>${patch.progress}%</span></p><p class="synopsis">${esc(patch.synopsis)}</p>${axisRows(patch)}<div class="actions">${patch.versions.length?`<button class="btn btn-primary js-download">Télécharger le patch</button>`:`<button class="btn" disabled title="Aucun fichier publié pour le moment.">Patch indisponible</button>`}${STATIC ? `` : `<button class="btn js-favorite" data-type="patch" data-id="${patch.id}">♡ Ajouter aux favoris</button>`}<a class="btn" href="/report.html">Signaler un problème</a>${patch.vndbUrl ? `<a class="btn" href="${esc(patch.vndbUrl)}" rel="noopener noreferrer">Consulter sur VNDB</a>` : ``}</div></div></div></section>${shotsBlock}<section class="section"><div class="container content-layout"><div class="panel"><h2>Installation</h2><ol>${patch.instructions.map((x)=>`<li>${esc(x)}</li>`).join('')}</ol><h2>Prérequis</h2><ul>${patch.requirements.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><h2>Changelog</h2><ul>${patch.changelog.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><h2>Fichiers disponibles</h2><div class="table-wrap"><table><thead><tr><th>Version</th><th>Date</th><th>Taille</th><th>SHA-256</th></tr></thead><tbody>${patch.versions.map((v)=>`<tr><td>${esc(v.version)}</td><td>${date(v.releasedAt)}</td><td>${esc(v.size)}</td><td><code>${esc(v.checksum || patch.checksum)}</code></td></tr>`).join('')||`<tr><td colspan="4">Aucun fichier publié pour le moment.</td></tr>`}</tbody></table></div></div><aside class="panel"><h2>Compatibilité</h2><dl class="facts"><div class="fact"><dt>Plateformes</dt><dd>${esc(patch.platform)}</dd></div><div class="fact"><dt>Version du jeu</dt><dd>${esc(patch.gameVersion)}</dd></div><div class="fact"><dt>Moteur</dt><dd>${esc(patch.engine)}</dd></div><div class="fact"><dt>Équipe</dt><dd>${esc(patch.team)}</dd></div><div class="fact"><dt>Taille</dt><dd>${esc(patch.fileSize)}</dd></div><div class="fact"><dt>Téléchargements</dt><dd>${fmt(patch.downloads)}</dd></div></dl></aside></div></section>${linksBlock}<div class="modal" id="download-modal" role="dialog" aria-modal="true" aria-labelledby="download-title"><div class="modal-card"><h2 id="download-title">Confirmer le téléchargement</h2><p>Vous allez télécharger uniquement un patch de traduction. Le jeu original n’est pas inclus.</p><ul><li>Jeu requis : ${esc(patch.gameVersion)}</li><li>Système : ${esc(patch.platform)}</li><li>Taille : ${esc(patch.fileSize)}</li><li>Langue : ${esc(patch.patchLanguage)}</li>${patch.warnings.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><label class="checkbox"><input id="download-confirm" type="checkbox"> Je possède légalement le jeu et j’ai vérifié sa compatibilité.</label><div class="actions"><button class="btn js-close-modal">Annuler</button><button class="btn btn-primary js-confirm-download" disabled>Confirmer</button></div></div></div>`;
-    bindUserActions(); const modal = $('#download-modal'); const release = patch.versions[0]; const trigger = $('.js-download'); if (trigger) trigger.onclick=()=>modal.classList.add('open'); $('.js-close-modal').onclick=()=>modal.classList.remove('open'); $('#download-confirm').onchange=(e)=>$('.js-confirm-download').disabled=!e.target.checked; $('.js-confirm-download').onclick=async()=>{ try{ await api(`/api/patch-versions/${release.id}/download`,{method:'POST'}); modal.classList.remove('open'); toast('Téléchargement de démonstration enregistré.','success'); }catch(e){toast(e.message,'error');} };
+    $('#main').innerHTML = `<section class="detail-hero"><div class="container detail-grid"><img class="detail-cover" src="${esc(patch.cover)}" alt="${esc(patch.title)}"><div class="detail-info"><div class="breadcrumbs"><a href="/patchs.html">Patchs VN</a> / ${esc(patch.title)}</div>${badge('Patch VN')}<h1>${esc(patch.title)}</h1><p class="meta">${patch.currentVersion ? `<span>Version ${esc(patch.currentVersion)}</span><span>·</span>` : ``}<span>${esc(patch.status)}</span><span>·</span><span>${patch.progress}%</span></p><p class="synopsis">${esc(patch.synopsis)}</p>${axisRows(patch)}<div class="actions">${patch.downloadUrl || patch.versions.length ? `<button class="btn btn-primary js-download">Télécharger le patch</button>` : `<button class="btn" disabled title="Aucun fichier publié pour le moment.">Patch indisponible</button>`}${STATIC ? `` : `<button class="btn js-favorite" data-type="patch" data-id="${patch.id}">♡ Ajouter aux favoris</button>`}<a class="btn" href="/report.html">Signaler un problème</a>${patch.vndbUrl ? `<a class="btn" href="${esc(patch.vndbUrl)}" rel="noopener noreferrer">Consulter sur VNDB</a>` : ``}</div></div></div></section>${shotsBlock}<section class="section"><div class="container content-layout"><div class="panel"><h2>Installation</h2><ol>${patch.instructions.map((x)=>`<li>${esc(x)}</li>`).join('')}</ol><h2>Prérequis</h2><ul>${patch.requirements.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><h2>Changelog</h2><ul>${patch.changelog.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><h2>Fichiers disponibles</h2><div class="table-wrap"><table><thead><tr><th>Version</th><th>Date</th><th>Taille</th><th>Fichier</th></tr></thead><tbody>${patch.versions.map((v)=>`<tr><td>${esc(v.version)}</td><td>${date(v.releasedAt)}</td><td>${esc(v.size)}</td><td>${v.url || patch.downloadUrl ? `<a class="btn" href="${esc(v.url || patch.downloadUrl)}" rel="noopener noreferrer">Télécharger</a>` : (v.checksum || patch.checksum ? `<code>${esc(v.checksum || patch.checksum)}</code>` : `—`)}</td></tr>`).join('')||`<tr><td colspan="4">Aucun fichier publié pour le moment.</td></tr>`}</tbody></table></div></div><aside class="panel"><h2>Compatibilité</h2><dl class="facts"><div class="fact"><dt>Plateformes</dt><dd>${esc(patch.platform)}</dd></div><div class="fact"><dt>Version du jeu</dt><dd>${esc(patch.gameVersion)}</dd></div><div class="fact"><dt>Moteur</dt><dd>${esc(patch.engine)}</dd></div><div class="fact"><dt>Équipe</dt><dd>${esc(patch.team)}</dd></div><div class="fact"><dt>Taille</dt><dd>${esc(patch.fileSize)}</dd></div><div class="fact"><dt>Téléchargements</dt><dd>${fmt(patch.downloads)}</dd></div></dl></aside></div></section>${steamBlock}${linksBlock}<div class="modal" id="download-modal" role="dialog" aria-modal="true" aria-labelledby="download-title"><div class="modal-card"><h2 id="download-title">Confirmer le téléchargement</h2><p>Vous allez télécharger uniquement un patch de traduction. Le jeu original n’est pas inclus.</p><ul><li>Jeu requis : ${esc(patch.gameVersion)}</li><li>Système : ${esc(patch.platform)}</li><li>Taille : ${esc(patch.fileSize)}</li><li>Langue : ${esc(patch.patchLanguage)}</li>${patch.warnings.map((x)=>`<li>${esc(x)}</li>`).join('')}</ul><label class="checkbox"><input id="download-confirm" type="checkbox"> Je possède légalement le jeu et j’ai vérifié sa compatibilité.</label><div class="actions"><button class="btn js-close-modal">Annuler</button><button class="btn btn-primary js-confirm-download" disabled>Confirmer</button></div></div></div>`;
+    bindUserActions(); setupShots(shots); const modal = $('#download-modal'); const release = patch.versions[0]; const trigger = $('.js-download'); if (trigger) trigger.onclick=()=>modal.classList.add('open'); $('.js-close-modal').onclick=()=>modal.classList.remove('open'); $('#download-confirm').onchange=(e)=>$('.js-confirm-download').disabled=!e.target.checked; $('.js-confirm-download').onclick=async()=>{ if(patch.downloadUrl){ window.open(patch.downloadUrl, `_blank`, `noopener`); modal.classList.remove(`open`); return; } try{ await api(`/api/patch-versions/${release.id}/download`,{method:'POST'}); modal.classList.remove('open'); toast('Téléchargement de démonstration enregistré.','success'); }catch(e){toast(e.message,'error');} };
   }
 
   function bindUserActions() {

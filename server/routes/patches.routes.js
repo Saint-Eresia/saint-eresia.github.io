@@ -8,7 +8,7 @@ const router = express.Router();
 
 const STATUSES = ['En développement', 'Alpha', 'Bêta', 'Stable', 'Terminé', 'Obsolète', 'Abandonné'];
 const TYPES = ['Traduction complète', 'Traduction partielle', 'Correctif', 'Interface', 'Compatibilité', 'Patch technique', 'Voix', 'Restauration de contenu'];
-const TEXT_FIELDS = { title: 180, synopsis: 4000, currentVersion: 60, gameVersion: 120, platform: 180, developer: 180, publisher: 180, engine: 100, team: 180, originalLanguage: 60, patchLanguage: 60, vndbId: 30, vndbUrl: 300, repository: 300, gamebanana: 300, fileSize: 40, checksum: 64, cover: 300 };
+const TEXT_FIELDS = { title: 180, synopsis: 4000, currentVersion: 60, gameVersion: 120, platform: 180, developer: 180, publisher: 180, engine: 100, team: 180, originalLanguage: 60, patchLanguage: 60, vndbId: 30, vndbUrl: 300, repository: 300, gamebanana: 300, steamAppId: 12, downloadUrl: 300, fileSize: 40, checksum: 64, cover: 300 };
 const LIST_FIELDS = { alternativeTitles: 10, systems: 8, requirements: 15, instructions: 20, changelog: 30, warnings: 10, screenshots: 12 };
 // Axes d'avancement suivis par l'équipe. `progress` en est toujours la moyenne : ne jamais l'éditer directement.
 const AXES = ['translation', 'images', 'technical', 'proofreading'];

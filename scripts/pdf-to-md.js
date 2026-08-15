@@ -7,6 +7,7 @@
 //   --traducteur <texte>  valeur du champ traducteur (défaut : Saint Eresia)
 //   --statut <texte>      Brouillon (défaut), Publié ou Archivé
 const fs = require('node:fs');
+const { pathToFileURL } = require('node:url');
 const sharp = require('sharp');
 const path = require('node:path');
 
@@ -188,8 +189,19 @@ async function run() {
     return { dir, urlBase, prefix, OPS };
   };
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  // pdf.js charge openjpeg.wasm (images JPEG 2000) et jbig2.wasm depuis wasmUrl. Sans cette
+  // option il concatène `null` au nom du fichier et renonce à décoder les illustrations.
+  const pdfjsDir = path.dirname(require.resolve('pdfjs-dist/package.json'));
+  const asUrl = (sub) => `${pathToFileURL(path.join(pdfjsDir, sub)).href}/`;
   const data = new Uint8Array(fs.readFileSync(input));
-  const document = await pdfjs.getDocument({ data, useSystemFonts: true }).promise;
+  const document = await pdfjs.getDocument({
+    data,
+    useSystemFonts: true,
+    wasmUrl: asUrl('wasm'),
+    standardFontDataUrl: asUrl('standard_fonts'),
+    cMapUrl: asUrl('cmaps'),
+    cMapPacked: true,
+  }).promise;
 
   const pages = [];
   for (let n = 1; n <= document.numPages; n += 1) {

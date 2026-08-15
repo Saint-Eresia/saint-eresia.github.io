@@ -1,0 +1,73 @@
+---
+titre: Épilogue
+volume: Les soupirs de Haruhi Suzumiya
+statut: Publié
+traducteurs: Le Mamelouk
+equipe: Baka Tsuki
+telechargement: 
+format: 
+date: 21/12/08
+---
+
+Jusqu’à ce que le festival de l’école démarre, nous n’étions pas si occupés que ça.
+
+En fait, je pense que le plus amusant de tout évènement a lieu lors des préparatifs. Dès qu'un évènement commence, tout le monde est si occupé que personne ne voit le temps passé. Il sera bientôt temps de conclure et de tout nettoyer. Mais avant que ça arrive, profitons de ce temps libre. Tout au moins, je suis libre aujourd’hui et demain ; J’espère que personne ne viendra m’ennuyer pendant ma période de relaxation.
+
+Quant à Haruhi, la seule personne qui pourrait se plaindre de cette période de tranquillité, elle a remis sa tenue de bunny girl et elle distribue des prospectus à l’entrée principale. J’aimerais bien savoir combien elle va pouvoir en distribuer avant que les professeurs ou que les gardiens ne l’arrêtent.
+
+Je sortis de la salle de club, en direction du campus plein d’animation.
+
+Mon cœur, rempli d'agitation il y a peu de temps, semblait finalement s'être calmé. Koizumi le croyait et Nagato l’avait promis, donc il ne devrait pas y avoir de problèmes pour le moment. Comme Shamisen ne peut plus parler, c'est ce dont j'avais besoin pour confirmer que tout était revenu à la normale. L'actuel Shamisen est maintenant aussi silencieux que Nagato. J’ai estimé qu’il serait inhumain de le chasser, et donc, j’ai pensé le garder comme animal de compagnie. En outre, ma sœur est très excitée d’avoir un jouet en peluche qui peut se déplacer par ses propres moyens, donc, j’ai dit à ma famille « que les précédents propriétaires avaient décidé de déménager. »
+
+Ce chat mâle émettait parfois des bruits de miaulement, mais c'était ce que cela semblait être à mes oreilles, peut-être qu’il parlait vraiment… Eh, ça n'a pas d'importance.
+
+En terme de disparitions, ceux qui portaient d’étranges costumes depuis quelques jours ne participèrent pas en fait au festival.
+
+J’avais vu la brochure distribuée par le comité exécutif du festival et ils n’y étaient pas. J’avais également épié dans les salles de club possibles (tel que le club Théâtre) mais je n'avais rien trouvé. Qui étaient donc ces gens ?
+
+« Hmm »
+
+M'étais-je murmuré inconsciemment, tout en marchant tranquillement dans le bâtiment de l’école.
+
+Et si c'était des personnes surnaturelles se promenant à l’école ? Et s'ils portaient aussi des habits futuristes ? Oui, tout comme Nagato.
+
+Si c'était vraiment comme ça, alors Nagato pourrait s'être habillée comme ça pour cacher sa véritable identité à Haruhi, ou tout au moins lui donner l’impression que des habits comme ceux-ci n'apparaissaient seulement que durant des festivals.
+
+Nagato avait toujours été du genre silencieuse, et donc, je n’avais aucune idée si ceci est vrai. Mais il est très probable qu'une autre sorte de conflit se déroulait dont je n'avais pas connaissance, peut-être se déroulant de manière très détendue. Même si nous étions au bord de la destruction de la Terre, je crois qu’elle resterait quand même silencieuse. Si je lui demande directement, elle pourrait me le dire. Mais, je pense qu’elle dirait tout simplement quelque chose, qui serait incompréhensible en utilisant les langues disponibles aux humains, et je ne pense pas que j’ai l’intelligence pour essayer de comprendre ce qu’elle pourrait dire.
+
+Par conséquent, j’ai décidé de rester silencieux moi-même. Particulièrement face à Haruhi, je crois que je devrais garder mon silence.
+
+
+
+Changement de sujet. On projette actuellement notre film dans la salle de projection. Je crois qu’il y a seulement le nôtre et celui du club de recherche cinématographique de prévu. C’est après qu'Haruhi ait fait une énorme protestation envers ce club qu’ils ont finalement cédé et accepté de montrer notre film avec leur production. Hé, il n'y avait pas d'autre choix, seulement cette pièce possèdait un projecteur. Je dois admettre qu’ils avaient l'air vraiment troublés jusqu'à la toute fin, mais tout de même, ils, comme aucune personne présente dans ce monde, ne semblaient pas avoir la capacité de rejeter les décisions d'Haruhi. Et donc finalement, ils ont été pratiquement forcés à montrer notre film de mauvaise qualité ayant des films publicitaires au milieu.
+
+Puisque nous parlons de ça, je devrais vous faire également savoir que, selon le comité de direction d'étudiant, la Brigade SOS n'est toujours pas un club officiel. Ainsi "L'aventure d'Asahina Mikuru" n'est pas sur la liste officielle des événements. Il semblerait que nous n'allons pas pouvoir gagner le premier prix, après tout. Je pense que toutes les voix destinées à notre film iront probablement au club de cinématographie.
+
+Ah oui, vous vous souvenez de ce film de soirée qui avait prétendument donné à Haruhi l’idée d’en faire un ? Après quelques recherches, je découvris qu’il n’avait pas reçu de Golden Globe Award. C’était un film promotionnel en noir et blanc nommé « Only » qui a été montré au Festival de Cannes. Elle devait être folle de croire que ce film pouvait gagner la moindre récompense. Pour confirmer ceci, j'avais même loué le film. Il s'était avéré que je m'étais endormi lors de la première demi-heure. Et donc, je n'ai aucune idée si le contenu est amusant ou ennuyeux. Je pense que j’essayerais encore de le regarder avant de le rendre.
+
+
+
+Puisque c'était une occasion rare, j'ai également observé la pièce de la classe 1-9.
+
+Koizumi n’avait pas arrêté de sourire pendant toute la durée de la pièce. Son personnage était quelqu’un qui mourrait stupidement à la fin ; le niveau de stupidité rivalisait avec le film d’Haruhi. Mais d'une certaine façon elle semblait être très populaire. Peut-être que je la rabassais inconsciemment parce que Koizumi était l’acteur. Son jeu d'acteur n'était pas vraiment joué, on aurait plutôt dit que c'était lui qui interprétait lui-même normalement. C'était probablement une autre raison pour laquelle je n'avais pas pensé que c'était si bon.
+
+Après s'être incliné sous les applaudissements de public, Koizumi me fit un clin d’œil comme une réponse. Naturellement, je m'enfuis de ce clin d'oeil avait qu’il ne m’atteigne. Quant à la classe de Nagato, j’allais aussi me moquer d'eux. Cependant, je n'avais pas prévu qu'il y aurait une si longue file d’attente devant la salle de divination. J’avais juste jeté un petit coup d’œil à l’intérieur. Sous les rideaux noirs, au milieu de plusieurs filles habillées aussi en noir, je vis le visage blanc et sans expression de Nagato. Elle avait mis ses mains sur la boule en cristal, parlant aux clients avec une tonalité sans beaucoup d'émotion. S’il te plait Nagato, aide les juste à retrouver les objet perdus et ne fais rien d’autre.
+
+
+Au sujet de toutes ces anomalies provoquées par le film, elles semblent toutes avoir été réparé après l'ajout de "Cette histoire est une fiction" à la fin. Mais ce monde ne peut pas simplement être reparé par une simple phrase comme ca, non ? Haruhi, Asahina-san, Nagato, Koizumi et moi, sommes toujours ici, non ? Comment le « il n’y a pas de relation avec de vraies personnes » est-il même vrai ? Peut-être qu’un jour, nous voudrons tous vivre nos propres vies, mais pour le moment, la Brigade SOS existe toujours, son chef et ses membres aussi.
+
+Ahh... Comment pourrais-je dire ça ? Parfois j’aimerais penser, que peut-être tout ceci est un grand mensonge, qu'Haruhi n'a en fait aucun pouvoir, et que c’est juste une plaisanterie inventée par Asahina, Nagato, et Koizumi. Ces colombes avait simplement été peintes ; Shamisen parlant était juste du ventriloquisme ou un microphone caché ; et que les pétales de cerisier en automne, plus le Mikuru beam étaient justes des effets spéciaux.
+
+Et même si c’est vrai, je ne peux pas en dire plus.
+
+« Donc ce n’est pas possible. »
+
+Quoiqu'il arrive maintenant, ce genre de situation n'est pas exactement heureux. Je pense que tout le monde bloqué ensemble est beaucoup plus relaxant qu’être isolé seul avec Haruhi. Je suis heureux de ne pas être le seul membre de la Brigade SOS.
+
+Et même si je suis la seule personne normale.
+
+L’horloge de la classe entra dans mon champ de vision, et cet endroit était déjà devenu un lieu pour se relaxer, tout comme la classe 1-5.
+
+Ah oui, ce n’est pas le moment d'avoir la tête dans les nuages, c’est presque l’heure. Comment pourrais-je gaspiller ce bon de réduction ? Sans mentionner le fait que je suis aussi intéressé par ce qu’elle porte.
+
+Je courus rapidement vers l'endroit du rendez-vous décidé avec Taniguchi et Kunikida. Le plan était de visiter l'endroit où on pouvait manger de l'udon servi par Asahina-san. 

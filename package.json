@@ -11,6 +11,7 @@
     "db:seed": "node server/database/seed.js",
     "content:import": "node server/database/import-content.js",
     "pdf:md": "node scripts/pdf-to-md.js",
+    "wiki:md": "node scripts/wiki-to-md.js",
     "build:static": "node server/database/import-content.js && node scripts/build-static.js",
     "test": "node --test server/tests/*.test.js",
     "check": "node --check server/app.js && node --test server/tests/*.test.js"

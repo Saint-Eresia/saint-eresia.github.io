@@ -1,0 +1,1103 @@
+---
+titre: Rhapsodie en feuilles de bambou
+volume: L'Ennuie de Haruhi Suzumiya
+statut: Publié
+traducteurs: Le Mamelouk
+equipe: Baka Tsuki
+telechargement: 
+format: 
+date: 10/11/08
+---
+![](\assets\illustrations\suzumiya\Sh_v3_illust_03.jpg)
+
+Le mois de mai était déjà très chaud, mais juillet était tout simplement insupportable. L'humidité était encore pire, montant mon facteur d'inconfort à des niveaux records. Il n'y avait aucune chance que le bâtiment bon marché de notre lycée ait des installations de grande classe comme l'air conditionné. La salle de classe 1-5 grésillait comme la salle d'attente pour un bus en direction de l'enfer. J'étais persuadé que l'architecte n'avait aucune idée de la signification d'un "milieu de vie confortable".
+
+Pour rendre les choses encore pires, cette semaine était la première semaine des examens trimestriels de juillet, la gaieté dans mon cœur étant partie s'attarder aux environs du Brésil, sans vouloir revenir pour le moment.
+
+Mes résultats de milieu de trimestre étaient déjà désastreux, donc inutile d'imaginer que mes examens de fin de trimestre puissent jamais avoir un résultat satisfaisant. C'était principalement dû au fait que je passais trop de temps avec la Brigade SOS, et qu'en conséquence je n'arrivais pas à me concentrer sur mes études. Je ne voulais pas y être mêlé, mais depuis le printemps de cette année, à chaque fois qu'Haruhi faisait une suggestion, je me retrouvais mystérieusement à la suivre. C'était devenu une partie de ma vie quotidienne, et je commençais à me détester pour mon accoutumance à cette vie.
+
+C'était après l'école quand le soleil brillait depuis l'ouest dans la salle de classe. La fille assise derrière moi me tapa le dos avec son stylo.
+
+"Est-ce que tu sais quel jour on est ?"
+
+Suzumiya Haruhi me posait la question avec l'apparence charmante d'un enfant la veille de Noël. Chaque fois qu'elle affichait une telle expression, c'était le signe qu'elle était probablement sur le point de faire des bêtises. Je fis semblant de réfléchir pendant environ trois secondes, avant de dire :
+
+"Ton anniversaire ?"
+
+"Non !"
+
+"L'anniversaire d'Asahina-san."
+
+"Nan !"
+
+"L'anniversaire de Koizumi ou de Nagato."
+
+"Comment est-ce que je connaîtrais leur date d'anniversaire !?"
+
+"En passant, mon anniversaire est le ..."
+
+"Qui se soucie de ça ? Tu ne sais vraiment pas quel jour important nous sommes ?"
+
+Quelle que soit l'importance que tu lui donnes, c'est toujours un jour normal et très chaud d'après moi.
+
+"Dis-moi, quelle est la date d'aujourd'hui ?"
+
+"Le 7 juillet...... je ne veux pas vraiment y penser, mais tu n'es pas en train de penser au Festival Tanabata, n'est-ce pas ?"
+
+"Bien sûr que si ! C'est le festival Tanabata ! Tu devrais t'en souvenir si tu oses te prétendre japonais."
+
+En réalité, il s'agit d'une fête chinoise. Et selon le calendrier chinois, Tanabata devrait être le mois prochain.
+
+Haruhi tenait son stylo et l'agitait devant mon visage,
+
+"L'Asie s'étend de la mer rouge jusqu'ici."
+
+Qu'est-ce que c'est que ce concept de la géographie ?
+
+"Est-ce qu'ils ne mettent pas ensemble tous ces pays pour les qualifications de la Coupe du Monde ? C'est comme juillet et août, ce sont tous les deux des mois de l'été."
+
+Non, sérieux ?
+
+"Laisse tomber. Quoi qu'il en soit nous devons aussi mettre en place une activité pour Tanabata. J'insiste pour que ce festival soit traité sérieusement."
+
+J'avais l'impression qu'il y avait des choses qui méritaient d'être traitées plus sérieusement que ceci. Mais est-ce que tu avais vraiment besoin de me dire ça ? Je ne veux vraiment pas savoir ce que tu as planifié.
+
+"Ce sera plus amusant si nous le faisons ensemble. J'annonce officiellement, que nous devons organiser quelque chose de grand pour Tanabata tous les ans à partir de cette année."
+
+"Ne décide pas ça par toi-même."
+
+Bien que j'ai dit ça, en voyant qu'Haruhi semblait extraordinairement excitée, je savais que c'était stupide d'essayer de la contredire.
+
+"Attends-moi dans la salle du club ! Ne rentre pas chez toi tout seul !" me précisa-t-elle.
+
+Je n'avais pas besoin qu'elle me le dise, j'avais déjà prévu d'aller dans la salle de club de toute façon. Parce qu'il existe une personne que je devais voir au moins une fois. Et uniquement cette personne.
+
+
+
+Les autres membres étaient déjà rassemblés dans la salle de club, qui se trouvait au deuxième étage du bâtiment réservé aux clubs artistiques. Au lieu de l'appeler la salle de club que la Brigade SOS empruntait au club de Littérature, ce serait une meilleure description de l'appeler le de facto quartier général que la brigade avait envahi de force.
+
+"Oh, bonjour."
+
+La personne qui me souriait et qui me saluait avec entrain était Asahina-san. Elle était la source du réconfort de mon coeur, sans elle, la Brigade SOS aurait aussi peu de sens que le riz au curry sans aucun cube au curry d’ajouter.
+
+Depuis juillet, Asahina-san avait changé pour un costume de bonne d'été. C'était Haruhi qui lui avait apporté le costume, je n'avais absolument aucune idée d'où elle obtenait tous ces costumes pittoresques, alors qu'Asahina-san la remercierait toujours intensément, "Ah......m...merci beaucoup." Aujourd'hui elle était toujours la bonne remplaçante de la Brigade SOS, préparant avec empressement du [wheat thé] pour moi. Je buvais à petites gorgées mon thé et étudiait l'intérieur de la pièce.
+
+"Hé, comment vont les choses ?"
+
+Koizumi leva la tête et me salua. Il était assis en face d'un échiquier, qui était posé sur la table, et tenait un livre d'échecs d'une main tout en déplaçant les pièces d'échecs avec l'autre.
+
+
+"Les choses n'ont jamais été normales depuis que je suis entré au lycée."
+
+Koizumi dit qu'il était lassé d'Othello, et donc avait décidé d'apporter un échiquier la semaine dernière. Mais comme ni moi ni aucun autre ne savaient comment jouer aux échecs, il devait jouer tout seul. Il semblait vraiment détendu alors que pourtant les examens allaient bientôt avoir lieu.
+
+"Eh bien, je ne suis pas exactement détendu. J'utilise juste le temps pendant lequel je n'étudie pas pour exercer mon cerveau. Pour chaque problème résolu, la vitesse de la circulation du sang dans le cerveau augmente. Ca te tente une partie ?"
+
+Non merci, je n'ai pas envie d'exercer mon cerveau qui est déjà épuisé en ce moment. Si je pense à de nouvelles choses bizarres, alors tous ces mots d'Anglais pour lesquels j'ai passé un temps difficile à mémoriser seront éjectés de mon cerveau.
+
+"C'est dommage. Peut-être je devrais apporter un Monopoly ou une bataille navale la prochaine fois ? Ah oui, pourquoi pas quelque chose auquel nous pourrions tous jouer ? A quoi penses-tu ?"
+
+Peu importe, ou peut-être pas. Ce n'est pas le groupe d'étude des jeux sur plateau, c'est la Brigade SOS. En passant, je suis toujours perplexe au sujet des activités de la Brigade SOS. Je n'étais pas sûr de ce que ce club mystérieux devait faire. Et je ne voulais pas non plus le savoir, puisque ne rien savoir augmentait mes chances de survie. Je n'étais donc pas motivé pour faire quoi que ce soit, c'était ma parfaite logique.
+
+Koizumi souleva légèrement ses épaules et retourna étudier son livre d'échecs. Il souleva le roi noir et le déplaça sur le plateau.
+
+Assise à côté de Koizumi, montrant moins d'émotion qu'un robot, Nagato Yuki était occupée à lire son livre. Cette silencieuse et froide extraterrestre avait abandonné les romans traduits pour les romans originaux en langues étrangères. Actuellement elle était en train de lire un livre dont la couverture était griffonnée dans une langue que je n'arrivais pas à reconnaître, comme celle de ces livres de charmes magiques vieux et épais. Je devinais que ce devait être de l'étrusque ancien ou une autre langue étrange. J'étais sûr que Nagato n'aurait aucun problème pour lire ces tablettes de pierre en Linéaire A.
+
+Je sortis une chaise pliante et m'assis dessus. Asahina-san m'apporta rapidement une tasse. Qui désirerait boire du thé chaud lors d'un jour aussi chaud...... Je n'avais aucune intention de me plaindre, ce qui aurait attiré la colère divine, et bus à petites gorgées mon [wheat thé] avec reconnaissance. Hmm, c'est bouillant.
+
+Un ventilateur électrique qu'Haruhi avait dû faucher quelque part se trouvait dans le coin de la pièce. Cependant il rafraichissait autant que de l'eau chaude versée sur un tas de pierres grésillantes de chaleur. Si tu peux faucher, pourquoi ne pas plutôt faucher une de ces tours aéroréfrigérantes verticales de la salle des profs ?
+
+Je détournai mon regard de mon manuel d'Anglais, dont les pages étaient tournées par le vent, j'arquai mon dos sur la chaise pliante et m'étirai.
+
+Sachant parfaitement bien que je n'allais pas étudier quand je serais chez moi, j'avais voulu voir si ce ne serait pas mieux pour moi d'étudier dans la salle du club après les cours ; mais je réalisai que tant que je n'étais pas intéressé par quelque chose, il m'était impossible de le faire quel que soit l'endroit où je me trouvais. Difficile de me forcer à faire quelque chose dont je n'ai pas envie, tant physiquement et mentalement. Autrement dit, c'est plus sain de ne pas se forcer. C'est ça, je ne vais pas étudier. Je fis tournoyer mon stylo, fermai mon livre, et décidai de regarder mon stabilisateur mental. Le stabilisateur qui pouvait apaiser mon coeur cynique était maintenant habillé dans un costume de bonne et était assis en face de moi, travaillant sur ses problèmes de maths.
+
+Regardant intensément les questions, puis griffonnant sur le cahier ; elle réfléchissait avec désinvolture, puis écrivait soudainement comme une folle, comme si elle était inspirée par quelque chose - celle qui répétait ce cycle n'étant autre qu'Asahina-san.
+
+Je me sentais bien plus détendu en la regardant. Je ressentis soudainement un grand sentiment de pitié, comme si jeter tout mon argent, sauf mon argent de poche, dans une boite de charité dans la rue n'était pas un si grand problème. Asahina-san ne remarquait pas que j'étais en train de la regarder, et se concentra sur l'étude de ses maths. Toutes cela était suffisant pour me faire sourire. En fait, j'étais déjà en train de sourire. Je me sentais comme si j'étais en train de regarder un bébé phoque.
+
+Nos yeux se croisèrent.
+
+"Ah, qu.., qu'est-ce qu'il y a ? Est-c.., est-ce que j'ai fait quelque chose d'étrange ?"
+
+Asahina-san se pomponna frénétiquement, ce qui fit fondre mon cœur encore davantage. Juste au moment où j'allais chanter mes louanges angéliques......
+
+"Ya-hoo !"
+
+La porte s'était ouverte violemment. Une fille brusque la franchit à grandes enjambées.
+
+"Désolée, je suis en retard."
+
+Pas besoin de t'excuser, personne ne t'attendait.
+
+Haruhi était apparue dans la pièce, portant une branche de bambou sur son épaule. C'était un grand morceau d'un bâton de bambou vivant, avec des feuilles de bambou vertes poussant dessus. Pourquoi est-ce que tu as apporté ça ici ? Pour faire un cochon tirelire en bambou ?
+
+Haruhi gonfla sa poitrine et répondit :
+
+"Pourquoi ? C'est pour y suspendre des voeux, bien sûr."
+
+Pourquoi ? Dans quel but ?
+
+"C'est simple : je n'ai plus suspendu ces vœux pour bâton de bambou depuis si longtemps. Alors faisons le ici et maintenant, c'est Tanabata, après tout !"
+
+......Comme d'habitude, cela n'avait absolument aucun sens.
+
+"Où est-ce que tu as eu ça ?"
+
+"La forêt de bambou derrière l'école."
+
+Si je me souviens bien, c'est une propriété privée, ignoble voleuse de bambou.
+
+"Est-ce que c'est vraiment important ? Les racines de bambou grandissent sous terre, ils ne devraient pas être affectés si la moitié supérieure d'une branche était coupée ! Ce serait un délit si j'avais volé toute la branche. J'ai été piquée par plusieurs moustiques, ça me démange vraiment. Mikuru-chan, est-ce que tu peux me mettre une crème anti-démangeaison dans le dos ?"
+
+"Oui, tout de suite !"
+
+Asahina-san avança à petits pas avec une trousse de premiers soins, elle avait l'air d'une infirmière en formation. Elle sortit la pommade, puis plaça ses mains dans le col de la marinière, sur le dos d'Haruhi. Haruhi se pencha en avant et dit :
+
+"Un peu plus à droite......trop à droite. Oui, juste là."
+
+Haruhi ressemblait maintenant à un chaton dont on caresse le menton et clignait les yeux de détente. Elle plaça la branche de bambou sur le côté de la fenêtre, et se tint calmement sur le bureau du commandant, puis sortit de quelque part plusieurs feuilles de tanzaku et sourit très joyeusement :
+
+"Maintenant écrivons nos vœux !"
+
+Nagato leva la tête lentement, Koizumi sourit prudemment, et Asahina-san ouvrit ses yeux en grand. Qu'avait-elle prévu cette fois ? Haruhi sauta du bureau, sa jupe flottant au vent, lorsqu'elle dit :
+
+"Mais il y a des conditions."
+
+"Quelles conditions ?"
+
+"Kyon, est-ce que tu sais qui sont ceux qui exaucent les vœux des gens pendant le Tanabata ?"
+
+"Est-ce que ce ne sont pas Orihime et Hikoboshi ?"
+
+"Exact. Ça fait dix points. Maintenant, est-ce que tu sais à quelles étoiles Orihime et Hikoboshi sont liés ?"
+
+"Non."
+
+"Est-ce que ce ne serait pas Véga et Altaïr ?"
+
+Koizumi répondit rapidement.
+
+"C'est juste ! 85 points ! Ce sont les deux étoiles ! Autrement dit, tu dois diriger la branche de bambou portant les tanzakus vers ces deux étoiles. Compris ?"
+
+Qu'est-ce que tu essayes de dire ? Et à quoi exactement correspondent les 15 points restants ?
+
+Hé hé. Sans aucune raison, Haruhi me lança soudain une expression rusée.
+
+"Laisse-moi expliquer. Il n'y a aucun moyen de voyager plus vite que la vitesse de la lumière, selon le principe de relativité restreinte."
+
+A quoi bon me dire tout ça tout d'un coup ? Haruhi sortit une note de la poche de sa jupe et la lut bruyamment :
+
+"Juste pour que vous sachiez. La distance entre la Terre et Véga, et entre la Terre et Altaïr sont respectivement de 25 et 16 années-lumière. Cela signifie qu'il faut 25 et 16 ans pour envoyer un message vers ces étoiles depuis la Terre. Ce sont les faits - pigé ?"
+
+Et alors ? Au fait, tu as vraiment pris la peine de rechercher de telles informations ?
+
+"Donc c'est le temps qu'il faut pour qu'un dieu reçoive nos vœux, n'est-ce pas ? Nous devrons attendre tout ce temps pour voir nos vœux accordés. Donc il faut écrire ce que nous souhaitons dans 25 et 16 ans ! Ecrire des vœux comme 'je désire avoir un sex-symbol comme petit ami pour noël prochain !' ne va pas marcher, parce que le vœu ne sera pas accordé à temps !"
+
+Haruhi agitait beaucoup ses bras et continuait d'expliquer.
+
+"Attends, si ça met environ 20 ans pour que le vœu arrive là-bas, est-ce que ça ne devrait pas prendre autant de temps pour qu'il revienne ? Est-ce que ça ne veut pas dire que nous devons plutôt attendre 50 et 32 ans pour que nos vœux se réalisent ?"
+
+"Eh bien, ce sont des dieux. Ils vont évidemment trouver un moyen de nous aider. Il y a toujours des soldes à 50% chaque année !"
+
+Dès qu'elles ne lui conviennent plus, elle ne tient absolument plus aucun compte des lois de la relativité et les jette par la fenêtre.
+
+"Maintenant, est-ce que tout le monde comprend ce que je suis en train de dire ? Il y a deux types de tanzaku, un pour Véga, et l'autre pour Altaïr. Donc s'il vous plait, écrivez ce que vous désirez pour dans 25 et 16 ans."
+
+C'est totalement ridicule. Essayer de prier en même temps pour que deux souhaits soient réalisés est terriblement sans gêne. Par ailleurs, il est impossible de savoir ce que nous allons faire dans 25 et 16 ans. Comment est-ce que nous pourrions savoir maintenant quels souhaits nous aurons alors à ce moment-là ? Je suppose que le mieux que nous puissions souhaiter est que nos plans retraites ou nos fonds d'investissement n'aient aucun problème et continuent de fonctionner correctement jusqu'à cette date.
+
+Si Orihime et Hikoboshi devaient entendre de tels souhaits, je suis sûr qu'ils souffriraient de maux de tête. Ils ne peuvent se rencontrer qu'une fois par an, et alors on leur demande de réaliser des souhaits aussi idiots. Pourquoi est-ce que vous ne demandez pas plutôt à la place à vos propres politiciens d'aider ? Si j'étais eux, c'est tout ce que je répondrais.
+
+Mais comme toujours, cette fille inventait toutes sortes d'absurdités. Je ne peux pas m'empêcher de me demander si il y a un Trou blanc à l'intérieur de sa tête, puisque son bon sens semblait purement et simplement provenir d'un univers différent.
+
+"En fait, ce n'est pas totalement vrai."
+
+Koizumi semblait vouloir défendre Haruhi, mais il le fit si doucement que j'étais le seul à pouvoir l'entendre.
+
+"C'est vrai que le discours et le comportement de Suzumiya-san sont assez uniques. Mais dans la situation actuelle, il est clair qu'elle raisonne avec bon sens."
+
+Koizumi révélait vers moi son sourire habituel et continua :
+
+"Si son schéma de pensée était anormal, alors ce monde ne serait pas aussi stable. Si c'était le cas, ce monde serait déjà devenu un monde étrange dicté par des lois très bizarres."
+
+"Comment est-ce que tu le sais ?" lui demandais-je.
+
+"Suzumiya-san souhaite que le monde entier change un petit peu, et elle a elle-même le pouvoir de reconstruire entièrement le monde. Tu le sais très bien."
+
+Bien sûr que je le savais. Même si j'avais des doutes.
+
+"Et si le monde n'est pas encore devenu complètement irrationnel, c'est parce qu'elle privilégie le bon sens face à ses propres souhaits."
+
+"Ca peut sembler puéril, mais," Koizumi leva la tête et dit :
+
+"Prenons un exemple, elle souhaite que le père noël existe. Tout le monde sait que le père noël n'existe pas. Parce qu'en ne considérant que le Japon, il n'est tout simplement pas possible pour quelqu'un d'entrer dans une maison fermée au milieu de la nuit, laisser un cadeau et s'en aller sans être détecté. Comment est-ce que le père noël sait ce que chaque enfant désire pour Noël ? Et il est impossible qu'il puisse laisser un cadeau dans les maisons de chaque enfant dans le monde en une seule nuit. C'est physiquement impossible."
+
+Quiconque réfléchit sérieusement à ce genre de problème est forcément cinglé.
+
+"Exactement, c'est pourquoi le père noël ne peut pas exister."
+
+Je continuais à débattre parce qu'il était du côté d'Haruhi, ce qui m'agaçait prodigieusement. Je lui posai donc ma question,
+
+"Si tu dis vrai, est-ce que ce ne devrait pas être impossible pour les extra-terrestres, voyageurs temporels et espers d'exister ? Comment se fait-il que tu sois là ?"
+
+"J'imagine que Suzumiya-san n'est pas très à l'aise avec son bon sens. Son bon sens lui refuse son souhait - c'est à dire vivre dans un monde où les évènements surnaturels sont normaux."
+
+Est-ce que cela signifie que ses pensées désordonnées prennent légèrement le dessus sur son bon sens ?
+
+"Peut-être n'est-elle pas capable de supprimer totalement ces pensées. C'est pourquoi moi, Asahina-san et Nagato-san avons été invoqués à ses côtés, et pourquoi j'ai reçu des pouvoirs surnaturels. Bien que je ne sache pas trop ce que tu en penses."
+
+Il vaut mieux rester incertain. Au moins je ne suis pas comme toi, je suis parfaitement conscient que je suis un être humain normal.
+
+Allez savoir si c'est une bénédiction ou une malédiction.
+
+"Hé vous ! Pas de discussions privées ! Je parle de quelque chose de sérieux ici !"
+
+Irrités de nous voir murmurer entre nous, les yeux d'Haruhi prirent une forme triangulaire en nous fixant pendant qu'elle nous criait dessus. Et nous reçûmes docilement d'Haruhi des tanzakus et des stylos avant de retourner nous assoir.
+
+Haruhi fredonnait et commença à écrire ; Nagato restait assise et regardait fixement le tanzaku ; tandis qu'Asahina-san avait une expression troublée, comme si elle faisait face à quelque chose d'encore plus dur qu'un problème de maths. Koizumi dit tranquillement, "Hum, c'est ennuyeux", tout en inclinant la tête en pleine réflexion. Est-ce que vous avez besoin tous les trois de réfléchir si sérieusement pour quelque chose comme ça ? Est-ce que ce ne serait pas plus facile d'écrire juste ce que l'on aime ?
+C'était exactement le genre de chose qu'un garnement trop gâté aurait écrit. Si encore ce n'était qu'une plaisanterie ; mais Haruhi semblait terriblement sérieuse quand elle accrocha ses tanzakus sur la branche de bambou.
+
+......Et ne me dites pas que les souhaits que vous avez écrits vont vraiment se réaliser !
+
+Je faisais tourner le stylo autour de mes doigts et regardais sur le côté. La branche de bambou qu'Haruhi avait "volée" était couchée contre la fenêtre, les feuilles chiffonnées. La brise occasionnelle produisaient un bruit de froissement de feuilles aux effets relaxants.
+
+"Tout le monde a fini ?"
+
+La voix d'Haruhi ramena mon esprit à la réalité. Sur la table devant elle se trouvait deux notes qu'elle lut: 
+
+  "Que le monde tourne autour de moi !"
+
+  "Je souhaite que la terre tourne dans le sens inverse."
+
+C'était exactement le genre de chose qu'un garnement trop gâté aurait écrit. Si encore ce n'était qu'une plaisanterie ; mais Haruhi semblait terriblement sérieuse quand elle accrocha ses tanzakus sur la branche de bambou.
+
+Asahina-san avait écrit avec son écriture mignonne et soignée :
+
+  "Je souhaite que ma couture s'améliore"
+
+  "Je souhaite que ma cuisine s'améliore"
+
+Les souhaits d'Asahina-san étaient vraiment trop adorables. Elle serra les paumes de ses mains et pria pour les tanzakus qu'elle accrochait sur la branche de bambou. Je pense qu'elle a dû comprendre quelque chose de travers.
+
+Il n'y avait rien d'intéressant sur les tanzakus de Nagato. Avec une police de caractère très régulière, elle avait écrit des mots abstraits tels que "harmoniser" et "réorganiser".
+
+Koizumi n'était pas très différent de Nagato. D'une écriture griffonnée, il avait écrit des phrases simples comme "paix mondiale" et "famille fraternelle".
+
+Et moi ? Les miens étaient aussi très simples. D'ici 25 et 16 ans, je serais un vieil aigri, donc je suppose que mon futur moi souhaitera les choses suivantes :
+
+  "Je veux de l'argent"
+
+  "Je veux une maison individuelle avec un jardin où je pourrais donner un bain à un chien"
+
+"Des souhaits si ennuyants !"
+
+Haruhi énonça ses pensées semblant étonnée après avoir vu mes notes. Elle était la moins bien placée pour être surprise par mes souhaits. Sur le long terme, mes souhaits étaient bien plus sains que celui qui demande que la Terre tourne dans le sens inverse !
+
+"Oublie ça ! Tout le monde, vérifiez bien les souhaits que vous avez écrits ! La première période clé sera dans 16 ans à partir de maintenant. Faisons une course pour voir quel voeux Altaïr réalisera en premier !"
+
+"Ah...... oui, bien sûr."
+
+Je regardais Asahina-san qui hochait la tête avec une expression sérieuse alors que je m'asseyais sur la chaise pliante. En regardant avec plus de soin, je vis que Nagato était déjà retournée dans son monde de livres.
+
+Haruhi sortit la longue branche de bambou par la fenêtre et la plaça dans une position stable. Elle tira alors une chaise contre la fenêtre et s'assit dessus. Elle plaça son coude sur le rebord de la fenêtre et regarda dans le ciel. Le côté de son visage semblait légèrement mélancolique, comme si elle ne savait pas quoi faire après. C'est le genre de fille dont l'humeur changeait très rapidement, et dire qu'elle criait avec tant d'excitation il y a juste un instant.
+
+J'ouvris mon manuel, et commençai à tenter à nouveau de réviser pour mes examens. Alors que je tentais de mémoriser les différentes sortes d'adjectifs,
+
+"...... Dans 16 ans hein ? C'est une longue période."
+
+J'entendis Haruhi murmurer entre ses dents derrière moi. 
+
+![](\assets\illustrations\suzumiya\Sh_v03c02_01.jpg)
+
+Nagato était en train de lire son roman dans une langue étrangère, Koizumi commença à jouer aux échecs tout seul, tandis que j'étais occupé à mémoriser mes traductions anglaises. Pendant tout ce temps, Haruhi était assise à côté de la fenêtre en regardant dans le ciel. Elle était en fait très jolie à regarder tant qu'elle restait assise là sans bouger. Au début je pensais qu'elle avait décidé de prendre une feuille du livre de Nagato, mais d'une certaine façon la vision d'Haruhi assise là et se comportant correctement me rendait encore plus mal à l'aise. Je la soupçonnais de réfléchir, assise là, à de nouveaux projets sources de nombreux maux de tête.
+
+Cependant, pour une raison inconnue, Haruhi semblait particulièrement déprimée aujourd'hui. Par moment, elle regardait le ciel et soupirait profondément. C'était encore plus terrifiant. Ce silence était probablement le calme avant la tempête et c'était vraiment terrifiant. L'Empereur Sutoku était comme ça pendant les deux-trois premiers jours après avoir été exilé en Sanuki.
+
+
+Frou frou J'entendis le bruit du papier froissé et levai la tête. Assise en face de moi et travaillant dur sur ses problèmes de maths, Asahina-san plaça un doigt sur ses lèvres et ferma son oeil droit, elle me donna alors un tanzaku supplémentaire qu'elle avait préparé un peu plus tôt. Jetant un oeil vers Haruhi, Asahina-san retira alors sa main et baissa la tête avec le visage d'une petite fille qui vient tout juste de réussir une farce.
+
+Ma complicité dans ce crime était inéluctable. Je pris rapidement le tanzaku qu'Asahina-san m'avait donné et le lut avec précaution.
+
+"S'il te plait reste dans la salle de club après que l'activité d'aujourd'hui soit terminée. - Mikuru-chan"
+
+Le message plus haut était écrit sur une note avec une écriture petite et arrondie.
+
+Bien sûr j'allais suivre l'instruction.
+
+
+
+"C'est tout pour aujourd'hui."
+
+Dit Haruhi qui ramassa rapidement son sac et sortit de la pièce. Elle se comportait de manière assez inhabituelle aujourd'hui. Elle était comme un camion diesel brusquement devenu aussi docile qu’une voiture à énergie solaire. Les choses se passent vraiment bien pour moi aujourd'hui, pensais-je.
+
+"Eh bien je dois m'excuser moi aussi."
+
+Koizumi rangea son jeu d'échec et se leva. Après avoir échangé un regard avec moi et Asahina-san, il quitta lui aussi la salle du club de littérature.
+
+Nagato ferma son épais livre avec un fort bruit. Oh, tu t'en vas aussi ? Merci d'avoir compris...... Alors que la reconnaissance m'envahissait, Nagato marcha vers moi silencieusement comme un chat.
+
+"Prends ça."
+
+Elle sortit un morceau de papier. C'était un autre tanzaku. Je ne peux pas t'aider à l'envoyer dans l'espace même si tu me le donnes ! pensais-je pour moi-même alors que je regardais le tanzaku.
+
+Des formes géométriques étranges étaient dessinées dessus. Qu'est-ce que c'est que ça ? Une sorte de Langage Sumérien? Je suis désolé mais même la machine Enigma ne serait pas capable de déchiffrer le sens de ce message.
+
+Je fronçais les sourcils et étudiais les motifs, qui n'étaient ni des dessins ni des mots, avec des formes triangulaire, circulaire et des formes de vague. Nagato s'était déjà retournée et avait fait son sac, et sortait de la pièce.
+
+Oublie ça. Je plaçai le morceau de tanzaku dans la poche de ma veste, puis me tournai face à Asahina-san.
+
+"Je, je suis désolée, mais j'espère que tu voudras venir avec moi quelque part."
+
+Cette invitation venant d'Asahina-san en personne, je serais condamné par les cieux si je refusais. Je sauterais même dans une fosse en fer en fusion si elle me le demandait.
+
+"Bien sûr, où allons-nous ?"
+
+"C'est......hum...... c'est trois ans plus tôt."
+
+Je demandais un lieu et elle me répondait une date à la place. Mais......
+
+Pas encore trois ans plus tôt ? pensais-je en moi-même ; mais j'étais soudain intéressé. Après tout, Asahina-san affirme être un voyageur temporel venu d'un futur inconnu. J'ai tendance à l'oublier car elle est tellement adorable. Mais trois ans plus tôt ? Nous allons trois ans plus tôt ? Cela signifie-t-il que nous allons voyager dans le temps ?
+
+"O......oui."
+
+"Bien sûr, je serais très content d'y aller, mais pourquoi moi ? Qu'allons-nous y faire ?"
+
+"Ça......tu le sauras quand tu y seras......Je pense."
+
+Hu ?
+
+Peut-être que c'était le regard confus sur mon visage, Asahina-san secoua ses mains désespérément et me supplia avec des larmes dans les yeux :
+
+"Je t'en prie ! S'il te plait ne demande rien et accepte simplement, pour le moment ! Ou j'aurais des......hum......ce serait problématique."
+
+"Eh bien......d'accord, allons-y."
+
+"Vraiment ? Merci !"
+
+Asahina-san était contente et m'attrapa joyeusement les mains. Ah, le bonheur d'Asahina-san était mon bonheur ha ha ha !!!
+
+Maintenant que j'y pense, quand Asahina-san avait déclaré qu'elle était du futur, il n'y avait personne pour vérifier ses dires. Ce n'est que quand j'ai rencontré la version adulte d'Asahina-san que j'ai vraiment cru à son histoire, et je ne peux pas nier avoir eu des soupçons sur une possible conspiration derrière tout ça. Ne serait-ce donc pas une grande occasion de vraiment prouver qu'"Asahina-san vient du futur" ?
+
+"Donc, où est la machine à voyager dans le temps ?"
+
+J'avais pensé que nous devions seulement ramper dans un tiroir, mais Asahina-san dit qu'il n'y avait pas un tel dispositif. Donc comment allions-nous commencer le voyage dans le temps ? Asahina-san se tortilla et serra son tablier et dit alors :
+
+"A partir d'ici"
+
+Hu ? Ici ? Je me retournais et regardais avec désinvolture la salle de club, qui était vide à l'exception de nous deux.
+
+"Oui, assieds-toi s'il te plait. Peux-tu fermer les yeux s'il te plait ? Oui, détends aussi tes épaules."
+
+Je fis comme elle me dit. J'espérais que je ne serais pas frappé à l'arrière de ma tête soudainement.
+
+"Kyon-kun......"
+
+La faible voix d'Asahina-san parvint de derrière mon oreille. Une respiration si douce.
+
+"Je suis désolée."
+
+J'avais un mauvais pressentiment. Alors que j'allais ouvrir mes yeux, soudainement tout devint noir autour de moi. J'avais perdu connaissance après avoir ressenti une forte sensation écoeurante en perdant l'équilibre. Avant que les ténèbres n'arrivent, je pensai en moi-même que je n'aurais pas accepté si j'avais su.
+
+
+
+Quand je repris connaissance, ma vision était renversée de 90 degrés. Tout ce qui était debout se trouvait allongé, quand je vis les lumières des lampadaires de la rue qui allait de la gauche vers la droite, je compris que j'étais couché par terre. C'est alors que je ressentis une sensation chaude du côté gauche de ma tête.
+
+"Oh, tu es réveillé ?"
+
+dit la voix d'un ange. J'étais totalement réveillé maintenant. Qu'est-ce qui se contorsionnait sous mon oreille gauche ?
+
+"Hum......si tu ne lèves pas ta tête...... je serais......"
+
+Asahina-san avait l'air troublée. Je me redressais et cherchais où je me trouvais.
+
+Un banc dans un parc la nuit.
+
+Qu'est-ce qui se passe ici ? J'étais en train de dormir sur les genoux d'Asahina-san, et comme je dormais, je n'en avais absolument aucun souvenir. Quel dommage.
+
+"J'ai les jambes engourdies, ça commençait à être fatiguant."
+
+Asahina-san sourit, embarrassée, et baissa la tête. Je ne savais pas où elle était allée se changer, mais son costume de bonne avait été remplacé par sa marinière du lycée Nord. Il y avait eu suffisamment de temps entre le crépuscule et tard dans la nuit pour qu'elle puisse se changer, alors que j'étais endormi pendant tout ce temps. Mais, pourquoi est-ce que je dormais ?
+
+"C'est parce que je ne peux pas te laisser connaître les méthodes pour voyager dans le temps, comme ce sont des informations secrètes...... es-tu en colère ?"
+
+Non, je ne suis pas du tout en colère. Si c'était Haruhi, je me serais rebellé contre elle ; mais comme c'était Asahina-san, ça ne me dérangeait pas.
+
+En parlant de ça, un peu plus tôt j'avais juste fermé les yeux et je me trouvais sur une chaise dans la salle de club, alors pourquoi étais-je maintenant soudainement dans un parc au milieu de la nuit ? Et je pense que j'ai déjà été dans ce parc avant. Je me souviens, Nagato m'avait aussi demandé de la rencontrer dans ce parc l'autre jour ; est-ce que c'est une sorte de terre sacrée pour les gens étranges ?
+
+Je me grattais la tête, il y avait quelque chose que je devais demander :
+
+"Dans quel plan du temps nous trouvons-nous ?"
+
+Assise à côté de moi, Asahina-san répondit :
+
+"Par rapport à notre temps d'origine, c'est le 7 juillet trois ans plus tôt. Il est à peu près 9 heures du soir je pense ?"
+
+"Vraiment ?"
+
+"Oui."
+
+Elle semblait sérieuse.
+
+Je n'avais jamais pensé que nous arriverions ici aussi facilement. Bien sûr, je n'étais pas suffisamment naïf pour croire tout ce qu'elle me dirait, je devais d'abord le confirmer. J'allais appeler la hotline de l'horloge parlante et de la météo.
+
+Alors que j'étais sur le point de dire à Asahina-san ce que j'avais prévu de faire, mon épaule gauche fut tout à coup plus lourde. Hu ? Asahina-san avait maintenant sa tête sur mon épaule. Une Asahina-san épuisée était maintenant appuyée contre moi ; qu'est-ce que cela signifiait ?
+
+"Asahina-san."
+
+Pas de réponse.
+
+"Hum......"
+
+"(Ronflement)......"
+
+Des ronflements ?
+
+J'avançais ma tête en avant et la tournais de 85 degrés vers la gauche, et vis Asahina-san avec ses yeux fermés, ses lèvres à moitié ouvertes tandis qu'elle ronflait en silence. Qu'est-ce qu'il se passe ici ?
+
+Froissement......
+
+Les buissons derrière furent soudainement froissés. Je sentis mon coeur sortir de ma bouche, c'était quoi ?
+
+"Est-elle endormie ?"
+
+Sortant des buissons apparue...... une autre Asahina-san.
+
+"Bonsoir Kyon-kun."
+
+C'était la version élégante d'Asahina-san. Une jolie jeune femme, bien que plus âgée que l'Asahina-san endormie sur mon épaule. Cette Asahina-san avait bien grandi, à tout point de vue. Alors qu'elle était toujours mignonne, son charme s'était décuplé. Je l'ai déjà rencontré, et comme la dernière fois, elle portait un chemisier blanc et une minijupe bleue. Cette Asahina-san marchait actuellement en face de nous.
+
+"Hé hé, vue comme ça,"
+
+L'Asahina-san adulte pinça les joues de l'Asahina-san endormie et dit :
+
+"On dirait vraiment une enfant."
+
+L'air nostalgique, Asahina-san (grande) caressa la marinière d'Asahina-san (petite),
+
+"C'est donc à ça que je ressemble à cet age ?"
+
+Sentant la respiration douce d'Asahina-san (petite) sur mon bras, je ne pouvais pas bouger et restais assis, intimidé, observant Asahina-san (grande).
+
+"C'était sa mission de t'amener ici, mais à partir de maintenant, ce sera ma mission de te guider."
+
+L'air idiot, je demandais à Asahina-san, dont le sourire émettait une aura de maturité :
+
+"Hum...... qu'est-ce que......"
+
+"Je ne peux pas expliquer en détail, c'est confidentiel. Tout ce que je peux faire c'est te guider."
+
+Je me tournais pour regarder l'Asahina-san endormie sur mon épaule.
+
+"C'est moi qui l'ai endormie, je ne pouvais pas être vue par elle."
+
+"Pourquoi cela ?"
+
+"Parce que quand j'étais elle, je ne m'étais pas vue moi-même."
+
+La raison semblait à la fois claire et déroutante. La charmante Asahina-san ferma un oeil et dit :
+
+"Va en direction du sud en suivant le chemin de fer là-bas ; tu arriveras à un collège public. S'il te plait, pourras-tu aider la personne qui se trouve devant le portail de l'école ? Peux-tu y aller maintenant ? Et j'espère que cela ne te dérange pas de me porter tout le long, je ne dois pas être trop lourde."
+
+Elle parlait comme les villageois dans ces jeux de rôle. Je me demandais quel trésor j'allais obtenir comme récompense ?
+
+"Une récompense ? Eh bien......"
+
+L'Asahina-san adulte plaça avec élégance sa main sous son menton et réfléchit intensément, puis me gratifia d'un sourire mature,
+
+"Je n'ai rien à t'offrir, mais tu peux m'embrasser pendant que je dors. Et vérifie bien que je sois endormie."
+
+Un transaction si attirante ! C'était exactement ce que je souhaitais. La vue d'Asahina-san dormant profondément était si adorable que j'étais tenté de le faire, mais......
+
+"C'est un peu......"
+
+Que ce soit mon humeur ou bien la situation, je ne trouvais pas que c'était vraiment approprié de ma part. Franchement, je me décevais moi-même d'être si raisonnable.
+
+"Il reste peu de temps, tu dois y aller maintenant."
+
+Est-ce l'indice que tu me donnes cette fois ?
+
+"Oh, oui, s'il te plait ne lui dis pas que j'étais ici. Accrochons nos doigts et faisons une promesse."
+
+Je levais de manière automatique mon petit doigt et l'accrochais à celui d'Asahina-san (grande). Est-ce que je peux rester comme ça pendant une minute supplémentaire ?
+
+"Alors au revoir Kyon-kun."
+
+Dit joyeusement Asahina-san (grande) avant de se fondre instantanément dans les ténèbres. Elle avait disparu avec habileté cette fois.
+
+"Bon maintenant......" murmurais-je pour moi-même. Je me demande quand je vais rencontrer cette Asahina-san adulte à nouveau ? J'avais l'impression qu'elle n'avait pas beaucoup changé depuis la dernière fois que je l'avais rencontrée, quand elle m'avait donné cet étrange indice. Peut-être cette Asahina-san qui est apparue vient d'un plan du temps antérieur à celle que j'ai rencontrée avant. Je ne sais pas. Comment le pourrais-je. Vu les circonstances, j'allais certainement rencontrer bien d'autres Asahina-san venues de diverses époques.
+
+
+
+Asahina-san, que je transportais sur mon dos, n'était pas légère. Elle n'était pas particulièrement lourde non plus. Naturellement, j'avançais moins vite comme ça. Son visage angélique me soufflait doucement dans l'oreille ; c'en était presque criminel. Soumise à cette respiration, ma nuque commençait à me démanger.
+
+J'évitais le regard des piétons (même s'il n'y avait presque personne dans la rue), et me dirigeais rapidement dans la direction que l'Asahina-san adulte m'avait indiquée. Je pense que je marchais alors encore pendant dix minutes, les piétons sur la route devenant de moins en moins nombreux alors que j'avançais. Après avoir tourné à un coin, nous arrivâmes enfin à notre destination.
+
+Le collège Est. J'ai entendu parler de cet endroit. C'était le collège de Taniguchi et Haruhi. En parlant de ça, une silhouette familière se trouvait devant le portail de l'école. Je la reconnus instantanément alors qu'elle était sur le point d'escalader le portail métallique.
+
+"Hé !"
+
+Après avoir crié, je ressentis de la surprise. Comment savais-je qui était cette personne ? C'était trop incroyable. Je regardais le dos de cette personne, la taille était beaucoup plus fine, tandis que les cheveux noirs n'étaient ni courts ni longs.
+
+Bien sûr, je ne connais qu'une seule personne qui sortirait furtivement pendant la nuit et tenterait d'escalader le portail de l'école.
+
+"Quoi ?"
+
+Maintenant, je commençais à vraiment réaliser que j'étais face à une réalité passée, datant de 3 ans. Sans blague, il semblerait que j'ai vraiment reculé de trois ans dans le temps.
+
+Appuyé contre le portail, le visage qui se tourna et me regarda était en effet plus jeune que celui du commandant de la Brigade SOS que je connaissais. Cependant il n'y avait aucune erreur possible : ces yeux brillants, c'étaient ceux d'Haruhi. Même si elle était habillée décontracté, d'un T-shirt et un short, elle n'avait pas changé. Trois ans plus tôt, Haruhi était en première année au collège. Donc est-ce que c'était la personne qu'Asahina-san voulait que j'aide ?
+
+"Qui es-tu ? Un criminel sexuel ? Ou un kidnappeur ? En tout cas, tu as l'air louche."
+
+Les lampes floues baignaient la rue d'une faible lumière blanche. Je ne pouvais pas voir distinctement son expression, mais Haruhi, en première année de collège, était en train de me regarder avec des yeux qui avaient vu quelque chose de louche. Qui semblait le plus louche ? Une fille tentant d'escalader le portail d'une école au milieu de la nuit ? Ou moi me baladant en transportant une fille endormie ? Je n'avais pas vraiment envie d'y penser.
+
+"C'est toi qui as l'air louche. Que fais-tu donc ici ?"
+
+"Que pourrais-je faire d'autre ici ? Pénétrer illégalement les locaux, bien sûr."
+
+Ne déclare pas tes intentions criminelles si ouvertement comme ça, il y a une limite à l'impudence !
+
+"Tu es arrivé juste au bon moment. Je ne te connais pas mais si tu es libre, alors aide-moi un petit peu ! Ou j'appelle la police."
+
+Je devrais être celui appelant la police, mais j'ai déjà promis à l'autre Asahina-san. D'un autre côté, pourquoi est-ce que je trouve toujours cette forme de vie connue sous le nom de Suzumiya Haruhi agrippée à moi ? Même ici et à cette époque ?
+
+Haruhi sauta à l'intérieur au dessus du portail et ouvrit le portail avec une clé. Où as-tu eu cette clé ?
+
+"Je l'ai volé quand personne ne regardait. C'était trop facile."
+
+Elle est donc vraiment pickpocket. Haruhi ouvrit lentement le portail en fer en le faisant glisser et me fit un signe de la main. Je marchais vers la petite fille, qui faisait une tête de moins que son futur elle trois ans plus tard, tout en soutenant Asahina-san.
+
+Près de l'entrée du collège Est se trouvait un terrain d'athlétisme. Le complexe scolaire était devant nous. Haruhi commença à traverser le sombre terrain d'athlétisme en oblique.
+
+Heureusement qu'il faisait si noir, comme ça elle ne pouvait pas voir distinctement mon visage ni celui d'Asahina-san. Dans trois ans, Haruhi n'imaginera jamais qu'elle nous a déjà rencontré moi et Asahina-san alors qu'elle était en première année de collège. C'était une bonne chose, ça pourrait être ennuyeux.
+
+Haruhi se dirigea tout droit vers un coin du terrain d'athlétisme et m'emmena à l'arrière de l'entrepôt des équipements sportifs. À l'intérieur il y avait un chariot rouillé. Une machine à tracer des lignes à la craie pendait derrière ses roues. Il y avait aussi plusieurs sacs de poudre de craie.
+
+![](\assets\illustrations\suzumiya\Sh_v03c02_02.jpg)
+
+"Je les avais cachés à l'avance dans l'entrepôt pendant la soirée, assez futé non ?"
+
+Haruhi rayonnait. Elle porta alors le sac de poudre de craie, qui était presque aussi lourd qu'elle, sur le chariot et l'installa. La façon dont elle poussait lentement le chariot me fit réaliser à quel point elle était jeune. Je suppose que les élèves en première année de collège sont encore plus ou moins des enfants.
+
+Je plaçai avec précaution l'Asahina-san endormie contre le mur de l'entrepôt. S'il te plait reste assise ici comme une gentille fille pour le moment.
+
+"Laisse-moi le faire ! Donne-moi cette chose, amène plutôt la machine à tracer des lignes à la craie."
+
+Dois-je vraiment l'aider ? Tout ce temps, j'ai été dirigé par Haruhi comme un esclave, elle était comme un robot devenu incontrôlable et qui ne s'arrêterait pas tant qu'elle n'aurait pas tout détruit. Elle était toujours la même du passé jusqu'au présent. Il semblerait que la nature fondamentale d'une personne ne change pas si facilement en l'espace de trois ans.
+
+"Suis mes instructions et dessine les lignes. C'est ça, toi ici. Je dois prendre du recul pour voir si tu as fait des erreurs. Ah ! Tu l'as mal dessiné ici ! Qu'est-ce que tu fais !?"
+
+Être capable de diriger un élève de lycée qu'elle venait tout juste de rencontrer sans même être nerveuse, aucun doute, c'était effectivement Haruhi. Si c'était la première fois que je rencontrais ce genre de collégienne, j'aurais probablement conclu qu'elle était cinglée.
+
+Si je l'avais connue avant de rencontrer Nagato, Asahina-san et Koizumi, bien sûr.
+
+
+
+En suivant les instructions d'Haruhi, je dessinai des lignes blanches du côté gauche et droit de la piste. Pendant près de trente minutes, aucun professeur gardien de nuit n'apparut, et aucune voiture de police ne vint pour enquêter après avoir reçu des plaintes de voisins.
+
+Est-ce que ces motifs étranges apparus soudainement sur le terrain d'athlétisme dont Taniguchi m'avait parlé vont être dessinés par... moi-même ?
+
+Je regardais en silence le motif sur lequel je travaillais si dur. Haruhi me rejoignit alors et me prit la machine des mains. Elle commença à dessiner quelques lignes supplémentaires et dit :
+
+"Hé, est-ce que tu crois aux extraterrestres ?"
+
+Wow c'était soudain.
+
+"Je suppose qu'il y en a."
+
+L'image de Nagato apparut dans ma tête.
+
+"Et les voyageurs temporels ?"
+
+"Hum, ce ne serait pas surprenant qu'ils existent."
+
+En ce moment, je suis moi-même un voyageur temporel.
+
+"Et pour les espers ?"
+
+"Je suppose qu'ils sont partout ?"
+
+Je pensais soudainement à de nombreux points rouges volant dans les airs.
+
+"Et les sliders ?"
+
+"Je n'en ai jamais rencontré pour le moment."
+
+"Humpf."
+
+Haruhi jeta sur le côté la machine à dessiner des lignes à la craie et essuya la craie de son visage avec ses épaules.
+
+"Hum, ça devrait être bon."
+
+Je commençais à me sentir inquiet, était-ce parce que j'avais dit quelque chose que je n'aurais pas du dire ? Haruhi me regarda et dit,
+
+"Est-ce que c'est l'uniforme du lycée Nord ?"
+
+"Oui."
+
+"Quel est ton nom ?"
+
+"John Smith."
+
+"......Es-tu un idiot ?"
+
+"Est-ce que je ne peux pas utiliser un alias pour une fois ?"
+
+"Et qui est cette fille ?"
+
+"C'est ma soeur. Elle souffre d'une maladie du sommeil appelée narcolepsie. Elle est comme ça depuis quelque temps maintenant, elle tombe soudainement endormie n'importe où et n'importe quand, c'est pourquoi je dois la transporter."
+
+"Humpf."
+
+Haruhi mordit sa lèvre inférieure et se tourna sur le côté, incrédule. Je décidais de changer de sujet.
+
+"Au fait, c'est pour quoi faire ?"
+
+"Tu ne le vois pas ? C'est un message."
+
+"Pour qui ? Ne me dis pas que c'est pour Hikoboshi et Orihime ?"
+
+Haruhi sembla surprise et me demanda :
+
+"Comment le sais-tu ?"
+
+"......Eh bien, c'est Tanabata aujourd'hui. Je connais quelqu'un qui fait aussi ce genre de chose."
+
+"Vraiment ? J'aimerais rencontrer cette personne. Y a-t-il vraiment quelqu'un comme ça au lycée Nord ?"
+
+"Oui."
+
+De tout temps, la seule personne qui ferait ce genre de truc, c'est toi.
+
+"Hum, le lycée Nord......"
+
+Haruhi marmonna pour elle-même en pleine réflexion. Elle resta silencieuse pendant un moment comme un légume salé, puis se tourna soudainement.
+
+"Je rentre chez moi maintenant. J'ai terminé ce que j'étais venu faire ici. Au revoir."
+
+Elle s'en alla à grands pas. Même pas un mot de remerciement ? Quelle impolitesse. Mais c'est vraiment comment ça que Haruhi se comporte. De plus, elle ne m'avait pas donné son nom pendant tout ce temps. Je suppose que c'était une bonne chose qu'elle ne l'ait pas fait.
+
+
+
+On ne pouvait pas rester ici pour toujours, donc je décidai de réveiller Asahina-san. Bien sûr, pas avant d'avoir rangé dans l'entrepôt le chariot et la poudre de craie qu'Haruhi avait abandonnés.
+
+Dormant comme un chaton, Asahina-san était si mignonne que j'étais tenté de lui faire quelque chose de coquin, mais finalement je résistai à cette impulsion et lui secouai doucement les épaules.
+
+"Hum......huh. Euh ?......"
+
+Ouvrant les yeux, Asahina-san commença à regarder de tous les côtés.
+
+"EH !?"
+
+Elle cria et se mit debout aussitôt.
+
+"Q,q,q......quel est cet endroit ? Pourquoi ? Quelle heure est-il maintenant ?"
+
+Comment devais-je lui répondre ? Alors que je réfléchissais à une réponse, Asahina-san cria soudainement, "AH !!!" Même dans le noir, je pouvais voir que son visage blanc était maintenant encore plus pâle que d'habitude.
+
+Asahina-san se fouilla avec ses deux mains,
+
+"Le TPDD......il n'est plus là. Je ne le trouve pas~~."
+
+Asahina-san était au bord des larmes, et après un moment elle se mit vraiment à pleurer. Elle avait l'air d'un enfant qui s'était perdu pendant qu'elle s'essuyait les yeux avec ses mains et pleurait. Mais ce n'était pas le moment de contempler sa beauté.
+
+"Qu'est-ce qu'un TPDD ?"
+
+"Sanglot~~......C'est une information secrète, je ne suis pas supposée en parler......c'est quelque chose comme une machine à voyager dans le temps. Je l'ai utilisé pour venir dans ce plan du temps......mais je n'arrive pas à le trouver. Sans ça, nous ne pouvons pas retourner à l'époque dont nous venons......"
+
+"Et donc comment a-t-il pu disparaître ?"
+
+"Je ne sais pas......Je ne suis pas supposée le perdre......mais il n'est vraiment plus là."
+
+Je pensais à l'autre Asahina-san, qui la touchait un peu plus tôt.
+
+"Est-ce que quelqu'un peut venir nous aider......"
+
+"C'est impossible. Sanglot~~."
+
+Asahina-san m'expliqua tout en reniflant, que chaque évènement dans un plan du temps était déjà décidé, donc si il existe un TPDD, alors il devrait être avec elle. Et maintenant, elle ne l'avait plus, donc cela signifiait qu'il était inévitable qu'elle le perde, donc il avait été décidé qu'elle "ne le portait plus maintenant"......quelque chose comme ça. Qu'est-ce que c'était supposé signifier ?
+
+"En d'autres mots, qu'est-ce qu'il va se passer pour nous ?"
+
+"Sanglot, sanglot. Cela signifie, si la situation se confirme, que nous allons être bloqués dans ce plan du temps trois ans plus tôt et que nous serons incapables de revenir à notre période d'origine."
+
+Ça c'est grave ! pensais-je pour moi-même. Mais d'un autre coté, je n'étais pas si inquiet. L'Asahina-san adulte ne m'a rien dit à ce sujet. Je suppose que c'est elle qui a pris le TPDD et créé cette situation. J'en déduisais que l'Asahina-san (grande) était venue dans le passé dans cet unique but. Pour l'Asahina-san qui était venue d'une période plus éloignée que cette Asahina-san, c'était inévitable.
+
+Je détournais les yeux d'Asahina-san, qui sanglotait avec tristesse, et regardais le terrain d'athlétisme. Le mystérieux motif qu'Haruhi avait imaginé et que j'avais dessiné semblait très embrouillé. Les professeurs et élèves du collège Est auront probablement un grand choc quand ils verront ça le matin suivant. J'espère juste que ces gribouillis ne sont pas une sorte de malédiction dirigée vers les extraterrestres...... Pendant que j'y réfléchissais, cela me frappa finalement.
+
+Il faisait noir partout, l'école était seulement éclairée par une faible lumière venant des lampadaires de la rue dehors. Les lignes blanches que j'avais dessinées étaient si grandes que si je n'avais pas pris beaucoup de recul, je n'aurais pas pu le voir du tout.
+
+C'est pourquoi cela me prit autant de temps pour le découvrir.
+
+Je cherchais dans ma poche et sortis le tanzaku que Nagato m'avait donné. Des formes géométrique bizarres y étaient dessinées.
+
+"Il est possible qu'il y ait un moyen pour s'en sortir."
+
+Je dis, Asahina-san me regarda en clignant des yeux alors que je continuais d'étudier le tanzaku.
+
+Le motif des symboles dessinés était exactement le même que le message d'Haruhi pour les étoiles, le graffiti qu'Haruhi et moi venions de dessiner sur le terrain de l'école.
+
+
+
+Nous quittâmes le collège Est et arrivâmes à un complexe d'appartement de haut standing près de la gare.
+
+"Est-ce que ce n'est pas ...... la maison de Nagato-san ?"
+
+"Oui. Je ne lui ai pas demandé exactement quand elle est arrivée sur Terre, mais je suis sûr qu'elle était là trois ans plus tôt......Je suppose."
+
+Je me tenais à l'entrée du complexe d'appartement et appuyai sur le bouton pour l'appartement 708. Un son se fit entendre à travers l'interphone, je pouvais sentir la chaleur des mains de la nerveuse Asahina-san à travers mes manches. Je parlai dans le haut-parleur :
+
+"Est-ce la résidence de Nagato Yuki?"
+
+"......" L'interphone répondit comme ça.
+
+"Hum, je ne sais pas comment le dire......"
+
+"......"
+
+"Je suis un ami de Suzumiya Haruhi......est-ce que cela a un sens pour toi ?"
+
+A travers l'interphone, j'entendis une respiration glaciale. Une courte pause et puis......
+
+"Entrez."
+
+Bip La porte principale s'ouvrit. Je conduisis Asahina-san, qui semblait terrifiée, dans l'ascenseur. Nous arrivâmes au septième étage, puis devant l'appartement 708, que j'avais déjà visité une fois. Je poussais doucement la porte, qui s'ouvrit lentement.
+
+Nagato Yuki se tenait devant la porte. Tout me semblait irréel. Asahina-san et moi avions-nous vraiment voyagé dans le temps ?
+
+Nagato semblait exactement la même que quand je l'avais vue un peu plus tôt, ce qui me fit douter de notre voyage à travers le temps. Sa façon de porter la marinière du lycée Nord, me regardant avec ses yeux sans émotion, et son apparent manque de chaleur corporelle et de sentiment d'existence... Tout correspondait à la Nagato que je connaissais. La seule différence était que Nagato avait récemment arrêté de porter des lunettes, alors que cette Nagato en portait, comme la première fois que je l'avais rencontrée.
+
+Je ne sais pas du tout quand l'actuelle Nagato avait arrété de porter la paire de lunettes que cette Nagato portait sur son visage.
+
+"Hé !" Je levais la main et lui donnais un sourire amical. Nagato était aussi vide d'émotion que toujours. Asahina-san se cacha derrière mon dos et tremblait sans cesse.
+
+"Pouvons-nous entrer ?"
+
+"......"
+
+Nagato retourna en silence à l'intérieur de son appartement. Je le pris comme si elle nous avait donné à Asahina-san et moi la permission d'entrer. Nous retirâmes nos chaussures et nous dirigeâmes vers le salon. C'était le même que trois ans plus tard, l'endroit était aussi vide que d'habitude. Nagato se tenait debout et attendait que nous entrions. Pas le choix, je décidai de rester debout et de tout lui expliquer. Par quoi dois-je commencer ? Le premier jour d'école où j'ai rencontré Haruhi ? Ce serait une histoire terriblement longue.
+
+Sautant les détails, je lui donnais un bref résumé de ce qu'il s'était passé. Ses yeux sans émotion continuaient de me fixer à travers ses lunettes. Je pense que cela me prit environ cinq minutes pour lui expliquer, bien que personnellement je pense que le résumé de cette histoire d'Haruhi n'avait pour le moins ni queue ni tête.
+
+"......Et donc, le toi de dans trois ans, m'a donné ça."
+
+Nagato regarda le tanzaku que je sortis, ses doigts flottèrent au-dessus des symboles étranges comme si elle lisait un code-barre.
+
+"Compris."
+
+Nagato hocha simplement la tête. C'est vrai ? Attends, je viens de penser soudainement à quelque chose qui me tracassait vraiment.
+
+Je plaçais ma main sur ma tempe et dit :
+
+"C'est vrai que j'ai connu Nagato depuis pas mal de temps, mais pour toi c'était dans trois ans. Je veux dire, pour le toi maintenant, c'est la première fois que nous nous rencontrons n'est-ce pas ?"
+
+Même moi, je ne comprenais pas ce que je racontais. Mais les lunettes de Nagato brillèrent alors qu'elle répondit calmement, comme si rien ne s'était passé,
+
+"Oui."
+
+"Donc......"
+
+"Obtention de la permission pour le partage de mémoire avec une disparité temporelle alternative. Téléchargement réversible des données à travers les plans du temps."
+
+Hein quoi ?
+
+"Le 'moi' qui existe dans le plan du temps ultérieur de trois ans, et le 'moi' qui existe dans cette période du temps sommes une seule et même personne."
+
+Et donc quoi ? N'est-ce pas supposé être le cas ? Mais il n'était pas possible que la Nagato de trois ans plus tard puisse partager sa mémoire avec la Nagato de trois ans plus tôt.
+
+"C'est possible."
+
+Comment tu fais ça ?
+
+"Synchronisation."
+
+Hum, je ne comprends toujours pas.
+
+Nagato s'arrêta de répondre et enleva lentement ses lunettes. Ses yeux sans émotion clignèrent dans ma direction. C'était en effet le visage de la fille bouquineuse que je pus reconnaître. C'était la Nagato Yuki que je connaissais.
+
+"Pourquoi portes-tu l'uniforme du lycée Nord ? As-tu déjà commencé l'école ?"
+
+"Non, actuellement je suis en stand-by."
+
+"Stand-by......tu as l'intention d'être en stand-by pendant trois ans ?"
+
+"Oui."
+
+"C'est vraiment......"
+
+Patient de ta part. Est-ce que tu ne trouves pas ça ennuyeux ? Nagato secoua la tête et dit :
+
+"C'est une mission."
+
+Ses yeux clairs me regardèrent directement :
+
+"Il y a plus qu'un seul moyen pour voyager à travers le temps."
+
+Nagato dit avec une expression vide :
+
+"Le TPDD est seulement un outil pour contrôler l'espace-temps, il contient des incertitudes et des inexactitudes. De nombreuses théories existent sur le mouvement à travers le continuum espace-temps."
+
+Asahina-san m'attrapa à nouveau la main fermement :
+
+"Hum.....qu'est-ce que ça veut dire ?"
+
+"Utiliser le TPDD pour transférer des formes de vie organique à travers le temps est possible, mais cela génère du bruit. Pour nous, ce n'est pas un outil idéal."
+
+Quand tu dis "nous", est-ce que tu parles de l'Entité Consciente de Données Intégrées ?
+
+"Est-ce que Nagato-san peut réaliser un saut à travers les plans du temps dans sa forme complète ?"
+
+"La forme n'est pas nécessaire. C'est suffisant pour le voyage dans le temps tant qu'il contient les même données."
+
+En faisant la navette entre passé, présent et futur, hein ?
+
+Si Asahina-san pouvait le faire, alors cela ne devait pas poser de difficultés à Nagato. Nagato possédait les pouvoirs adéquats pour le faire. Je commençai à me demander si, comparée à Nagato et Koizumi, Asahina-san ne serait pas une outsider.
+
+"Alors c'est bon."
+
+J'interrompis la conversation entre Asahina-san et Nagato, ce n'était pas le moment de débattre des théories et du fonctionnement des voyages dans le temps. La question maintenant était : que devons-nous faire pour qu'Asahina-san et moi puissions retourner trois ans dans le futur ?
+
+Nagato hocha simplement la tête à nouveau et dit :
+
+"Cela peut être réalisé."
+
+Elle se leva alors et ouvrit la porte en papier de la chambre qui était connectée avec le salon.
+
+"Ici."
+
+C'était une chambre de style japonaise avec des tatamis, il n'y avait rien d'autre que des tatamis. Cela donnait une terrible impression de solitude, comme on pouvait s'y attendre de l'appartement de Nagato. Ça je pouvais le comprendre, mais pourquoi nous avait-elle amenés ici, dans la chambre d'ami ? Est-ce qu'une machine à voyager dans le temps était cachée à l'intérieur de cette pièce ? Alors que j'allais la bombarder de questions, Nagato sortit un futon d'un placard et commença à l'étendre à plat sur le sol. Elle avait même sorti deux couvertures.
+
+"J'espère que c'est juste moi qui réfléchis trop......mais tu n'es pas en train de nous demander de dormir ici, n'est-ce pas ?"
+
+Nagato apporta les couvertures et me regarda. Les silhouettes d'Asahina-san et moi se reflétaient clairement dans ses pupilles claires comme du cristal.
+
+"Si."
+
+"Ici ? Avec Asahina-san ? Tous les deux ?"
+
+"Oui."
+
+Je jetais un regard de côté et vis Asahina-san l'air embarrassée, son visage rougissant furieusement. Cette réaction était prévisible, je suppose.
+
+Mais Nagato ne semblait pas du tout préoccupée :
+
+"Maintenant dormez."
+
+Ne sois pas si directe !
+
+"Il ne s'agit que de dormir."
+
+Soupir......c'est ce que je comptais faire de toute façon. J'échangeai un regard avec Asahina-san. Elle rougit alors que je haussai les épaules. C'était nous qui étions venus voir Nagato pour de l'aide, si elle veut que nous dormions, alors dormons ! Ce serait une solution extrêmement simple si nous nous réveillons et que nous nous retrouvons à notre époque.
+
+Nagato éteignit les lumières en appuyant sur le bouton avec sa main et commença à marmonner quelque chose. Alors que je me demandais, Elle ne peut pas nous souhaiter bonne nuit, n'est-ce pas ? Les lampes clignotèrent et s'éteignirent.
+
+Eh bien dormons ! Je m'allongeais et remontais la couverture sur moi.
+
+![](\assets\illustrations\suzumiya\Sh_v03c02_03.jpg)
+
+L'instant suivant les lumières s'allumèrent à nouveau. Le tube fluorescent clignota lentement alors que la lumière se stabilisait. Hu ? Qu'est-ce que cette sensation bizarre ? Dehors, par la fenêtre, c'était le même ciel nocturne qu'avant.
+"J'espère que c'est juste moi qui réfléchis trop......mais tu n'es pas en train de nous demander de dormir ici, n'est-ce pas ?"..."Si."
+
+Je me relevai, et Asahina-san fit de même en serrant sa couverture.
+
+Son visage innocent comme celui d'un enfant semblait troublé, et elle me regarda avec un air interrogateur, mais bien sûr je ne savais pas comment répondre à ses questions.
+
+Nagato se tenait là comme à l'instant précédent, lorsqu'elle appuya sur l'interrupteur.
+
+J'avais l'impression que ce n'était pas le visage habituel de Nagato, comme s'il y avait des émotions dans celui-ci. Je regardai plus précisément son visage d'un blanc pâle, c'était comme si elle voulait exprimer quelque chose dont elle n'était pas capable à cause de conflits dans son coeur. Si je ne connaissais pas son visage depuis si longtemps, je l'aurais à peine remarqué. Cependant je peux garantir que ce n'était pas juste mon imagination.
+
+J'entendis une respiration à mes côtés. Je me retournai et vis Asahina-san tripotant la montre à affichage digitale à son poignet droit.
+
+"Hein ? Cela ne se peut pas ? ......Hein ? C'est vrai ?"
+
+Je jetai un oeil à sa montre, est-ce que cette chose est le fameux TPDD ?
+
+"Non, c'est juste une montre digitale automatique."
+
+Tu veux dire ces montres qui se synchronisent automatiquement à l'heure officielle ? Asahina-san me sourit joyeusement et dit :
+
+"Nous sommes de retour. Notre époque d'origine le 7 juillet......juste après neuf heures et demi du soir. Quel soulagement ......Pfiuu !"
+
+Son soupir de soulagement venait du fond de son coeur.
+
+La Nagato que nous connaissions se tenait à la porte. Sans lunettes, cette Nagato Yuki semblait légèrement plus douce. En la voyant avec trois ans de plus, je compris finalement. La Nagato devant moi avait en effet un peu changé depuis que je l'avais vue la première fois dans la salle du club de littérature quand Haruhi m'y avait amené. Le changement était si infime qu'elle ne s'en rendait probablement pas compte elle-même.
+
+"Mais, comment as-tu fait ?"
+
+Nagato expliqua à Asahina-san sans aucune émotion :
+
+"Gel sélectif de données liquéfiées connectées dans un plan du temps, conservation jusqu'à la destination connue à l'intérieur du continuum espace-temps, et finalement dégel des données."
+
+Elle dit plusieurs termes très abstraits, fit une pause puis ajouta :
+
+"Et c'est maintenant."
+
+Asahina-san tenta de se lever, mais ses genoux étaient ramollis et elle s'agenouilla à nouveau :
+
+"Se pourrait-il que......impossible......Nagato-san, tu......"
+
+Nagato resta silencieuse.
+
+"Qu'y a-t-il ?" Je demandais.
+
+"Nagato-san......a stoppé le temps lui-même. Elle a probablement gelé le temps dans cet espace où nous étions pendant trois ans, jusqu'à aujourd'hui quand elle a finalement dégelé le temps......n'est-ce pas ?"
+
+"Oui." Nagato répondit et hocha la tête.
+
+"C'est incroyable de pouvoir être capable de stopper le temps......waah~."
+
+Asahina-san tomba à genoux fatiguée et soupira.
+
+Je pensais en moi-même, il semblerait que nous soyons revenus sans risque trois ans dans le futur. J'en étais sûr rien qu'en voyant la réaction d'Asahina-san, elle était incapable de masquer ses pensées. Peu importe, je vais admettre pour le moment que la raison pour laquelle nous sommes revenus trois plus tard est que le temps a été gelé. Maintenant je pouvais accepter presque n'importe quoi, peu importe ce que c'était, je peux en gros l'accepter sans aucun problème. Tout allait bien......mais,
+
+Ce n'était pas la première fois que j'avais visité la maison de Nagato. Elle m'avait invité une fois, il y a un peu plus d'un mois, mais à ce moment-là je n'avais vu que le salon et n'étais pas entré dans la chambre d'ami, dont je ne connaissais même pas l'existence. Donc......hum, en d'autres mots, qu'est-ce qui se passe ici ?
+
+Je regardai Nagato, et Nagato me regarda.
+
+......En d'autres mots, quand je suis passé la première fois et que j'ai entendu son histoire à propos des explosions de données, il y avait un autre "moi" dormant dans cette pièce à côté de nous.
+
+Que se passait-il ? Cela paraissait une déduction logique.
+
+"Oui." dit Nagato. Je fus soudainement pris de vertiges.
+
+"......Hé, est-ce que cela signifie qu'à ce moment-là tu savais déjà ce qui allait arriver ? Y compris moi et les évènements d'aujourd'hui ?"
+
+"Oui."
+
+De mon point de vue, la première fois que j'ai rencontré Nagato était au début de l'année scolaire quand Haruhi avait imaginé la création de la Brigade SOS. Cependant Nagato m'avait déjà rencontré lors de Tanabata trois ans plus tôt. Pour moi, cela venait d'arriver, mais elle m'avait dit qu'elle était déjà là il y a trois ans. Je pense que je suis déjà devenu fou.
+
+Moi et Asahina-san étions abasourdis et étonnés par cette tournure des évènements. J'avais toujours su de quoi Nagato était capable, mais je ne pensais pas qu'elle pouvait même geler le temps. Dans ce cas, est-ce que ça ne fait pas d'elle l'incroyable 'Wonder Woman' ?
+
+"Pas entièrement vrai."
+
+Elle refusa nettement mes louanges.
+
+"C'était une exception spéciale. Une urgence. Sauf si c'est très important, cette méthode est rarement utilisée."
+
+Et nous étions considérés "très importants".
+
+"Merci, Nagato."
+
+Je commençai par la remercier. En fait, c'était tout ce que je pouvais faire.
+
+"Ce n'est pas grave."
+
+Nagato hocha son visage de marbre, puis me tendit le tanzaku avec les symboles géométriques dessinés dessus. Je le reçus et m'aperçus que le papier était très usé, comme si trois ans s'étaient passés.
+
+"Oh oui, les symboles sur ce tanzaku, peux-tu me dire ce qu'ils veulent dire ?"
+
+Je demandai avec désinvolture. Je ne pensais pas que quelqu'un pouvait lire ces symboles insensés dessinés par Haruhi, et j'avais donc simplement dit ça pour plaisanter.
+
+"Je suis ici,"
+
+Répondit Nagato. J'étais déconcerté.
+
+"C'est ce qui est écrit dessus."
+
+J'étais de plus en plus déconcerté.
+
+"Est-ce que ces dessins ou symboles Nazca sont une sorte de langue extraterrestre ?"
+
+Nagato ne répondit pas à cette question.
+
+
+
+Asahina-san et moi quittâmes l'appartement de Nagato et marchâmes sous un ciel éclairé par la lune.
+
+"Asahina-san, est-ce que cela avait une signification pour toi de m'emmener dans le passé ?"
+
+Asahina-san tenta de réfléchir de son mieux, puis leva la tête et dit avec une voix extrêmement douce :
+
+"Je suis désolée. Je......eh bien......hum......Je ne suis pas sûre......Je suis comme......l'extrémité de l'interface......non, la base......non, je suis juste une apprentie......"
+
+"Cependant tu es aux côtés d'Haruhi."
+
+"C'est parce que je n'ai jamais imaginé que je serais capturée par Suzumiya-san pour rejoindre le club."
+
+Dit-elle en faisant la moue. Asahina-san, tu as l'air mignonne aussi avec cette expression.
+
+"Je suis seulement les ordres......de mes supérieurs. Donc je ne sais même pas quelle signification ont les choses que je fais."
+
+Voyant Asahina-san rougir, je me demandai : est-ce que ce supérieur était l'Asahina-san adulte en personne ? C'était une spéculation sans fondement, mais comme les seuls voyageurs temporels étaient elle et l'Asahina-san normale, on ne pouvait pas me blâmer de penser ça.
+
+"Je vois."
+
+J'inclinai la tête et marmonnai.
+
+Cependant, je ne comprenais toujours pas. Si l'Asahina-san adulte était venue me donner un indice, alors elle savait ce qui allait nous arriver. Et il semblerait qu'elle n'ait rien dit non plus à cette Asahina-san. Que se passe-t-il au juste ?
+
+"Hum......"
+
+Inutile de faire une migraine pour ça. Si Asahina-san ne comprenait pas alors il était impossible que je comprenne. Nagato avait dit qu'il y avait plusieurs moyens pour voyager dans le temps. Les futurs voyageurs temporels ont leur propre ensemble de lois je suppose ? J'espère que quelqu'un m'expliquera tout ça quand tout sera réglé.
+
+À la gare, je pris un chemin différent d'Asahina-san. Sa petite silhouette me remercia à nouveau, puis partit comme si c'était terriblement dommage. Quand elle fut hors de vue, je me dirigeai aussi chez moi, et ce ne fut qu'à ce moment que je réalisai que j'avais laissé mon sac dans la salle de club.
+
+
+
+Le jour suivant était le 8 juillet ; pour mon esprit c'était en effet le jour suivant, mais pour mon corps, c'était comme si trois ans et un jour s'étaient passés depuis que j'avais quitté l'école. J'arrivai à l'école les mains vides et me dirigeai directement vers la salle du club pour rallier la salle de classe après avoir récupéré mon sac. Asahina-san avait dû arriver plus tôt puisque son sac n'était pas visible.
+
+Arrivant dans la salle de classe, je vis Haruhi assise là, regardant avec intensité dehors par la fenêtre, comme si elle s'attendait à l'arrivée d'extraterrestres.
+
+"Qu'y a-t-il ? Tu as l'air d'être déprimée depuis hier. As-tu ramassé et mangé des champignons toxiques ?"
+
+Dis-je en m'asseyant. Haruhi soupira délibérément et dit :
+
+"Ce n'est vraiment rien. Je ressens juste de la mélancolie en pensant au passé. Des souvenirs que d'un Tanabata."
+
+Je frissonnai aussitôt. Quels souvenirs étaient-ce ......Je ne lui demandai pas.
+
+"Je vois."
+
+Haruhi tourna la tête et observa les changements dans les nuages. Je secouai mes épaules. Je n'avais aucune intention de déclencher cette bombe. N'importe qui avec du bon sens ferait de même.
+
+
+
+Après les cours, la salle du club de littérature était à nouveau devenue le quartier général de la Brigade SOS.
+
+Haruhi dit seulement, "Jette la branche de bambou, elle est inutile maintenant." Puis elle partit aussitôt. Le brassard de "commandant" avait l'air assez seul après avoir été laissé sur la table. Soupir, demain elle sera de nouveau la fille excentrique nous demandant de faire des choses totalement impossibles. C'est ce genre de personne.
+
+Asahina-san n'était pas là non plus. Seul Nagato Yuki était dans la salle à mes côtés, alors que je jouais aux échecs avec Koizumi. Incapable de résister à sa passion "évangélique" pour les échecs, j'acceptai de le laisser m'apprendre comment on jouait à ce jeu.
+
+J'avais pensé que Koizumi avait décidé de se mettre aux échecs parce qu'il était très mauvais à Othello, mais il semblerait que j'avais tort. Il était aussi mauvais aux échecs.
+
+Je pris un des pions de Koizumi avec mon cavalier, jetant un oeil à Nagato qui regardait intensément l'échiquier avec son visage vide.
+
+"Dis, Nagato, je ne comprends toujours pas. Est-ce qu'Asahina-san vient vraiment du futur ?"
+
+Nagato inclina lentement la tête.
+
+"Oui."
+
+"Mais ça semble paradoxal d'aller dans le passé puis de retourner dans le futur."
+
+C'était prévisible. S'il n'y avait aucune continuité entre le passé et le futur - si nous retournons trois ans en arrière, nous nous endormons là-bas et nous nous réveillons dans le présent, alors le "présent" dans lequel nous étions maintenant devrait être un monde différent de "l'hier" dont on était parti. En conséquence, j'avais donné à Haruhi une idée qu'elle n'aurait pas eu, et cette idée avait poussé Haruhi à venir au lycée Nord, et accru son intérêt pour toutes les formes de vie non humaines......c'était une possibilité.
+
+Si je n'avais pas voyagé dans le temps trois ans plus tôt, peut-être que tout ça n'aurait jamais eu lieu. D'après le ton de l'Asahina-san adulte, elle semblait en savoir plus que nous. En d'autres termes, une continuité semblait exister entre le passé et le futur. Cela contredisait ce que m'avait dit Asahina-san plus tôt. Je pouvais m'en rendre compte, aussi idiot que je puisse être.
+
+"Comme il n'y a aucune conclusion à la théorie du paradoxe, il n'y a aucun moyen de prouver qu'il n'y a pas de paradoxe."
+
+dit calmement Nagato, m'offrant une expression étrange qui disait Cela doit tout expliquer. Cette explication est certainement suffisante pour toi, mais je ne la comprends pas du tout. Nagato leva sa nuque blanche et lisse et me regarda :
+
+"Bientôt tu comprendras."
+
+Elle retourna alors à son siège habituel et retourna dans son monde de livres. Koizumi parla alors :
+
+"C'est le cas. En ce moment mon roi est mis en échec par ta tour. C'est vraiment un problème pour moi, où puis-je m'échapper ?"
+
+dit Koizumi en saisissant son roi noir avant de le placer avec désinvolture dans la poche de sa veste. Il me montra alors ses paumes comme un magicien révélant ses trucs :
+
+"Eh bien, y a-t-il un paradoxe si je fais ça ?"
+
+Je jouai avec ma tour blanche entre mes doigts et pensai, Je ne vais pas jouer un stupide kōan avec toi, et je ne vais pas me satisfaire de sujets abstraits. Donc je refuse de te répondre.
+
+En tout cas - il n'y avait aucun doute que l'existence d'Haruhi était paradoxale, et on peut en dire autant de ce monde.
+
+"Par ailleurs, un roi ne signifie rien pour nous ; c'est surtout la reine qui joue un rôle important."
+
+Je plaçai la tour blanche sur la case où s'était trouvé le roi noir. Reine au Roi 8.
+
+"......Je ne sais pas ce qui va arriver, j'espère juste que ce ne sera pas quelque chose qui me donnera de terribles maux de tête."
+
+Nagato resta silencieuse, alors que Koizumi sourit et dit :
+
+"Je pense que le mieux serait que les choses restent paisibles, à moins que tu préfères que quelque chose se passe ?"
+
+Je grognai et dessinai un cercle avec mon nom sur la feuille de score. 

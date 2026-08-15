@@ -5,7 +5,7 @@ traducteurs: Beatripping
 equipe: Saint Eresia
 telechargement: https://drive.google.com/file/d/17g1zQ_qTiph0_WDTc7J2wMKJ6-4QBofz/view?usp=sharing
 format: PDF
-date: 
+date: 22/07/26
 ---
 
 ![](/assets/illustrations/zero-no-tsukaima/tome-01-p001-1.webp)
@@ -18,7 +18,9 @@ date:
 
 ![](/assets/illustrations/zero-no-tsukaima/tome-01-p005-1.webp)
 
-Le Royaume de la Magie Chapitre premier : Je suis un familier « Qui es-tu ? » demanda la jeune fille en scrutant le visage de Saito. Derrière elle s’étendait un ciel d’un bleu limpide.
+## Chapitre Premier : Je suis un familier
+
+« Qui es-tu ? » demanda la jeune fille en scrutant le visage de Saito. Derrière elle s’étendait un ciel d’un bleu limpide.
 
 Elle paraissait avoir à peu près son âge. Sous une cape noire, elle portait un chemisier blanc et une jupe plissée grise. Agenouillée près de lui, elle contemplait son visage avec stupeur.
 
