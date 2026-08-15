@@ -68,8 +68,37 @@ app.use(express.static(publicDir, { extensions: ['html'], maxAge: env.isProducti
 app.use(notFound);
 app.use(errorHandler);
 
+// Surveillance de content/ et des captures : tout ajout ou modification est repris sans redémarrer.
+function watchContent() {
+  const { reloadContent } = require('./repositories/store');
+  const importer = require('./database/import-content');
+  const targets = [
+    path.join(__dirname, '..', 'content'),
+    path.join(__dirname, '..', 'public', 'assets', 'screenshots')
+  ];
+  let timer = null;
+  const refresh = () => {
+    clearTimeout(timer); // on attend la fin des écritures avant de relire
+    timer = setTimeout(() => {
+      try {
+        importer.run();
+        const counts = reloadContent();
+        console.log(`Contenu rechargé : ${counts.novels} roman(s), ${counts.patches} patch(s).`);
+      } catch (error) {
+        console.error(`Rechargement impossible : ${error.message}`);
+      }
+    }, 300);
+  };
+  for (const dir of targets) {
+    try { fs.watch(dir, { recursive: true }, refresh); }
+    catch { /* dossier absent ou surveillance non supportée : on l'ignore */ }
+  }
+  console.log('Surveillance de content/ active : déposez un .md, le site se met à jour seul.');
+}
+
 if (require.main === module) {
   const server = app.listen(env.port, () => console.log(`Saint Eresia disponible sur ${env.appUrl}`));
+  if (env.nodeEnv !== 'production') watchContent();
   const shutdown = () => server.close(() => { if (pool) pool.end(); process.exit(0); });
   process.on('SIGTERM', shutdown); process.on('SIGINT', shutdown);
 }

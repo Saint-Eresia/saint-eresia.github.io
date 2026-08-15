@@ -3,7 +3,8 @@
 
 function applyImportedContent(novels) {
   let imported;
-  try { imported = require('../data/content.json'); } catch { return novels; }
+  // Lecture directe : require() met en cache et empêcherait tout rechargement à chaud.
+  try { imported = JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname, 'content.json'), 'utf8')); } catch { return novels; }
   if (!imported || !Array.isArray(imported.sections)) return novels;
   let applied = 0, unknown = 0;
   for (const section of imported.sections) {
@@ -15,6 +16,7 @@ function applyImportedContent(novels) {
       novel.volumes.push(volume);
       novel.volumes.sort((a, b) => a.number - b.number);
     }
+    if (section.volumeTitle) volume.title = section.volumeTitle;
     let chapter = volume.chapters.find((c) => c.slug === section.slug);
     if (!chapter) {
       chapter = { id: novel.id * 1000 + section.volume * 10 + section.number, number: section.number, slug: section.slug, title: '' };
@@ -24,7 +26,9 @@ function applyImportedContent(novels) {
     Object.assign(chapter, {
       title: section.title, status: section.status, publishedAt: section.publishedAt,
       wordCount: section.wordCount, readingTime: section.readingTime,
-      translator: section.translator || novel.translator, content: section.content
+      translators: section.translators && section.translators.length ? section.translators : [],
+      team: section.team || novel.translator, download: section.download || null,
+      kind: section.kind || 'chapter', label: section.label || 'Chapitre', imported: true, content: section.content
     });
     applied += 1;
   }

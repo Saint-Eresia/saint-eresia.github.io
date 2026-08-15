@@ -1,7 +1,7 @@
 ---
 titre:
 statut: Brouillon
-traducteur: Baka-tsuki
+traducteurs:
 date:
 ---
 

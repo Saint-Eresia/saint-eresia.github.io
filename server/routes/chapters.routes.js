@@ -11,7 +11,7 @@ router.get('/:slug', (req, res) => {
   const found = allChapters().find(({ chapter }) => chapter.slug === req.params.slug);
   if (!found) return res.status(404).json({ error: 'Chapitre introuvable.' });
   if (found.chapter.status === 'Programmé' && new Date(found.chapter.scheduledAt) > new Date() && !req.session?.user) return res.status(404).json({ error: 'Chapitre introuvable.' });
-  res.json({ ...found.chapter, novel: { id: found.novel.id, slug: found.novel.slug, title: found.novel.title, readingUnit: found.novel.readingUnit || `chapter` }, volume: { id: found.volume.id, number: found.volume.number, title: found.volume.title }, navigation: allChapters().filter((x) => x.novel.id === found.novel.id).map((x) => ({ slug: x.chapter.slug, number: x.chapter.number, title: x.chapter.title })) });
+  res.json({ ...found.chapter, novel: { id: found.novel.id, slug: found.novel.slug, title: found.novel.title, readingUnit: found.novel.readingUnit || `chapter`, team: found.novel.translator }, volume: { id: found.volume.id, number: found.volume.number, title: found.volume.title }, navigation: allChapters().filter((x) => x.novel.id === found.novel.id).map((x) => ({ slug: x.chapter.slug, number: x.chapter.number, title: x.chapter.title })) });
 });
 
 router.patch('/:id', requireAuth, requireMinimumRole('TRANSLATOR'), (req, res) => {

@@ -22,7 +22,7 @@ const novelSpecs = [
     originalTitle: '涼宮ハルヒの憂鬱', alternativeTitles: ['Suzumiya Haruhi no Yūutsu', 'The Melancholy of Haruhi Suzumiya'],
     author: 'Nagaru Tanigawa', artist: 'Noizi Ito', translator: 'Baka-tsuki', genres: ['Science-fiction', 'Comédie', 'École'], tags: ['Surnaturel', 'Club scolaire'],
     workStatus: 'En cours', translationStatus: 'Reprise en cours', publishedAt: '2003-06-06', readingUnit: 'chapter', volumeCount: 12, chaptersPerVolume: 6,
-    translationNote: 'Les chapitres déjà disponibles proviennent de la traduction de Baka-tsuki, aujourd’hui abandonnée. Saint Eresia reprend la suite.',
+    translationNote: 'Les cinq premiers tomes ont été partiellement traduits par Baka-Tsuki. La suite est traduite par Saint Eresia.',
     synopsis: 'Light novel de Nagaru Tanigawa illustré par Noizi Ito, publié chez Kadokawa (Sneaker Bunko). Premier tome de la série Haruhi Suzumiya.'
   }
 ];
@@ -97,7 +97,8 @@ const patches = [
     ],
     warnings: ['Ce téléchargement ne contient pas le jeu original.'],
     changelog: ['Scripts, dialogues et texte système traduits', 'Police accentuée et sous-titres des vidéos intégrés', 'Menus et CG en cours de reprise'],
-    checksum: '', cover: '/assets/VN/chaoschild.webp', versions: []
+    checksum: '', cover: '/assets/VN/chaoschild.webp',
+    repository: '', gamebanana: '', screenshots: [], versions: []
   },
   {
     id: 2, slug: 'rance-01-fr', title: 'Rance 01 : La quête pour Hikari — Patch FR',
@@ -115,7 +116,8 @@ const patches = [
     instructions: ['Les étapes d’installation seront publiées avec la première version du patch.'],
     warnings: ['Ce téléchargement ne contient pas le jeu original.', 'Œuvre réservée à un public adulte.'],
     changelog: [],
-    checksum: '', cover: '/assets/VN/rance01.webp', versions: []
+    checksum: '', cover: '/assets/VN/rance01.webp',
+    repository: '', gamebanana: '', screenshots: [], versions: []
   }
 ];
 

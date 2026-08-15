@@ -76,7 +76,10 @@ Le deuxième paragraphe. Une ligne vide sépare deux paragraphes.
 ```
 
 - `statut` : `Brouillon` (défaut), `Publié` ou `Archivé`. Seuls les chapitres publiés sont visibles des lecteurs.
-- `traducteur` : à renseigner quand il diffère de l'équipe créditée sur le roman — par exemple les
+- `traducteurs` : les personnes ayant traduit **ce tome précisément**, séparées par des virgules.
+  Affichées en tête de lecture. Exemple : `traducteurs: Beatripping` ou `traducteurs: Mekki, Miccle`.
+- `equipe` : l'équipe créditée pour ce tome, si elle diffère de celle du roman.
+- `traducteur` : ancienne forme au singulier, toujours acceptée — par exemple les
   chapitres de Suzumiya repris de Baka-tsuki.
 - `date` : date de publication, au format `AAAA-MM-JJ`.
 

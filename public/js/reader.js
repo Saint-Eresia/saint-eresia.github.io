@@ -13,6 +13,13 @@
   let saveTimer;
   const key = `saint-eresia:reader:${novelSlug}`;
   // Mention de fantraduction, affichée avant et après le texte du chapitre.
+  // Bandeau de crédits en tête de lecture : œuvre, équipe et personnes ayant traduit ce tome.
+  const credits = () => {
+    const team = chapter.team || chapter.novel.team;
+    const names = (chapter.translators || []).filter(Boolean);
+    if (!team && !names.length) return ``;
+    return `<aside class="credits"><p class="credits-title">${esc(chapter.novel.title)}</p>${team ? `<p>Traduction : ${esc(team)}</p>` : ``}${names.length ? `<p>${names.length > 1 ? `Traducteurs` : `Traduit par`} : ${esc(names.join(`, `))}</p>` : ``}</aside>`;
+  };
   const disclaimer = (extra = ``) => `<aside class="disclaimer ${extra}"><strong>Interdit à la vente</strong><p>Prière d’acheter les séries à leur sortie en France pour soutenir le marché et les auteurs.</p><p>Veuillez acheter la série une fois licenciée en France.</p></aside>`;
   const prefKey = 'saint-eresia:reader-preferences';
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[c]));
@@ -45,7 +52,7 @@
     root.style.setProperty('--reader-line', next.lineHeight || 1.9);
     root.style.setProperty('--reader-width', `${next.width || 760}px`);
     content.style.fontFamily = next.fontFamily || 'Georgia,serif';
-    body.classList.remove('light','sepia','dark'); if (next.theme) body.classList.add(next.theme);
+    body.classList.remove('light','sepia','dark'); body.classList.add(next.theme || 'dark'); // sombre par défaut, comme le site
     document.querySelector('#font-size').value = next.fontSize || 19;
     document.querySelector('#line-height').value = Math.round((next.lineHeight || 1.9) * 10);
     document.querySelector('#reader-width').value = next.width || 760;
@@ -75,9 +82,9 @@
     try { const me = await request('/api/auth/me'); user = me.user; csrf = me.csrfToken; chapter = await request(`/api/chapters/${encodeURIComponent(chapterSlug)}`); }
     catch (error) { content.innerHTML = `<h1>Chapitre indisponible</h1><p>${esc(error.message)}</p>`; return; }
     document.title = `${chapter.novel.title} — Chapitre ${chapter.number} | Saint Eresia`;
-    document.querySelector('.reader-title').textContent = `${chapter.novel.title} · ${chapter.novel.readingUnit === `volume` ? `Tome ${chapter.volume.number}` : `Chapitre ${chapter.number}`}`;
+    document.querySelector('.reader-title').textContent = `${chapter.novel.title} · ${chapter.novel.readingUnit === `volume` ? `Tome ${chapter.volume.number}` : (chapter.kind && chapter.kind !== `chapter` ? chapter.label : `Chapitre ${chapter.number}`)}`;
     document.querySelector('#back-link').href = `/novel.html?slug=${encodeURIComponent(chapter.novel.slug)}`;
-    content.innerHTML = `${chapter.novel.readingUnit === `volume` ? `<h1>Tome ${chapter.volume.number}${chapter.title ? ` — ${esc(chapter.title)}` : ``}</h1>` : `<p class="eyebrow">Volume ${chapter.volume.number}${chapter.volume.title ? ` · ${esc(chapter.volume.title)}` : ``}</p><h1>Chapitre ${chapter.number}${chapter.title ? ` — ${esc(chapter.title)}` : ``}</h1>`}${disclaimer()}${chapter.content}${disclaimer(`disclaimer-end`)}<nav class="reader-nav"><button class="btn" data-go="-1" ${!navTarget(-1)?'disabled':''}>← Chapitre précédent</button><button class="btn btn-primary" data-go="1" ${!navTarget(1)?'disabled':''}>Chapitre suivant →</button></nav>`;
+    content.innerHTML = `${chapter.novel.readingUnit === `volume` ? `<h1>Tome ${chapter.volume.number}${chapter.title ? ` — ${esc(chapter.title)}` : ``}</h1>` : `<p class="eyebrow">Volume ${chapter.volume.number}${chapter.volume.title ? ` · ${esc(chapter.volume.title)}` : ``}</p><h1>${chapter.kind && chapter.kind !== `chapter` ? esc(chapter.label) : `Chapitre ${chapter.number}`}${chapter.title && chapter.title !== chapter.label ? ` — ${esc(chapter.title)}` : ``}</h1>`}${credits()}${chapter.content}${disclaimer(`disclaimer-end`)}<nav class="reader-nav"><button class="btn" data-go="-1" ${!navTarget(-1)?'disabled':''}>← Chapitre précédent</button><button class="btn btn-primary" data-go="1" ${!navTarget(1)?'disabled':''}>Chapitre suivant →</button></nav>`;
     document.querySelector('#prev').disabled = !navTarget(-1); document.querySelector('#next').disabled = !navTarget(1);
     document.querySelectorAll('[data-go]').forEach((button) => button.onclick = () => go(Number(button.dataset.go)));
     applyPrefs();
@@ -98,7 +105,7 @@
     if (['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName)) return;
     if (event.key === 'ArrowLeft') go(-1); if (event.key === 'ArrowRight') go(1);
     if (event.key.toLowerCase() === 'f') body.classList.toggle('focus');
-    if (event.key.toLowerCase() === 'd') { const themes=['light','sepia','dark']; const current=preferences().theme||'light'; savePrefs({theme:themes[(themes.indexOf(current)+1)%3]}); }
+    if (event.key.toLowerCase() === 'd') { const themes=['dark','sepia','light']; const current=preferences().theme||'dark'; savePrefs({theme:themes[(themes.indexOf(current)+1)%3]}); }
     if (event.key === '+' || event.key === '=') savePrefs({fontSize:Math.min(28,(preferences().fontSize||19)+1)});
     if (event.key === '-') savePrefs({fontSize:Math.max(15,(preferences().fontSize||19)-1)});
     if (event.key === 'Escape') controls.classList.add('hidden');

@@ -41,11 +41,12 @@ function copyTree(from, to, insideDir = '') {
 }
 
 // Reproduit la forme des réponses de l'API pour que le front change le moins possible.
+// Le site public ne montre que ce qui est publié : les tomes vides ne sont pas exportés.
 const publicNovel = (novel) => ({
   ...novel,
-  volumes: novel.volumes.map((volume) => ({
+  volumes: novel.volumes.filter((volume) => volume.chapters.some((c) => c.status === 'Publié')).map((volume) => ({
     ...volume,
-    chapters: volume.chapters.map(({ content, ...rest }) => rest)
+    chapters: volume.chapters.filter((c) => c.status === 'Publié').map(({ content, ...rest }) => rest)
   }))
 });
 
@@ -69,7 +70,7 @@ function buildData() {
       .map((x) => ({ slug: x.chapter.slug, number: x.chapter.number, title: x.chapter.title, volume: x.volume.number }));
     write(`data/chapters/${chapter.slug}.json`, {
       ...chapter,
-      novel: { id: novel.id, slug: novel.slug, title: novel.title, readingUnit: novel.readingUnit || 'chapter' },
+      novel: { id: novel.id, slug: novel.slug, title: novel.title, readingUnit: novel.readingUnit || 'chapter', team: novel.translator },
       volume: { id: volume.id, number: volume.number, title: volume.title },
       navigation: siblings
     });

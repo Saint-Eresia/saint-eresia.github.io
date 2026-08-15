@@ -1,7 +1,7 @@
 ---
 titre:
 statut: Brouillon
-traducteur: Saint Eresia
+traducteurs:
 date:
 ---
 

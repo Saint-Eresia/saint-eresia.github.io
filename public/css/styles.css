@@ -1,10 +1,21 @@
-/* Saint Eresia — thème clair. Palette, rayons et ombres pilotés par les jetons ci-dessous. */
+/* Saint Eresia — sombre par défaut, clair sur demande (data-theme="light" sur <html>). */
 :root{
+  --background:224 18% 8%;--foreground:220 16% 92%;--card:224 16% 11%;--card-soft:224 16% 14%;
+  --muted:224 14% 18%;--muted-fg:220 10% 62%;--border:224 14% 20%;--border-strong:224 12% 28%;
+  --primary:349 74% 56%;--primary-dark:349 74% 46%;--primary-soft:349 40% 18%;
+  --success:152 45% 52%;--success-soft:152 35% 16%;--warning:38 80% 60%;--warning-soft:36 40% 15%;
+  --header-bg:224 18% 8%/.88;--overlay:224 30% 4%/.65;
+  --radius:.9rem;--radius-sm:.55rem;--header:70px;--content:1240px;
+  --shadow:0 1px 2px rgb(0 0 0/.3),0 10px 30px rgb(0 0 0/.35);
+  --shadow-lift:0 2px 4px rgb(0 0 0/.35),0 18px 40px rgb(0 0 0/.45);
+  color-scheme:dark
+}
+:root[data-theme="light"]{
   --background:34 30% 98%;--foreground:222 22% 14%;--card:0 0% 100%;--card-soft:34 34% 96%;
   --muted:220 16% 95%;--muted-fg:220 10% 46%;--border:220 15% 90%;--border-strong:220 14% 82%;
   --primary:349 72% 46%;--primary-dark:349 74% 36%;--primary-soft:349 70% 96%;
   --success:152 52% 36%;--success-soft:152 55% 94%;--warning:32 84% 42%;--warning-soft:38 92% 94%;
-  --radius:.9rem;--radius-sm:.55rem;--header:70px;--content:1240px;
+  --header-bg:0 0% 100%/.86;--overlay:222 20% 12%/.45;
   --shadow:0 1px 2px rgb(24 26 34/.05),0 10px 30px rgb(24 26 34/.07);
   --shadow-lift:0 2px 4px rgb(24 26 34/.06),0 18px 40px rgb(24 26 34/.12);
   color-scheme:light
@@ -26,7 +37,7 @@ h3{font-size:17px}
 .skip-link:focus{top:1rem}
 
 /* En-tête et navigation */
-.site-header{height:var(--header);position:sticky;top:0;z-index:50;background:rgb(255 255 255/.86);border-bottom:1px solid hsl(var(--border));backdrop-filter:blur(12px)}
+.site-header{height:var(--header);position:sticky;top:0;z-index:50;background:hsl(var(--header-bg));border-bottom:1px solid hsl(var(--border));backdrop-filter:blur(12px)}
 .header-inner{height:100%;display:flex;align-items:center;gap:28px}
 .brand{display:flex;align-items:center;gap:11px;min-width:max-content}
 .brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:hsl(var(--primary));color:#fff;font-family:Georgia,serif;font-size:18px;font-weight:700;box-shadow:0 4px 12px hsl(var(--primary)/.28)}
@@ -155,7 +166,7 @@ main{min-height:calc(100vh - var(--header))}
 .volume{margin-bottom:14px;border:1px solid hsl(var(--border));border-radius:var(--radius);overflow:hidden;background:hsl(var(--card))}
 .volume summary{cursor:pointer;padding:16px 18px;background:hsl(var(--card-soft));font-weight:700}
 .volume .list{padding:12px}
-.chapter-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:12px;border-bottom:1px solid hsl(var(--border))}
+.chapter-row{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:12px;padding:12px;border-bottom:1px solid hsl(var(--border))}
 .chapter-row:last-child{border:0}
 .chapter-row small{color:hsl(var(--muted-fg))}
 
@@ -183,7 +194,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--
 .kpi strong{font-size:30px;display:block;font-family:Georgia,serif;color:hsl(var(--primary))}
 
 /* Fenêtres modales et notifications */
-.modal{position:fixed;inset:0;z-index:80;display:none;place-items:center;padding:16px;background:rgb(24 26 34/.45);backdrop-filter:blur(3px)}
+.modal{position:fixed;inset:0;z-index:80;display:none;place-items:center;padding:16px;background:hsl(var(--overlay));backdrop-filter:blur(3px)}
 .modal.open{display:grid}
 .modal-card{width:min(520px,100%);max-height:90vh;overflow:auto;padding:26px;border-radius:var(--radius);background:hsl(var(--card));box-shadow:var(--shadow-lift)}
 .toast-region{position:fixed;right:16px;top:84px;z-index:100;display:grid;gap:8px}
@@ -201,11 +212,11 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--
 .footer-bottom{padding:18px 0;border-top:1px solid hsl(var(--border));color:hsl(var(--muted-fg));font-size:12.5px}
 
 /* Lecteur de chapitres : clair par défaut, variantes sépia et sombre */
-.reader-page{--reader-width:740px;--reader-font:19px;--reader-line:1.85;background:#fbf9f6;color:#241f1b;color-scheme:light}
+.reader-page{--reader-width:740px;--reader-font:19px;--reader-line:1.85;background:hsl(var(--background));color:hsl(var(--foreground))}
 .reader-page.light{background:#fbf9f6;color:#241f1b}
 .reader-page.sepia{background:#f2e8d5;color:#3e3426}
 .reader-page.dark{background:#15161a;color:#e6e4e0;color-scheme:dark}
-.reader-header{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid rgb(128 128 128/.2);background:rgb(251 249 246/.94);backdrop-filter:blur(10px)}
+.reader-header{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid hsl(var(--border));background:hsl(var(--header-bg));backdrop-filter:blur(10px)}
 .reader-page.sepia .reader-header{background:rgb(242 232 213/.94)}
 .reader-page.dark .reader-header{background:rgb(21 22 26/.94)}
 .reader-progress{position:fixed;top:0;left:0;z-index:60;height:3px;width:0;background:hsl(var(--primary))}
@@ -213,7 +224,7 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--
 .reader-content{width:min(var(--reader-width),calc(100% - 40px));margin:64px auto 110px;font-family:Georgia,serif;font-size:var(--reader-font);line-height:var(--reader-line)}
 .reader-content h1{text-align:center;font-size:2.1em;margin-bottom:56px}
 .reader-content p{margin:0 0 1.15em}
-.reader-controls{position:fixed;right:20px;bottom:20px;z-index:42;padding:16px;width:264px;border-radius:var(--radius);background:#fff;box-shadow:var(--shadow-lift)}
+.reader-controls{position:fixed;right:20px;bottom:20px;z-index:42;padding:16px;width:264px;border-radius:var(--radius);background:hsl(var(--card));box-shadow:var(--shadow-lift)}
 .reader-page.sepia .reader-controls{background:#f7efe0}
 .reader-page.dark .reader-controls{background:#1e2026}
 .reader-controls.hidden{display:none}
@@ -333,10 +344,30 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--
 .icon-mask{display:block;width:17px;height:17px;background:currentColor;-webkit-mask:var(--icon) center/contain no-repeat;mask:var(--icon) center/contain no-repeat}
 
 /* Mention de fantraduction affichée sur les fiches de romans et dans le lecteur */
-.disclaimer{margin:0;padding:14px 18px;border:1px solid hsl(38 70% 80%);border-left:4px solid hsl(var(--warning));border-radius:var(--radius-sm);background:hsl(var(--warning-soft));color:hsl(32 60% 26%);font-size:13.5px;line-height:1.55}
+.disclaimer{margin:0;padding:14px 18px;border:1px solid hsl(var(--warning)/.35);border-left:4px solid hsl(var(--warning));border-radius:var(--radius-sm);background:hsl(var(--warning-soft));color:hsl(var(--foreground));font-size:13.5px;line-height:1.55}
 .disclaimer strong{display:block;margin-bottom:5px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--warning))}
 .disclaimer p{margin:0 0 5px}
 .disclaimer p:last-child{margin-bottom:0}
 .reader-content .disclaimer{margin:0 0 42px;font-family:Inter,system-ui,sans-serif}
 .reader-content .disclaimer-end{margin:42px 0 0}
-.reader-page.dark .disclaimer{background:hsl(32 40% 14%);border-color:hsl(32 40% 28%);color:hsl(38 60% 78%)}
+.reader-page.dark .disclaimer{background:hsl(36 40% 15%);border-color:hsl(38 50% 30%);color:hsl(38 60% 82%)}
+
+/* Illustrations dans le texte d'un chapitre */
+.reader-content figure{margin:2.2em 0;text-align:center}
+.reader-content figure img{max-width:100%;height:auto;border-radius:var(--radius-sm)}
+.reader-content figcaption{margin-top:.6em;font:italic 14px/1.5 Inter,system-ui,sans-serif;opacity:.75}
+
+/* Crédits en tête de lecture */
+.reader-content .credits{margin:0 0 18px;padding:14px 18px;border-radius:var(--radius-sm);background:hsl(var(--card-soft));border:1px solid hsl(var(--border));font:14px/1.6 Inter,system-ui,sans-serif}
+.reader-content .credits p{margin:0}
+.reader-content .credits-title{font-weight:700;font-size:15px;margin-bottom:4px}
+.chapter-row{gap:10px}
+.chapter-row .btn{white-space:nowrap}
+.chapter-row strong{display:block;margin-bottom:3px}
+.chapter-row small{display:block;color:hsl(var(--muted-fg))}
+.note-block{margin:0 0 16px;padding:12px 16px;border-left:3px solid hsl(var(--primary));border-radius:var(--radius-sm);background:hsl(var(--card-soft));font-size:14px;color:hsl(var(--muted-fg))}
+
+/* Captures d'écran d'un patch : défilement horizontal */
+.shots{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.shots img{height:230px;width:auto;border-radius:var(--radius-sm);border:1px solid hsl(var(--border));scroll-snap-align:start;flex:0 0 auto}
+.link-row{display:flex;flex-wrap:wrap;gap:10px}

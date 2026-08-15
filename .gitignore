@@ -28,3 +28,6 @@ _legacy_backup/css/
 _legacy_backup/js/
 _legacy_backup/metadata/
 _legacy_backup/pages/
+
+# Traductions tierces gardées en référence locale, jamais publiées
+_reference/

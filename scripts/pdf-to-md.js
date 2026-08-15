@@ -7,6 +7,7 @@
 //   --traducteur <texte>  valeur du champ traducteur (défaut : Saint Eresia)
 //   --statut <texte>      Brouillon (défaut), Publié ou Archivé
 const fs = require('node:fs');
+const sharp = require('sharp');
 const path = require('node:path');
 
 const args = process.argv.slice(2);
@@ -57,6 +58,7 @@ function dropRunningHeads(pages, bodySize) {
   for (const lines of pages) {
     const edges = [...lines.slice(0, 2), ...lines.slice(-2)];
     for (const line of new Set(edges)) {
+      if (line.image) continue;
       if (looksLikeHeading(line)) continue;
       const key = line.text.replace(/\d+/g, '#');
       count.set(key, (count.get(key) || 0) + 1);
@@ -65,18 +67,57 @@ function dropRunningHeads(pages, bodySize) {
   const repeated = new Set([...count].filter(([, n]) => n >= Math.max(2, pages.length * 0.5)).map(([key]) => key));
   return pages.map((lines) => lines.filter((line, index) => {
     const nearEdge = index < 2 || index >= lines.length - 2;
+    if (line.image) return true;
     if (!nearEdge || looksLikeHeading(line)) return true;
     if (/^[ivxlcdm]+$|^\d{1,4}$|^[-–—\s]*\d{1,4}[-–—\s]*$/i.test(line.text)) return false;
     return !repeated.has(line.text.replace(/\d+/g, '#'));
   }));
 }
 
+
+// Les illustrations sont écrites dans public/assets/... pour être servies par le serveur
+// comme par le site statique, et référencées en chemin absolu dans le Markdown.
+async function extractImages(page, pageNumber, { dir, urlBase, prefix, OPS }) {
+  const ops = await page.getOperatorList();
+  const found = [];
+  let ctm = [1, 0, 0, 1, 0, 0];
+  const stack = [];
+  const mul = (m, n) => [
+    m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
+    m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+    m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]
+  ];
+  for (let i = 0; i < ops.fnArray.length; i += 1) {
+    const fn = ops.fnArray[i];
+    if (fn === OPS.save) { stack.push(ctm.slice()); continue; }
+    if (fn === OPS.restore) { ctm = stack.pop() || [1, 0, 0, 1, 0, 0]; continue; }
+    if (fn === OPS.transform) { ctm = mul(ctm, ops.argsArray[i]); continue; }
+    if (fn !== OPS.paintImageXObject) continue;
+    const id = ops.argsArray[i][0];
+    let obj;
+    try { obj = await new Promise((res, rej) => { const t = setTimeout(() => rej(new Error('délai dépassé')), 15000); page.objs.get(id, (o) => { clearTimeout(t); res(o); }); }); }
+    catch { continue; }
+    if (!obj || !obj.data || !obj.width) continue;
+    const channels = obj.kind === 3 ? 4 : obj.kind === 2 ? 3 : 0;
+    if (!channels || obj.data.length < obj.width * obj.height * channels) continue;
+    // Les petites images sont des filets ou des logos, pas des illustrations.
+    if (obj.width < 200 || obj.height < 200) continue;
+    const name = `${prefix}-p${String(pageNumber).padStart(3, '0')}-${found.length + 1}.webp`;
+    fs.mkdirSync(dir, { recursive: true });
+    await sharp(Buffer.from(obj.data.buffer, obj.data.byteOffset, obj.width * obj.height * channels),
+      { raw: { width: obj.width, height: obj.height, channels } })
+      .webp({ quality: 82 }).toFile(path.join(dir, name));
+    found.push({ y: Math.max(ctm[5], ctm[5] + ctm[3]), url: `${urlBase}/${name}`, width: obj.width, height: obj.height });
+  }
+  return found;
+}
 const HEADING = /^(chapitre|chapter|prologue|épilogue|epilogue|interlude|partie|tome|volume)\b/i;
 const SCENE_BREAK = /^[\s*◇◆●○■□·・…\-–—=~]{3,}$/;
 
 // Les paragraphes se déduisent de l'espacement vertical et du retrait de première ligne.
 // L'interligne courant se déduit du document : un saut nettement plus grand marque un paragraphe.
-function medianGap(lines, bodySize) {
+function medianGap(allLines, bodySize) {
+  const lines = allLines.filter((l) => !l.image);
   const gaps = [];
   for (let i = 1; i < lines.length; i += 1) {
     const gap = lines[i - 1].y - lines[i].y;
@@ -90,12 +131,14 @@ function medianGap(lines, bodySize) {
 function toBlocks(lines, bodySize, lineGap) {
   const blocks = [];
   let current = null;
-  const left = Math.min(...lines.map((l) => l.x));
+  const textLines = lines.filter((l) => !l.image);
+  const left = Math.min(...textLines.map((l) => l.x));
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const previous = lines[i - 1];
     const gap = previous ? previous.y - line.y : 0;
     const isHeading = line.size > bodySize * 1.15 || HEADING.test(line.text);
+    if (line.image) { blocks.push({ type: 'image', image: line.image }); current = null; continue; }
     if (SCENE_BREAK.test(line.text)) { blocks.push({ type: 'break' }); current = null; continue; }
     if (isHeading && line.text.length < 120) {
       blocks.push({ type: 'heading', text: line.text, size: line.size });
@@ -123,6 +166,7 @@ function toMarkdown(blocks, { split }) {
   const out = [];
   for (const block of blocks) {
     if (block.type === 'break') { out.push('---'); continue; }
+    if (block.type === 'image') { out.push(`![](${block.image.url})`); continue; }
     if (block.type === 'heading') { out.push(`${split ? '#' : '##'} ${escapeMd(block.text)}`); continue; }
     if (block.text.length > 1) out.push(escapeMd(block.text));
   }
@@ -132,7 +176,17 @@ function toMarkdown(blocks, { split }) {
 const frontMatter = ({ titre, statut, traducteur, date }) =>
   ['---', `titre: ${titre || ''}`, `statut: ${statut}`, `traducteur: ${traducteur}`, `date: ${date || ''}`, '---', ''].join('\n');
 
+const ROOT_PUBLIC = path.join(__dirname, '..', 'public');
 async function run() {
+  // Dossier des illustrations : sous public/assets pour être servi par le serveur et le site statique.
+  const imageTarget = (OPS) => {
+    const outPath = flag('decouper') ? option('dossier', path.dirname(input)) : option('sortie', input.replace(/\.pdf$/i, '.md'));
+    const novel = path.basename(flag('decouper') ? path.dirname(path.resolve(outPath)) : path.dirname(path.resolve(outPath)));
+    const dir = option('illustrations', path.join(ROOT_PUBLIC, 'assets', 'illustrations', novel));
+    const urlBase = `/assets/illustrations/${novel}`;
+    const prefix = path.basename(outPath).replace(/\.md$/i, '') || 'illus';
+    return { dir, urlBase, prefix, OPS };
+  };
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const data = new Uint8Array(fs.readFileSync(input));
   const document = await pdfjs.getDocument({ data, useSystemFonts: true }).promise;
@@ -141,7 +195,13 @@ async function run() {
   for (let n = 1; n <= document.numPages; n += 1) {
     const page = await document.getPage(n);
     const content = await page.getTextContent();
-    pages.push(toLines(content.items));
+    const lines = toLines(content.items);
+    if (!flag('sans-illustrations')) {
+      const images = await extractImages(page, n, imageTarget(pdfjs.OPS));
+      for (const image of images) lines.push({ y: image.y, x: 0, size: 0, parts: [], text: '', image });
+      lines.sort((a, b) => b.y - a.y);
+    }
+    pages.push(lines);
   }
   // Taille de corps = celle qui porte le plus de texte ; les titres s'en écartent.
   const measure = (all) => { const sizes = new Map(); all.forEach((l) => sizes.set(l.size, (sizes.get(l.size) || 0) + l.text.length)); return [...sizes].sort((a, b) => b[1] - a[1])[0][0]; };
