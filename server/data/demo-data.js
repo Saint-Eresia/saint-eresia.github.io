@@ -123,7 +123,8 @@ const patches = [
     warnings: ['Ce téléchargement ne contient pas le jeu original.', 'Œuvre réservée à un public adulte.'],
     changelog: [],
     checksum: '', cover: '/assets/VN/rance01.webp',
-    repository: '', gamebanana: '', steamAppId: '', screenshots: [], versions: []
+    // Steam regroupe les deux titres sur une seule fiche « Rance 01 + 02 ».
+    repository: '', gamebanana: '', steamAppId: '3867130', screenshots: [], versions: []
   }
 ];
 

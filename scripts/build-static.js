@@ -4,9 +4,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { novels: baseNovels, patches } = require('../server/data/demo-data');
 const { applyImportedContent } = require('../server/data/content-merge');
+const { scanScreenshots } = require('../server/data/screenshots');
 
 // Pas de store ici : le build n'a besoin ni des comptes ni de bcrypt.
-const state = { novels: applyImportedContent(structuredClone(baseNovels)), patches };
+// Le scan des captures doit en revanche être rejoué : sans lui les fiches partiraient
+// avec screenshots: [] et aucune image ne s'afficherait sur le site publié.
+const state = { novels: applyImportedContent(structuredClone(baseNovels)), patches: scanScreenshots(structuredClone(patches)) };
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'dist');
