@@ -13,7 +13,7 @@
     { name: 'Mekki', avatar: '/assets/icondev/mekki.webp', roles: ['Fondateur', 'Traduction (JA->FR)', 'Programmation', 'Hacking', 'Édition d’images'], projects: ['CHAOS;HEAD NOAH', 'CHAOS;CHILD', 'Rance 01', 'Zero no Tsukaima', 'Rakudai Kishi no Cavaltry', 'Suzumiya Haruhi'], links: { gamebanana: 'https://gamebanana.com/members/1957696', github: 'https://github.com/jabberwockyfool', youtube: 'https://www.youtube.com/@jabberwockyfool', linktree: 'https://guns.lol/wrotemysins' } },
     { name: 'Medpapaya', avatar: '/assets/icondev/medpapaya.webp', roles: ['Fondateur', 'Traduction (EN->FR)', 'Édition d’images', 'Programmation', 'Hacking'], projects: ['CHAOS;HEAD NOAH', 'CHAOS;CHILD', 'Rance 01', 'Suzumiya Haruhi'], links: { gamebanana: 'https://gamebanana.com/members/1835686', github: 'https://github.com/medlpb' } },
     { name: 'Beatripping', avatar: '/assets/icondev/beatripping.webp', roles: ['Traduction (JA->FR)', 'Site Internet', 'Programmation'], projects: ['CHAOS;CHILD', 'Rance 01', 'Zero No Tsukaima'], links: { github: 'https://github.com/JemiraCodePrime' } },
-    { name: 'Ryuu7n', avatar: '/assets/icondev/ryuu7n.webp', roles: ['Communication', 'Bêta-Testing'], projects: ['CHAOS;CHILD', 'Rakudai Kishi no Cavalry'], links: { linktree: 'https://guns.lol/ryuu7n' } },
+    { name: 'Ejder', avatar: '/assets/icondev/ryuu7n.webp', roles: ['Communication', 'Bêta-Testing'], projects: ['CHAOS;CHILD', 'Rakudai Kishi no Cavalry'], links: { linktree: 'https://guns.lol/ryuu7n' } },
   ];
   const page = document.body.dataset.page || 'home';
   const $ = (selector, root = document) => root.querySelector(selector);
