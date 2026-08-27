@@ -108,7 +108,7 @@ const patches = [
     ],
     warnings: ['Ce téléchargement ne contient pas le jeu original.'],
     changelog: ['Scripts, dialogues et texte système traduits', 'Police accentuée et sous-titres des vidéos intégrés', 'Menus et CG traduits'],
-    checksum: '', cover: '/assets/VN/chaoschild.webp',
+    checksum: '', cover: '/assets/VN/chaoschild.webp', header: '/assets/VN/chaoschildheader.jpg',
     repository: 'https://github.com/jabberwockyfool/Chaos-Child-FR',
     gamebanana: 'https://gamebanana.com/mods/698264',
     downloadUrl: 'https://github.com/jabberwockyfool/Chaos-Child-FR/releases',

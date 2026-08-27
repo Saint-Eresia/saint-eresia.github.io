@@ -95,7 +95,17 @@
   function header() {
     const path = location.pathname;
     const current = (href) => path.endsWith(href) ? 'aria-current="page"' : '';
-    $('#site-header').innerHTML = `<a class="skip-link" href="#main">Aller au contenu</a><header class="site-header"><div class="container header-inner"><a class="brand" href="/index.html" aria-label="Saint Eresia, accueil"><span class="brand-mark">SE</span><span><span class="brand-name">Saint Eresia</span><small>Light Novels &amp; Visual Novel Patches</small></span></a><nav class="nav" aria-label="Navigation principale"><a href="/index.html" ${current('index.html')}>Accueil</a><a href="/novels.html" ${current('novels.html')}>Novels</a><a href="/patchs.html" ${current('patchs.html')}>Patchs VN</a><a href="/equipe.html" ${current('equipe.html')}>Équipe</a>${STATIC ? `` : `<a href="/reading-list.html" ${current('reading-list.html')}>Liste de lecture</a><a href="/history.html" ${current('history.html')}>Historique</a>`}</nav><div class="header-actions"><a class="icon-button" href="/novels.html" aria-label="Rechercher">⌕</a><button class="icon-button js-theme" type="button" aria-label="Basculer entre thème sombre et clair" title="Thème sombre ou clair">${document.documentElement.dataset.theme === `light` ? `☾` : `☀`}</button>${STATIC ? `` : `<a class="icon-button" href="/favorites.html" aria-label="Favoris">♡</a>`}${STATIC ? `` : `<a class="user-chip" href="${state.user ? '/profile.html' : '/login.html'}"><span class="avatar">${esc((state.user?.name || 'C').charAt(0).toUpperCase())}</span><span>${esc(state.user?.name || 'Connexion')}</span></a>`}<button class="menu-button" type="button" aria-label="Ouvrir le menu" aria-expanded="false">☰</button></div></div></header><nav class="mobile-nav" aria-label="Navigation mobile"><a href="/index.html">Accueil</a><a href="/novels.html">Novels</a><a href="/patchs.html">Patchs VN</a><a href="/equipe.html">Équipe</a>${STATIC ? `` : `<a href="/reading-list.html">Liste de lecture</a><a href="/favorites.html">Favoris</a><a href="/history.html">Historique</a>`}${state.user?.role === 'ADMIN' ? '<a href="/admin/">Administration</a>' : ''}</nav>`;
+  // Icônes de navigation, dessinées en ligne : rien à charger, elles suivent la couleur du texte.
+  const NAV_ICONS = {
+    accueil: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+    novels: '<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5z"/><path d="M8 3v18"/>',
+    patchs: '<rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M15.5 12h.01M18 14h.01"/>',
+    equipe: '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 20a5.5 5.5 0 0 0-2-4.2"/>',
+    liste: '<path d="M7 3h10a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z"/>',
+    historique: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/>'
+  };
+  const navIcon = (key) => `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_ICONS[key]}</svg>`;
+    $('#site-header').innerHTML = `<a class="skip-link" href="#main">Aller au contenu</a><header class="site-header"><div class="container header-inner"><a class="brand" href="/index.html" aria-label="Saint Eresia, accueil"><span class="brand-name">Saint Eresia</span></a><nav class="nav" aria-label="Navigation principale"><a href="/index.html" ${current('index.html')}>${navIcon(`accueil`)}Accueil</a><a href="/novels.html" ${current('novels.html')}>${navIcon(`novels`)}Novels</a><a href="/patchs.html" ${current('patchs.html')}>${navIcon(`patchs`)}Patchs VN</a><a href="/equipe.html" ${current('equipe.html')}>${navIcon(`equipe`)}Équipe</a>${STATIC ? `` : `<a href="/reading-list.html" ${current('reading-list.html')}>${navIcon(`liste`)}Liste de lecture</a><a href="/history.html" ${current('history.html')}>${navIcon(`historique`)}Historique</a>`}</nav><div class="header-actions"><a class="icon-button" href="/novels.html" aria-label="Rechercher">⌕</a><button class="icon-button js-theme" type="button" aria-label="Basculer entre thème sombre et clair" title="Thème sombre ou clair">${document.documentElement.dataset.theme === `light` ? `☾` : `☀`}</button>${STATIC ? `` : `<a class="icon-button" href="/favorites.html" aria-label="Favoris">♡</a>`}${STATIC ? `` : `<a class="user-chip" href="${state.user ? '/profile.html' : '/login.html'}"><span class="avatar">${esc((state.user?.name || 'C').charAt(0).toUpperCase())}</span><span>${esc(state.user?.name || 'Connexion')}</span></a>`}<button class="menu-button" type="button" aria-label="Ouvrir le menu" aria-expanded="false">☰</button></div></div></header><nav class="mobile-nav" aria-label="Navigation mobile"><a href="/index.html">${navIcon(`accueil`)}Accueil</a><a href="/novels.html">${navIcon(`novels`)}Novels</a><a href="/patchs.html">${navIcon(`patchs`)}Patchs VN</a><a href="/equipe.html">${navIcon(`equipe`)}Équipe</a>${STATIC ? `` : `<a href="/reading-list.html">${navIcon(`liste`)}Liste de lecture</a><a href="/favorites.html">Favoris</a><a href="/history.html">${navIcon(`historique`)}Historique</a>`}${state.user?.role === 'ADMIN' ? '<a href="/admin/">Administration</a>' : ''}</nav>`;
     // Bascule sombre / clair, mémorisée d'une visite à l'autre.
     $('.js-theme').addEventListener('click', () => {
       const light = document.documentElement.dataset.theme === 'light';
@@ -107,7 +117,7 @@
   }
 
   function footer() {
-    $('#site-footer').innerHTML = `<footer class="site-footer"><div class="container footer-grid"><div><a class="brand" href="/index.html"><span class="brand-mark">SE</span><span class="brand-name">Saint Eresia</span></a><p class="meta">Plateforme francophone consacrée aux Light Novels, Web Novels et patchs français pour œuvres narratives.</p></div><div><strong>Explorer</strong><div class="footer-links"><a href="/novels.html">Novels</a><a href="/patchs.html">Patchs VN</a><a href="/equipe.html">Équipe</a>${STATIC ? `` : `<a href="/favorites.html">Favoris</a>`}</div></div>${STATIC ? `` : `<div><strong>Compte</strong><div class="footer-links"><a href="/profile.html">Profil</a><a href="/reading-list.html">Liste de lecture</a><a href="/history.html">Historique</a></div></div>`}<div><strong>Informations</strong><div class="footer-links"><a href="/legal.html">Mentions légales</a><a href="/privacy.html">Confidentialité</a><a href="/terms.html">Conditions</a><a href="/copyright.html">Droits d’auteur</a><a href="/report.html">Signaler</a></div></div></div><div class="container footer-bottom">© 2026 Saint Eresia. Les œuvres originales appartiennent à leurs ayants droit. Nous encourageons leur achat.</div></footer>`;
+    $('#site-footer').innerHTML = `<footer class="site-footer"><div class="container footer-grid"><div><a class="brand" href="/index.html"><span class="brand-name">Saint Eresia</span></a><p class="meta">Plateforme francophone consacrée aux Light Novels, Web Novels et patchs français pour œuvres narratives.</p></div><div><strong>Explorer</strong><div class="footer-links"><a href="/novels.html">Novels</a><a href="/patchs.html">Patchs VN</a><a href="/equipe.html">Équipe</a>${STATIC ? `` : `<a href="/favorites.html">Favoris</a>`}</div></div>${STATIC ? `` : `<div><strong>Compte</strong><div class="footer-links"><a href="/profile.html">Profil</a><a href="/reading-list.html">Liste de lecture</a><a href="/history.html">Historique</a></div></div>`}<div><strong>Informations</strong><div class="footer-links"><a href="/legal.html">Mentions légales</a><a href="/privacy.html">Confidentialité</a><a href="/terms.html">Conditions</a><a href="/copyright.html">Droits d’auteur</a><a href="/report.html">Signaler</a></div></div></div><div class="container footer-bottom">© 2026 Saint Eresia. Les œuvres originales appartiennent à leurs ayants droit. Nous encourageons leur achat.</div></footer>`;
   }
 
   const badge = (type) => `<span class="badge ${type === 'Patch VN' ? 'warning' : ''}">${esc(type)}</span>`;
@@ -116,7 +126,13 @@
   // Un axe à null est sans objet pour ce patch (pas d'image à retoucher, par exemple) :
   // on ne l'affiche pas du tout plutôt que de montrer une barre vide trompeuse.
   function axisRows(patch) { const axes = patch.axes || {}; return `<dl class="axes">${Object.entries(AXIS_LABELS).filter(([key]) => axes[key] !== null && axes[key] !== undefined).map(([key, label]) => { const value = Math.max(0, Math.min(100, Number(axes[key]) || 0)); return `<div class="axis" data-axis="${key}" data-complete="${value === 100}"><dt>${label}</dt><dd class="progress slim"><span style="width:${value}%"></span></dd><dd class="axis-value">${value}%</dd></div>`; }).join('')}</dl>`; }
-  function patchCard(patch) { return `<article class="work-card"><a href="/patch.html?slug=${encodeURIComponent(patch.slug)}"><div class="cover"><img src="${esc(patch.cover)}" alt="${esc(patch.title)}" loading="lazy" width="360" height="480"></div><div class="card-body">${badge('Patch VN')}<h3 title="${esc(patch.title)}">${esc(patch.title)}</h3><div class="meta">${patch.currentVersion ? `<span>v${esc(patch.currentVersion)}</span><span>•</span>` : ``}<span>${esc(patch.status)}</span></div><div class="meta">${esc(patch.platform)}</div><div class="meta" style="justify-content:space-between"><span>Avancement</span><span class="axis-value">${patch.progress}%</span></div><div class="progress" title="Avancement global : ${patch.progress}%"><span style="width:${patch.progress}%"></span></div></div></a></article>`; }
+  // Un patch se présente en bandeau paysage quand il en a un, sinon en jaquette comme les romans.
+  // Le bandeau paysage est réservé à l'accueil ; ailleurs on garde la jaquette.
+  // Attention : appelé via .map(patchCard), le second argument est l'index — d'où le test sur .banner.
+  function patchCard(patch, options) {
+    const banner = options && options.banner ? patch.header : null;
+    return `<article class="work-card${banner ? ' banner-card' : ''}"><a href="/patch.html?slug=${encodeURIComponent(patch.slug)}"><div class="${banner ? 'banner' : 'cover'}"><img src="${esc(banner || patch.cover)}" alt="${esc(patch.title)}" loading="lazy"></div><div class="card-body">${badge('Patch VN')}<h3 title="${esc(patch.title)}">${esc(patch.title)}</h3><div class="meta">${patch.currentVersion ? `<span>${/^v/i.test(patch.currentVersion) ? `` : `v`}${esc(patch.currentVersion)}</span><span>•</span>` : ``}<span>${esc(patch.status)}</span></div><div class="meta">${esc(patch.platform)}</div><div class="meta" style="justify-content:space-between"><span>Avancement</span><span class="axis-value">${patch.progress}%</span></div><div class="progress" title="Avancement global : ${patch.progress}%"><span style="width:${patch.progress}%"></span></div></div></a></article>`;
+  }
   function pageHead(title, description, crumb = title) { return `<section class="page-head"><div class="container"><div class="breadcrumbs"><a href="/index.html">Accueil</a> / ${esc(crumb)}</div><h1>${esc(title)}</h1><p class="meta">${esc(description)}</p></div></section>`; }
 
   async function loadCatalogs() {
@@ -126,7 +142,7 @@
 
   async function renderHome() {
     await loadCatalogs();
-    const chapters = state.novels.flatMap((n) => n.volumes?.flatMap((v) => v.chapters.map((c) => ({ ...c, novel:n, volume:v }))) || []).filter((c) => c.status === 'Publié').slice(0,4);
+    const chapters = state.novels.flatMap((n) => n.volumes?.flatMap((v) => v.chapters.map((c) => ({ ...c, novel:n, volume:v }))) || []).filter((c) => c.status === 'Publié').sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || ''))).slice(0,4);
     const inProgress = state.patches.filter((p) => p.progress < 100);
     const released = state.patches.filter((p) => p.versions && p.versions.length);
     let resume = '';
@@ -141,16 +157,9 @@
     const progressCard = (p) => `<article class="progress-card"><img src="${esc(p.cover)}" alt="" loading="lazy" width="92" height="123"><div><h3><a href="/patch.html?slug=${encodeURIComponent(p.slug)}">${esc(p.title)}</a></h3><div class="meta">${esc(p.status)}</div><div class="overall"><strong>${p.progress}%</strong><span class="meta">au total</span></div>${axisRows(p)}</div></article>`;
     $('#main').innerHTML = `<div class="container home-layout">
       <div class="home-main">
-        <section class="panel flat">
-          <div class="panel-head"><h1>Traduction de visual novels et de light novels en français</h1></div>
-          <div class="panel-body">
-            <p>Saint Eresia traduit des visual novels et des light novels japonais vers le français. Nos patchs sont gratuits et ne contiennent jamais les fichiers du jeu d’origine : il faut posséder le jeu pour les utiliser.</p>
-            <p>La liste complète se trouve sur la <a href="/patchs.html">page des patchs</a>, et nos traductions de romans dans le <a href="/novels.html">catalogue</a>. L’avancement des projets en cours est détaillé plus bas, axe par axe.</p>
-          </div>
-        </section>
         ${released.length ? `<section>
           <div class="block-title"><h2>Patchs disponibles</h2><a href="/patchs.html">Tout voir →</a></div>
-          <div class="card-grid">${released.map(patchCard).join('')}</div>
+          <div class="patch-grid">${released.map((p) => patchCard(p, { banner: true })).join('')}</div>
         </section>` : ``}
         ${inProgress.length ? `<section>
           <div class="block-title"><h2>Avancement des projets</h2></div>
