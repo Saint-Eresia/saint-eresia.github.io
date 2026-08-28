@@ -122,6 +122,21 @@
 
   const badge = (type) => `<span class="badge ${type === 'Patch VN' ? 'warning' : ''}">${esc(type)}</span>`;
   function novelCard(novel) { return `<article class="work-card"><a href="/novel.html?slug=${encodeURIComponent(novel.slug)}"><div class="cover"><img src="${esc(novel.cover)}" alt="${esc(novel.title)}" loading="lazy" width="360" height="480"></div><div class="card-body">${badge(novel.type)}<h3 title="${esc(novel.title)}">${esc(novel.title)}</h3><div class="meta"><span>${esc(novel.workStatus)}</span>${novel.rating ? `<span>•</span><span class="rating">★ ${esc(novel.rating)}</span>` : ``}</div><div class="meta">Mis à jour ${date(novel.updatedAt)}</div></div></a></article>`; }
+  // Dates relatives en français : « hier », « il y a 3 jours », « il y a 2 mois ».
+  const RELATIF = typeof Intl !== 'undefined' && Intl.RelativeTimeFormat
+    ? new Intl.RelativeTimeFormat('fr', { numeric: 'auto' }) : null;
+  const NOUVEAU_JOURS = 14; // au-delà de deux semaines, une publication n'est plus une nouveauté
+  function depuis(iso) {
+    if (!iso) return '';
+    const jours = Math.round((Date.now() - new Date(`${iso}T12:00:00`).getTime()) / 86400000);
+    if (!Number.isFinite(jours)) return '';
+    if (!RELATIF) return `il y a ${jours} j`;
+    if (jours < 7) return RELATIF.format(-jours, 'day');
+    if (jours < 31) return RELATIF.format(-Math.round(jours / 7), 'week');
+    if (jours < 365) return RELATIF.format(-Math.round(jours / 30), 'month');
+    return RELATIF.format(-Math.round(jours / 365), 'year');
+  }
+  const estNouveau = (iso) => !!iso && (Date.now() - new Date(`${iso}T12:00:00`).getTime()) / 86400000 <= NOUVEAU_JOURS;
   const AXIS_LABELS = { translation: 'Traduction', images: 'Images', technical: 'Technique', proofreading: 'Relecture' };
   // Un axe à null est sans objet pour ce patch (pas d'image à retoucher, par exemple) :
   // on ne l'affiche pas du tout plutôt que de montrer une barre vide trompeuse.
@@ -142,7 +157,30 @@
 
   async function renderHome() {
     await loadCatalogs();
-    const chapters = state.novels.flatMap((n) => n.volumes?.flatMap((v) => v.chapters.map((c) => ({ ...c, novel:n, volume:v }))) || []).filter((c) => c.status === 'Publié').sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || ''))).slice(0,4);
+    // Une publication groupe souvent plusieurs sections le même jour : on les rassemble
+    // en une ligne par roman et par date, plutôt que de répéter le même titre.
+    const publiees = state.novels.flatMap((n) => n.volumes?.flatMap((v) => v.chapters.map((c) => ({ ...c, novel: n, volume: v }))) || []).filter((c) => c.status === 'Publié');
+    const parLot = new Map();
+    for (const section of publiees) {
+      const cle = `${section.novel.slug}|${section.publishedAt || ''}`;
+      if (!parLot.has(cle)) parLot.set(cle, { novel: section.novel, date: section.publishedAt, sections: [] });
+      parLot.get(cle).sections.push(section);
+    }
+    const lots = [...parLot.values()]
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+      .slice(0, 4)
+      .map((lot) => {
+        const parTome = lot.novel.readingUnit === 'volume';
+        const n = lot.sections.length;
+        const unite = parTome ? (n > 1 ? 'tomes' : 'tome') : (n > 1 ? 'chapitres' : 'chapitre');
+        // Un lot d'une seule section garde son intitulé précis ; au-delà, on annonce le nombre.
+        const seule = lot.sections[0];
+        const detail = n > 1
+          ? `${n} ${unite}`
+          : parTome ? `Tome ${seule.volume.number}`
+            : `Volume ${seule.volume.number} · ${seule.kind && seule.kind !== 'chapter' ? seule.label : `Chapitre ${seule.number}`}`;
+        return { ...lot, detail, lien: n > 1 ? `/novel.html?slug=${encodeURIComponent(lot.novel.slug)}` : `/reader.html?novel=${encodeURIComponent(lot.novel.slug)}&chapter=${encodeURIComponent(seule.slug)}` };
+      });
     const inProgress = state.patches.filter((p) => p.progress < 100);
     const released = state.patches.filter((p) => p.versions && p.versions.length);
     let resume = '';
@@ -183,9 +221,9 @@
           <ul style="margin:0 0 12px;padding-left:18px;font-size:13.5px;color:hsl(var(--muted-fg))"><li>Le jeu d’origine doit être acheté légalement.</li><li>Sauvegardez vos fichiers avant d’appliquer un patch.</li><li>Vérifiez la version du jeu indiquée sur la fiche.</li></ul>
           <a class="btn" href="/patchs.html">Voir les fiches</a>
         </div>
-        ${chapters.length ? `<div class="side-block">
+        ${lots.length ? `<div class="side-block">
           <h2>Derniers chapitres</h2>
-          <div class="mini-list">${chapters.map((c) => `<a class="mini-row" href="/reader.html?novel=${encodeURIComponent(c.novel.slug)}&chapter=${encodeURIComponent(c.slug)}"><img src="${esc(c.novel.cover)}" alt="" loading="lazy"><div><strong>${esc(c.novel.title)}</strong><span>Volume ${c.volume.number} · Chapitre ${c.number} — ${esc(c.status)}</span></div></a>`).join('')}</div>
+          <div class="mini-list">${lots.map((lot) => `<a class="mini-row" href="${lot.lien}"><img src="${esc(lot.novel.cover)}" alt="" loading="lazy"><div><strong>${esc(lot.novel.title)}</strong><span>${esc(lot.detail)}</span><span class="quand">${esc(depuis(lot.date))}${estNouveau(lot.date) ? `<em class="tag-neuf">Nouveau</em>` : ``}</span></div></a>`).join('')}</div>
         </div>` : ``}
       </aside>
     </div>`;
