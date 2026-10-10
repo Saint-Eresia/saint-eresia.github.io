@@ -1,0 +1,56 @@
+"use server";
+
+import { refresh } from "next/cache";
+import { redirect } from "next/navigation";
+import { guard, isHttpUrl, type ActionResult } from "@/lib/action-guard";
+import { db } from "@/lib/db";
+import { LINK_KINDS, LINK_LABELS, splitLines } from "@/lib/team";
+import { removeFile } from "@/lib/uploads";
+
+export type { ActionResult };
+
+export async function saveMember(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const denied = await guard();
+  if (denied) return denied;
+
+  const name = String(formData.get("name") ?? "").trim();
+  const roles = splitLines(String(formData.get("roles") ?? ""));
+  const projects = splitLines(String(formData.get("projects") ?? ""));
+  const position = Number(formData.get("position"));
+  if (!name || name.length > 80) return { error: "Le nom est requis (80 caractères maximum)." };
+  if (roles.length > 15 || projects.length > 30) return { error: "Trop de rôles ou de projets." };
+  if (!Number.isInteger(position) || position < 0) return { error: "L’ordre doit être un entier positif." };
+
+  const links: Record<string, string> = {};
+  for (const kind of LINK_KINDS) {
+    const url = String(formData.get(`link_${kind}`) ?? "").trim();
+    if (!url) continue;
+    if (!isHttpUrl(url)) return { error: `Le lien ${LINK_LABELS[kind]} doit commencer par http:// ou https://.` };
+    links[kind] = url;
+  }
+
+  const values = [name, roles.join("\n"), projects.join("\n"), JSON.stringify(links), position];
+  const id = Number(formData.get("id")) || null;
+  if (id === null) {
+    const { lastInsertRowid } = db
+      .prepare("INSERT INTO team_member (name, roles, projects, links, position) VALUES (?, ?, ?, ?, ?)")
+      .run(...values);
+    redirect(`/gestion/equipe/${lastInsertRowid}?cree=1`);
+  }
+  const { changes } = db
+    .prepare("UPDATE team_member SET name = ?, roles = ?, projects = ?, links = ?, position = ? WHERE id = ?")
+    .run(...values, id);
+  if (!changes) return { error: "Membre introuvable." };
+  refresh();
+  return { savedAt: Date.now() };
+}
+
+export async function deleteMember(id: number): Promise<ActionResult> {
+  const denied = await guard();
+  if (denied) return denied;
+  const member = db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get(id) as { avatarFile: string } | undefined;
+  if (!member) return { error: "Membre introuvable." };
+  db.prepare("DELETE FROM team_member WHERE id = ?").run(id);
+  await removeFile(member.avatarFile);
+  redirect("/gestion");
+}
