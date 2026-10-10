@@ -6,6 +6,9 @@ import { LibsqlDialect } from "@/lib/kysely-libsql";
 export const auth = betterAuth({
   // Même connexion libSQL que le reste du site (SQLite en local, Turso en production).
   database: { dialect: new LibsqlDialect(client), type: "sqlite" },
+  // Sur Vercel, la vérification du schéma au démarrage partirait pendant un pré-rendu Next (requête annulée) :
+  // les tables y sont garanties par `npm run db:cloud` / `db:migrate`.
+  advanced: { database: { validateSchema: !process.env.VERCEL } },
   socialProviders: {
     discord: {
       clientId: process.env.DISCORD_CLIENT_ID as string,

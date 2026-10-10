@@ -51,29 +51,38 @@ async function copyRows(source: ReturnType<typeof createClient>) {
   }
 }
 
-// Envoie chaque image locale encore référencée par son nom sur Vercel Blob et garde son adresse en base.
+// Nom local d’une image à partir de la valeur en base : « uuid.webp » ou une adresse Blob « …/uploads/uuid.webp ».
+function localName(file: string) {
+  if (FILE_PATTERN.test(file)) return file;
+  const match = /^https?:\/\/.+\/uploads\/([0-9a-f-]{36}\.webp)$/.exec(file);
+  return match?.[1] ?? null;
+}
+
+// Envoie chaque image locale sur Vercel Blob et garde son adresse en base. Les images déjà sur un autre
+// store Blob (ancien projet) sont renvoyées sur le store actuel dès que le fichier existe encore en local.
 async function uploadImages() {
   const urls = new Map<string, string>(); // nom local → adresse Blob
   for (const [table, column] of IMAGE_COLUMNS) {
     const rows = await db.prepare(`SELECT id, ${column} AS file FROM ${table}`).all<{ id: number; file: string }>();
     for (const row of rows) {
-      if (!FILE_PATTERN.test(row.file)) continue;
+      const name = localName(row.file);
+      if (!name) continue;
       let data: Buffer;
       try {
-        data = await fs.readFile(path.join(UPLOAD_DIR, row.file));
+        data = await fs.readFile(path.join(UPLOAD_DIR, name));
       } catch {
-        console.warn(`  ! ${table} #${row.id} : ${row.file} absent de data/uploads/, ignoré`);
+        if (FILE_PATTERN.test(row.file)) console.warn(`  ! ${table} #${row.id} : ${row.file} absent de data/uploads/, ignoré`);
         continue;
       }
-      const blob = await put(`uploads/${row.file}`, data, {
+      const blob = await put(`uploads/${name}`, data, {
         access: "public",
         contentType: "image/webp",
         addRandomSuffix: false,
         allowOverwrite: true,
         cacheControlMaxAge: 31_536_000,
       });
-      urls.set(row.file, blob.url);
-      await db.prepare(`UPDATE ${table} SET ${column} = ? WHERE id = ?`).run(blob.url, row.id);
+      urls.set(name, blob.url);
+      if (blob.url !== row.file) await db.prepare(`UPDATE ${table} SET ${column} = ? WHERE id = ?`).run(blob.url, row.id);
     }
     console.log(`✓ ${table} : images envoyées`);
   }
@@ -89,7 +98,11 @@ async function rewriteTexts(urls: Map<string, string>) {
       .all<{ id: number; text: string }>();
     let changed = 0;
     for (const row of rows) {
-      const text = row.text.replace(/\/uploads\/([0-9a-f-]{36}\.webp)/g, (whole, file: string) => urls.get(file) ?? whole);
+      // Adresse relative (/uploads/…) ou adresse d’un ancien store Blob (https://…/uploads/…).
+      const text = row.text.replace(
+        /(?:https?:\/\/[^\s)"']+)?\/uploads\/([0-9a-f-]{36}\.webp)/g,
+        (whole, file: string) => urls.get(file) ?? whole,
+      );
       if (text === row.text) continue;
       await db.prepare(`UPDATE ${table} SET ${column} = ? WHERE id = ?`).run(text, row.id);
       changed++;

@@ -126,7 +126,18 @@ function getShared(): Shared {
     shared = globalForDb.libsql;
     if (!shared) {
       const client = connect();
-      shared = { client, ready: prepareSchema(client) };
+      // Sur Turso, les tables sont créées par `npm run db:cloud` / `db:migrate` : rien à préparer à la requête.
+      // En local, la préparation s’exécute une fois ; si elle échoue (ex. requête annulée par Next pendant
+      // un pré-rendu), on l’oublie pour réessayer à la requête suivante au lieu de garder l’échec en cache.
+      const current: Shared = { client, ready: Promise.resolve() };
+      if (!TURSO_URL) {
+        current.ready = prepareSchema(client).catch((error) => {
+          if (shared === current) shared = undefined;
+          if (globalForDb.libsql === current) globalForDb.libsql = undefined;
+          throw error;
+        });
+      }
+      shared = current;
       if (process.env.NODE_ENV !== "production") globalForDb.libsql = shared;
     }
   }
