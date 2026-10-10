@@ -1,8 +1,0 @@
-# Security Policy
-Contact: mailto:admin@hivetoons.org
-Expires: 2027-08-04T00:24:26.754Z
-Preferred-Languages: en
-Canonical: https://hivetoons.org/.well-known/security.txt
-
-# If you discover a security vulnerability, please report it responsibly.
-# We appreciate your efforts in keeping our users safe.
