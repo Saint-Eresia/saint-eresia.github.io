@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { db } from "../src/lib/db";
 import { slugify } from "../src/lib/patches";
-import { saveImage } from "../src/lib/uploads";
+import { fileUrl, saveImage } from "../src/lib/uploads";
 
 type NovelSeed = {
   slug: string;
@@ -110,15 +110,15 @@ async function walk(dir: string, base = dir): Promise<string[]> {
 }
 
 async function seedNovel(seed: NovelSeed) {
-  if (db.prepare("SELECT 1 FROM novel WHERE slug = ?").get(seed.slug)) {
+  if (await db.prepare("SELECT 1 FROM novel WHERE slug = ?").get(seed.slug)) {
     console.log(`· ${seed.title} : déjà présent, ignoré`);
     return;
   }
-  const novelId = Number(
-    db
+  const novelId = (
+    await db
       .prepare("INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(seed.slug, seed.title, seed.originalTitle, seed.author, seed.artist, seed.status, seed.synopsis).lastInsertRowid,
-  );
+      .run(seed.slug, seed.title, seed.originalTitle, seed.author, seed.artist, seed.status, seed.synopsis)
+  ).lastInsertRowid;
   const owner = { type: "novel" as const, id: novelId };
   await saveImage(owner, "cover", await fs.readFile(path.join(DATA, "covers", seed.cover)), `Couverture de ${seed.title}`);
 
@@ -136,11 +136,11 @@ async function seedNovel(seed: NovelSeed) {
 
     let volumeId = volumeIds.get(location.volume);
     if (!volumeId) {
-      volumeId = Number(
-        db
+      volumeId = (
+        await db
           .prepare("INSERT INTO volume (novelId, number, title) VALUES (?, ?, ?)")
-          .run(novelId, location.volume, meta.volume ?? "").lastInsertRowid,
-      );
+          .run(novelId, location.volume, meta.volume ?? "")
+      ).lastInsertRowid;
       volumeIds.set(location.volume, volumeId);
     }
 
@@ -151,7 +151,7 @@ async function seedNovel(seed: NovelSeed) {
       if (!uploaded.has(source)) {
         const input = await fs.readFile(path.join(DATA, "illustrations", source));
         const image = await saveImage(owner, "illustration", input, alt || "Illustration");
-        uploaded.set(source, `/uploads/${image.file}`);
+        uploaded.set(source, fileUrl(image.file));
       }
       content = content.replace(whole, `![${alt || "Illustration"}](${uploaded.get(source)})`);
     }
@@ -162,7 +162,7 @@ async function seedNovel(seed: NovelSeed) {
     const download = /^https?:\/\//.test(meta.telechargement ?? "") ? meta.telechargement : "";
     const date = toSqlDate(meta.date) ?? "2026-08-15 12:00:00";
     const slug = location.label.startsWith("Tome") ? `tome-${location.volume}` : `tome-${location.volume}-${slugify(location.label)}`;
-    db.prepare(
+    await db.prepare(
       `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(novelId, volumeId, slug, location.position, location.label, meta.titre ?? "", content,

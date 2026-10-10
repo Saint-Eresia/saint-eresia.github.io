@@ -107,15 +107,15 @@ async function main() {
 
 async function seedPatches() {
   for (const seed of patches) {
-    if (db.prepare("SELECT 1 FROM patch WHERE slug = ?").get(seed.slug)) {
+    if (await db.prepare("SELECT 1 FROM patch WHERE slug = ?").get(seed.slug)) {
       // Base créée avant l’avancement détaillé : on complète seulement s’il n’y a encore aucune catégorie.
-      const { changes } = db
+      const { changes } = await db
         .prepare("UPDATE patch SET progressSteps = ? WHERE slug = ? AND progressSteps = '[]'")
         .run(JSON.stringify(seed.steps), seed.slug);
       console.log(`· ${seed.title} : déjà présent${changes ? ", avancement détaillé ajouté" : ", ignoré"}`);
       continue;
     }
-    const { lastInsertRowid } = db
+    const { lastInsertRowid } = await db
       .prepare(
         "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       )

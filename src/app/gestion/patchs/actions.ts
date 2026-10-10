@@ -11,8 +11,8 @@ import { averageProgress, MAX_STEPS, parseSteps, type ProgressStep } from "@/lib
 export type { ActionResult };
 
 // Date la modification et rafraîchit la page affichée.
-function changed(patchId: number): ActionResult {
-  db.prepare("UPDATE patch SET updatedAt = datetime('now') WHERE id = ?").run(patchId);
+async function changed(patchId: number): Promise<ActionResult> {
+  await db.prepare("UPDATE patch SET updatedAt = datetime('now') WHERE id = ?").run(patchId);
   refresh();
   return { savedAt: Date.now() };
 }
@@ -56,13 +56,13 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
-    const { lastInsertRowid } = db
+    const { lastInsertRowid } = await db
       .prepare("INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps);
+      .run(await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps);
     redirect(`/gestion/patchs/${lastInsertRowid}?cree=1`);
   }
 
-  const { changes } = db
+  const { changes } = await db
     .prepare(
       "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, updatedAt = datetime('now') WHERE id = ?",
     )
@@ -76,8 +76,8 @@ export async function deletePatch(patchId: number): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
 
-  const images = db.prepare("SELECT file FROM patch_image WHERE patchId = ?").all(patchId) as { file: string }[];
-  db.prepare("DELETE FROM patch WHERE id = ?").run(patchId); // les images suivent (ON DELETE CASCADE)
+  const images = await db.prepare("SELECT file FROM patch_image WHERE patchId = ?").all<{ file: string }>(patchId);
+  await db.prepare("DELETE FROM patch WHERE id = ?").run(patchId); // les images suivent (ON DELETE CASCADE)
   await Promise.all(images.map((image) => removeFile(image.file)));
   redirect("/gestion");
 }
@@ -87,35 +87,36 @@ export async function updateImageAlt(imageId: number, alt: string): Promise<Acti
   if (denied) return denied;
 
   const text = alt.trim().slice(0, 300);
-  const image = db.prepare("SELECT patchId FROM patch_image WHERE id = ?").get(imageId) as { patchId: number } | undefined;
+  const image = await db.prepare("SELECT patchId FROM patch_image WHERE id = ?").get(imageId) as { patchId: number } | undefined;
   if (!image) return { error: "Image introuvable." };
-  db.prepare("UPDATE patch_image SET alt = ? WHERE id = ?").run(text, imageId);
-  return changed(image.patchId);
+  await db.prepare("UPDATE patch_image SET alt = ? WHERE id = ?").run(text, imageId);
+  return await changed(image.patchId);
 }
 
 export async function reorderScreenshots(patchId: number, orderedIds: number[]): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
 
-  const current = db
+  const current = await db
     .prepare("SELECT id FROM patch_image WHERE patchId = ? AND kind = 'screenshot'")
     .all(patchId) as { id: number }[];
   const known = new Set(current.map((row) => row.id));
   if (orderedIds.length !== known.size || !orderedIds.every((id) => known.has(id))) {
     return { error: "L’ordre envoyé ne correspond pas aux images du patch. Rechargez la page." };
   }
-  const setPosition = db.prepare("UPDATE patch_image SET position = ? WHERE id = ?");
-  db.transaction(() => orderedIds.forEach((id, index) => setPosition.run(index, id)))();
-  return changed(patchId);
+  await db.batch(
+    orderedIds.map((id, index) => ({ sql: "UPDATE patch_image SET position = ? WHERE id = ?", args: [index, id] })),
+  );
+  return await changed(patchId);
 }
 
 export async function deleteImage(imageId: number): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
 
-  const image = db.prepare("SELECT * FROM patch_image WHERE id = ?").get(imageId) as PatchImage | undefined;
+  const image = await db.prepare("SELECT * FROM patch_image WHERE id = ?").get(imageId) as PatchImage | undefined;
   if (!image) return { error: "Image introuvable." };
-  db.prepare("DELETE FROM patch_image WHERE id = ?").run(imageId);
+  await db.prepare("DELETE FROM patch_image WHERE id = ?").run(imageId);
   await removeFile(image.file);
-  return changed(image.patchId);
+  return await changed(image.patchId);
 }

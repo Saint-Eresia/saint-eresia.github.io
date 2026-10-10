@@ -24,11 +24,11 @@ function parse(row: Row): TeamMember {
 
 export async function listTeam() {
   await connection();
-  return (db.prepare("SELECT * FROM team_member ORDER BY position, id").all() as Row[]).map(parse);
+  return (await db.prepare("SELECT * FROM team_member ORDER BY position, id").all() as Row[]).map(parse);
 }
 
 export async function getMember(id: number) {
   await connection();
-  const row = db.prepare("SELECT * FROM team_member WHERE id = ?").get(id) as Row | undefined;
+  const row = await db.prepare("SELECT * FROM team_member WHERE id = ?").get(id) as Row | undefined;
   return row ? parse(row) : null;
 }

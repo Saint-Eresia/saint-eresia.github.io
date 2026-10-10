@@ -41,7 +41,7 @@ const TEAM = [
 ];
 
 export async function seedTeam() {
-  if (db.prepare("SELECT 1 FROM team_member").get()) {
+  if (await db.prepare("SELECT 1 FROM team_member").get()) {
     console.log("· Équipe : déjà présente, ignorée");
     return;
   }
@@ -50,7 +50,7 @@ export async function seedTeam() {
   );
   for (const [index, member] of TEAM.entries()) {
     const avatarFile = await saveAvatar(await fs.readFile(path.join(import.meta.dirname, "seed-data", "team", member.avatar)));
-    insert.run(member.name, avatarFile, member.roles.join("\n"), member.projects.join("\n"), JSON.stringify(member.links), index + 1);
+    await insert.run(member.name, avatarFile, member.roles.join("\n"), member.projects.join("\n"), JSON.stringify(member.links), index + 1);
   }
   console.log(`✓ Équipe : ${TEAM.length} membres`);
 }

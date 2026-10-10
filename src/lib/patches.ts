@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
+import { fileUrl } from "@/lib/file-url";
 import { parseSteps, type ProgressStep } from "@/lib/progress-steps";
 
 export const STATUSES = ["En développement", "Alpha", "Bêta", "Stable", "Terminé", "Obsolète", "Abandonné"] as const;
@@ -31,12 +32,12 @@ export type Patch = {
 
 export type PatchWithImages = Patch & { cover: PatchImage | null; screenshots: PatchImage[]; steps: ProgressStep[] };
 
-export const imageUrl = (image: Pick<PatchImage, "file">) => `/uploads/${image.file}`;
+export const imageUrl = (image: Pick<PatchImage, "file">) => fileUrl(image.file);
 
-function withImages(patch: Patch): PatchWithImages {
-  const images = db
+async function withImages(patch: Patch): Promise<PatchWithImages> {
+  const images = await db
     .prepare("SELECT * FROM patch_image WHERE patchId = ? ORDER BY position, id")
-    .all(patch.id) as PatchImage[];
+    .all<PatchImage>(patch.id);
   return {
     ...patch,
     steps: parseSteps(patch.progressSteps),
@@ -45,22 +46,22 @@ function withImages(patch: Patch): PatchWithImages {
   };
 }
 
-// better-sqlite3 est synchrone : connection() empêche que ces lectures soient figées au build.
+// connection() empêche que ces lectures soient figées au build : la base change après le déploiement.
 export async function listPatches() {
   await connection();
-  const patches = db.prepare("SELECT * FROM patch ORDER BY updatedAt DESC, id DESC").all() as Patch[];
-  return patches.map(withImages);
+  const patches = await db.prepare("SELECT * FROM patch ORDER BY updatedAt DESC, id DESC").all<Patch>();
+  return Promise.all(patches.map(withImages));
 }
 
 export async function getPatchBySlug(slug: string) {
   await connection();
-  const patch = db.prepare("SELECT * FROM patch WHERE slug = ?").get(slug) as Patch | undefined;
+  const patch = await db.prepare("SELECT * FROM patch WHERE slug = ?").get<Patch>(slug);
   return patch ? withImages(patch) : null;
 }
 
 export async function getPatchById(id: number) {
   await connection();
-  const patch = db.prepare("SELECT * FROM patch WHERE id = ?").get(id) as Patch | undefined;
+  const patch = await db.prepare("SELECT * FROM patch WHERE id = ?").get<Patch>(id);
   return patch ? withImages(patch) : null;
 }
 
@@ -74,11 +75,11 @@ export function slugify(text: string) {
     .slice(0, 80);
 }
 
-export function uniqueSlug(title: string) {
+export async function uniqueSlug(title: string) {
   const base = slugify(title) || "patch";
   const taken = db.prepare("SELECT 1 FROM patch WHERE slug = ?");
   let slug = base;
-  for (let n = 2; taken.get(slug); n++) slug = `${base}-${n}`;
+  for (let n = 2; await taken.get(slug); n++) slug = `${base}-${n}`;
   return slug;
 }
 

@@ -3,6 +3,7 @@ import path from "node:path";
 import { UPLOAD_DIR } from "@/lib/db";
 import { FILE_PATTERN } from "@/lib/uploads";
 
+// Images stockées en local (développement). Sur Vercel Blob, les images ont leur propre adresse.
 export async function GET(_req: Request, ctx: RouteContext<"/uploads/[file]">) {
   const { file } = await ctx.params;
   if (!FILE_PATTERN.test(file)) return new Response("Introuvable", { status: 404 });

@@ -1,3 +1,4 @@
+import { fileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 
 // Avatar d’un membre, ou son initiale s’il n’en a pas.
@@ -11,7 +12,7 @@ export function MemberAvatar({
   if (member.avatarFile) {
     return (
       <img
-        src={`/uploads/${member.avatarFile}`}
+        src={fileUrl(member.avatarFile)}
         alt=""
         width={256}
         height={256}

@@ -1,8 +1,8 @@
 import "server-only";
-import { saveImage, type ImageKind, type ImageOwner } from "@/lib/uploads";
+import { fileUrl, MAX_UPLOAD_MB, saveImage, type ImageKind, type ImageOwner } from "@/lib/uploads";
 import { getViewer } from "@/lib/viewer";
 
-const MAX_BYTES = 25 * 1024 * 1024;
+const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
 // Traitement commun des envois d’images (glisser-déposer) pour les patchs et les novels.
 export async function handleImageUpload(
@@ -38,13 +38,13 @@ export async function handleImageUpload(
       continue;
     }
     if (file.size > MAX_BYTES) {
-      errors.push(`${file.name} : fichier trop lourd (25 Mo maximum).`);
+      errors.push(`${file.name} : fichier trop lourd (${MAX_UPLOAD_MB} Mo maximum).`);
       continue;
     }
     try {
       const alt = altFor(kind);
       const saved = await saveImage(owner, kind, Buffer.from(await file.arrayBuffer()), alt);
-      images.push({ url: `/uploads/${saved.file}`, alt });
+      images.push({ url: fileUrl(saved.file), alt });
     } catch {
       errors.push(`${file.name} : image illisible.`);
     }

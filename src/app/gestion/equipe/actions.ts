@@ -32,12 +32,12 @@ export async function saveMember(_prev: ActionResult, formData: FormData): Promi
   const values = [name, roles.join("\n"), projects.join("\n"), JSON.stringify(links), position];
   const id = Number(formData.get("id")) || null;
   if (id === null) {
-    const { lastInsertRowid } = db
+    const { lastInsertRowid } = await db
       .prepare("INSERT INTO team_member (name, roles, projects, links, position) VALUES (?, ?, ?, ?, ?)")
       .run(...values);
     redirect(`/gestion/equipe/${lastInsertRowid}?cree=1`);
   }
-  const { changes } = db
+  const { changes } = await db
     .prepare("UPDATE team_member SET name = ?, roles = ?, projects = ?, links = ?, position = ? WHERE id = ?")
     .run(...values, id);
   if (!changes) return { error: "Membre introuvable." };
@@ -48,9 +48,9 @@ export async function saveMember(_prev: ActionResult, formData: FormData): Promi
 export async function deleteMember(id: number): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
-  const member = db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get(id) as { avatarFile: string } | undefined;
+  const member = await db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get(id) as { avatarFile: string } | undefined;
   if (!member) return { error: "Membre introuvable." };
-  db.prepare("DELETE FROM team_member WHERE id = ?").run(id);
+  await db.prepare("DELETE FROM team_member WHERE id = ?").run(id);
   await removeFile(member.avatarFile);
   redirect("/gestion");
 }

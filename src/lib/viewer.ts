@@ -17,7 +17,7 @@ const teamCache = (globalForTeam.teamCache ??= new Map());
 
 async function fetchIsTeam(userId: string): Promise<boolean> {
   // accountId est l’identifiant Discord de l’utilisateur.
-  const account = db
+  const account = await db
     .prepare("SELECT id, accountId FROM account WHERE userId = ? AND providerId = 'discord'")
     .get(userId) as { id: string; accountId: string } | undefined;
   if (!account) return false;

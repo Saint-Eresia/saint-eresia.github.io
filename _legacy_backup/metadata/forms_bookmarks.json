@@ -1,0 +1,18 @@
+[
+    {
+        "action": "https://hivetoons.org/auth/signin",
+        "method": "POST",
+        "fields": [
+            {
+                "name": "email",
+                "type": "email",
+                "id": "email"
+            },
+            {
+                "name": "password",
+                "type": "password",
+                "id": "password"
+            }
+        ]
+    }
+]

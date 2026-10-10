@@ -1,0 +1,33 @@
+[
+    {
+        "action": "https://hivetoons.org/auth/signup",
+        "method": "POST",
+        "fields": [
+            {
+                "name": "name",
+                "type": null,
+                "id": "signup-name"
+            },
+            {
+                "name": "username",
+                "type": null,
+                "id": "signup-username"
+            },
+            {
+                "name": "email",
+                "type": "email",
+                "id": "signup-email"
+            },
+            {
+                "name": "password",
+                "type": "password",
+                "id": "signup-password"
+            },
+            {
+                "name": "country",
+                "type": null,
+                "id": "signup-country"
+            }
+        ]
+    }
+]

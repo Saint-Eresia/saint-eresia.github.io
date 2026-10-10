@@ -1,9 +1,11 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { db } from "@/lib/db";
+import { client } from "@/lib/db";
+import { LibsqlDialect } from "@/lib/kysely-libsql";
 
 export const auth = betterAuth({
-  database: db,
+  // Même connexion libSQL que le reste du site (SQLite en local, Turso en production).
+  database: { dialect: new LibsqlDialect(client), type: "sqlite" },
   socialProviders: {
     discord: {
       clientId: process.env.DISCORD_CLIENT_ID as string,

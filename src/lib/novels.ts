@@ -45,91 +45,93 @@ export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
 export const volumeHeading = (volume: Pick<Volume, "number" | "title">) =>
   volume.title ? `Tome ${volume.number} — ${volume.title}` : `Tome ${volume.number}`;
 
-const coverOf = (novelId: number) =>
-  (db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = 'cover'").get(novelId) as NovelImage | undefined) ?? null;
+const coverOf = async (novelId: number) =>
+  (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = 'cover'").get<NovelImage>(novelId)) ?? null;
 
-function volumesOf(novelId: number, publishedOnly: boolean): VolumeWithChapters[] {
-  const volumes = db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all(novelId) as Volume[];
-  const chapters = db
+async function volumesOf(novelId: number, publishedOnly: boolean): Promise<VolumeWithChapters[]> {
+  const volumes = await db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all<Volume>(novelId);
+  const chapters = await db
     .prepare(
       `SELECT ${SUMMARY_COLUMNS} FROM chapter c JOIN volume v ON v.id = c.volumeId
        WHERE c.novelId = ? ${publishedOnly ? "AND c.published = 1" : ""} ORDER BY v.number, c.position, c.id`,
     )
-    .all(novelId) as ChapterSummary[];
+    .all<ChapterSummary>(novelId);
   const withChapters = volumes.map((volume) => ({ ...volume, chapters: chapters.filter((c) => c.volumeId === volume.id) }));
   // Côté public, un tome sans chapitre publié n’apparaît pas.
   return publishedOnly ? withChapters.filter((volume) => volume.chapters.length > 0) : withChapters;
 }
 
-// better-sqlite3 est synchrone : connection() empêche que ces lectures soient figées au build.
+// connection() empêche que ces lectures soient figées au build : la base change après le déploiement.
 export async function listNovels() {
   await connection();
-  const novels = db.prepare("SELECT * FROM novel ORDER BY updatedAt DESC, id DESC").all() as Novel[];
+  const novels = await db.prepare("SELECT * FROM novel ORDER BY updatedAt DESC, id DESC").all<Novel>();
   const count = db.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(published), 0) AS published FROM chapter WHERE novelId = ?");
-  return novels.map((novel) => {
-    const { total, published } = count.get(novel.id) as { total: number; published: number };
-    return { ...novel, cover: coverOf(novel.id), chapterCount: total, publishedCount: published };
-  });
+  return Promise.all(
+    novels.map(async (novel) => {
+      const { total, published } = (await count.get<{ total: number; published: number }>(novel.id))!;
+      return { ...novel, cover: await coverOf(novel.id), chapterCount: total, publishedCount: published };
+    }),
+  );
 }
 
 export async function getNovelBySlug(slug: string) {
   await connection();
-  const novel = db.prepare("SELECT * FROM novel WHERE slug = ?").get(slug) as Novel | undefined;
+  const novel = await db.prepare("SELECT * FROM novel WHERE slug = ?").get<Novel>(slug);
   if (!novel) return null;
-  return { ...novel, cover: coverOf(novel.id), volumes: volumesOf(novel.id, true) };
+  return { ...novel, cover: await coverOf(novel.id), volumes: await volumesOf(novel.id, true) };
 }
 
 // Gestion : tous les chapitres, brouillons compris.
 export async function getNovelById(id: number) {
   await connection();
-  const novel = db.prepare("SELECT * FROM novel WHERE id = ?").get(id) as Novel | undefined;
+  const novel = await db.prepare("SELECT * FROM novel WHERE id = ?").get<Novel>(id);
   if (!novel) return null;
-  return { ...novel, cover: coverOf(novel.id), volumes: volumesOf(novel.id, false) };
+  return { ...novel, cover: await coverOf(novel.id), volumes: await volumesOf(novel.id, false) };
 }
 
 // Lecture publique d’un chapitre, avec les chapitres publiés voisins.
 export async function getPublishedChapter(novelSlug: string, chapterSlug: string) {
   await connection();
-  const novel = db.prepare("SELECT * FROM novel WHERE slug = ?").get(novelSlug) as Novel | undefined;
+  const novel = await db.prepare("SELECT * FROM novel WHERE slug = ?").get(novelSlug) as Novel | undefined;
   if (!novel) return null;
-  const chapter = db
+  const chapter = await db
     .prepare("SELECT * FROM chapter WHERE novelId = ? AND slug = ? AND published = 1")
     .get(novel.id, chapterSlug) as Chapter | undefined;
   if (!chapter) return null;
-  const volume = db.prepare("SELECT * FROM volume WHERE id = ?").get(chapter.volumeId) as Volume;
-  const order = volumesOf(novel.id, true).flatMap((v) => v.chapters);
+  const volume = (await db.prepare("SELECT * FROM volume WHERE id = ?").get<Volume>(chapter.volumeId))!;
+  const order = (await volumesOf(novel.id, true)).flatMap((v) => v.chapters);
   const index = order.findIndex((c) => c.id === chapter.id);
   return { novel, volume, chapter, previous: order[index - 1] ?? null, next: order[index + 1] ?? null };
 }
 
 export async function getChapterById(id: number) {
   await connection();
-  const chapter = db.prepare("SELECT * FROM chapter WHERE id = ?").get(id) as Chapter | undefined;
+  const chapter = await db.prepare("SELECT * FROM chapter WHERE id = ?").get(id) as Chapter | undefined;
   if (!chapter) return null;
-  const novel = db.prepare("SELECT * FROM novel WHERE id = ?").get(chapter.novelId) as Novel;
-  const volumes = db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all(novel.id) as Volume[];
+  const novel = await db.prepare("SELECT * FROM novel WHERE id = ?").get(chapter.novelId) as Novel;
+  const volumes = await db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all(novel.id) as Volume[];
   return { chapter, novel, volumes };
 }
 
 export async function getVolumeWithNovel(volumeId: number) {
   await connection();
-  const volume = db.prepare("SELECT * FROM volume WHERE id = ?").get(volumeId) as Volume | undefined;
+  const volume = await db.prepare("SELECT * FROM volume WHERE id = ?").get(volumeId) as Volume | undefined;
   if (!volume) return null;
-  const novel = db.prepare("SELECT * FROM novel WHERE id = ?").get(volume.novelId) as Novel;
-  const volumes = db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all(novel.id) as Volume[];
-  const { next } = db
+  const novel = await db.prepare("SELECT * FROM novel WHERE id = ?").get(volume.novelId) as Novel;
+  const volumes = await db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all(novel.id) as Volume[];
+  const { next } = (await db
     .prepare("SELECT COALESCE(MAX(position), 0) + 1 AS next FROM chapter WHERE volumeId = ?")
-    .get(volume.id) as { next: number };
+    .get<{ next: number }>(volume.id))!;
   return { volume, novel, volumes, nextPosition: next };
 }
 
 // « Tome 1 » dans le tome 1 → tome-1 ; « Chapitre 3 » dans le tome 2 → tome-2-chapitre-3.
-export function uniqueChapterSlug(novelId: number, volumeNumber: number, label: string, excludeId = 0) {
+export async function uniqueChapterSlug(novelId: number, volumeNumber: number, label: string, excludeId = 0) {
   const prefix = `tome-${volumeNumber}`;
   const part = slugify(label) || "chapitre";
   const base = part === prefix || part.startsWith(`${prefix}-`) ? part : `${prefix}-${part}`;
   const taken = db.prepare("SELECT 1 FROM chapter WHERE novelId = ? AND slug = ? AND id != ?");
   let slug = base;
-  for (let n = 2; taken.get(novelId, slug, excludeId); n++) slug = `${base}-${n}`;
+  for (let n = 2; await taken.get(novelId, slug, excludeId); n++) slug = `${base}-${n}`;
   return slug;
 }

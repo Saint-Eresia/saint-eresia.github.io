@@ -7,17 +7,20 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx --conditions=react-server scripts/seed.ts",
-    "db:migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts"
+    "db:seed": "tsx --conditions=react-server --env-file-if-exists=.env scripts/seed.ts",
+    "db:migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts",
+    "db:cloud": "tsx --conditions=react-server --env-file-if-exists=.env scripts/migrate-to-cloud.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.8.1",
     "better-auth": "^1.7.7",
-    "better-sqlite3": "^13.0.3",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
+    "kysely": "^0.29.6",
     "lucide-react": "^1.52.0",
     "next": "16.4.0",
     "radix-ui": "^1.7.0",
@@ -34,7 +37,6 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
-    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
