@@ -43,5 +43,8 @@ next-env.d.ts
 # variables d’exemple versionnées
 !.env.example
 
-# base SQLite et images envoyées
-/data/
+# base SQLite et images envoyées : versionnées (sauvegarde du contenu local, sans comptes ni sessions).
+# Fichiers temporaires de SQLite seulement :
+/data/*.db-wal
+/data/*.db-shm
+/data/*.db-journal
