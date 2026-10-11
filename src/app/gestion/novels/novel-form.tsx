@@ -17,6 +17,8 @@ type NovelFields = {
   artist: string;
   status: string;
   synopsis: string;
+  quote: string;
+  featured: string; // "1" : recommandé sur l’accueil
 };
 
 export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: readonly string[] }) {
@@ -87,6 +89,40 @@ export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: r
           placeholder="Résumé, notes de traduction, conseils de lecture…"
         />
       </div>
+
+      <fieldset className="space-y-4 rounded-xl border border-border p-4">
+        <legend className="px-1 text-sm font-bold">Carrousel « Recommandé » de l’accueil</legend>
+        <div className="grid gap-6 sm:grid-cols-[1fr_16rem]">
+          <div className="space-y-2">
+            <Label htmlFor="quote">Citation</Label>
+            <Input
+              id="quote"
+              name="quote"
+              maxLength={120}
+              placeholder="Ex. Live Alive !"
+              value={fields.quote}
+              onChange={(e) => set("quote")(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="featured">Affichage</Label>
+            <input type="hidden" name="featured" value={fields.featured} />
+            <Select value={fields.featured} onValueChange={set("featured")}>
+              <SelectTrigger id="featured" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Pas sur l’accueil</SelectItem>
+                <SelectItem value="1">Recommandé sur l’accueil</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          La diapositive utilise l’arrière-plan et le logo du novel (section Images), sa présentation et son dernier
+          chapitre publié.
+        </p>
+      </fieldset>
 
       {state.error && (
         <p role="alert" className="text-sm font-semibold text-destructive">

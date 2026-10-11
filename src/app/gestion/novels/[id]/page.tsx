@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { chapterHeading, getNovelById, NOVEL_STATUSES } from "@/lib/novels";
 import { imageUrl } from "@/lib/patches";
 import { saveNovelMembers } from "../actions";
-import { DeleteBackgroundButton } from "../delete-background-button";
+import { DeleteNovelImageButton } from "../delete-background-button";
 import { DeleteNovelButton } from "../delete-novel-button";
 import { NovelForm } from "../novel-form";
 import { VolumeManager } from "../volume-manager";
@@ -62,6 +62,8 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
               artist: novel.artist,
               status: novel.status,
               synopsis: novel.synopsis,
+              quote: novel.quote,
+              featured: novel.featured ? "1" : "0",
             }}
           />
         </section>
@@ -97,13 +99,37 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
                   alt={novel.background.alt}
                   className="aspect-[16/6] w-full rounded-lg border border-border object-cover"
                 />
-                <DeleteBackgroundButton novelId={novel.id} />
+                <DeleteNovelImageButton novelId={novel.id} kind="background" />
               </div>
             )}
             <Dropzone
               endpoint={`/api/novels/${novel.id}/images`}
               kind="background"
               label={novel.background ? "Remplacer l’arrière-plan" : "Ajouter un arrière-plan"}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-extrabold">Logo</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Affiché à droite dans le carrousel « Recommandé » de l’accueil. Utilisez un PNG à fond transparent
+                (logo du titre ou personnage détouré).
+              </p>
+            </div>
+            {novel.logo && (
+              <div className="space-y-2">
+                {/* Damier : la transparence du logo reste visible. */}
+                <div className="grid h-40 place-items-center rounded-lg border border-border bg-[repeating-conic-gradient(var(--muted)_0_25%,transparent_0_50%)] bg-[length:20px_20px] p-3">
+                  <img src={imageUrl(novel.logo)} alt={novel.logo.alt} className="max-h-full max-w-full object-contain" />
+                </div>
+                <DeleteNovelImageButton novelId={novel.id} kind="logo" />
+              </div>
+            )}
+            <Dropzone
+              endpoint={`/api/novels/${novel.id}/images`}
+              kind="logo"
+              label={novel.logo ? "Remplacer le logo" : "Ajouter un logo"}
             />
           </div>
         </section>

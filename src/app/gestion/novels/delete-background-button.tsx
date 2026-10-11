@@ -3,10 +3,12 @@
 import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { deleteNovelBackground } from "./actions";
+import { deleteNovelImage } from "./actions";
 
-// Retire l’arrière-plan d’un novel, après confirmation.
-export function DeleteBackgroundButton({ novelId }: { novelId: number }) {
+const LABELS = { background: "l’arrière-plan", logo: "le logo" } as const;
+
+// Retire l’arrière-plan ou le logo d’un novel, après confirmation.
+export function DeleteNovelImageButton({ novelId, kind }: { novelId: number; kind: "background" | "logo" }) {
   const [pending, startTransition] = useTransition();
   return (
     <button
@@ -14,11 +16,11 @@ export function DeleteBackgroundButton({ novelId }: { novelId: number }) {
       disabled={pending}
       className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
       onClick={() => {
-        if (!confirm("Supprimer l’arrière-plan ? Cette action est définitive.")) return;
+        if (!confirm(`Supprimer ${LABELS[kind]} ? Cette action est définitive.`)) return;
         startTransition(async () => {
-          const result = await deleteNovelBackground(novelId);
+          const result = await deleteNovelImage(novelId, kind);
           if (result.error) toast.error(result.error);
-          else toast.success("Arrière-plan supprimé.");
+          else toast.success("Image supprimée.");
         });
       }}
     >

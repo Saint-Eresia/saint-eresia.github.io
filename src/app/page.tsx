@@ -1,25 +1,29 @@
 import { ArrowRight, PenLine } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { FeaturedCarousel, type FeaturedSlide } from "@/components/featured-carousel";
 import { HomeFeed, type FeedItem } from "@/components/home-feed";
 import { NovelCard } from "@/components/novel-card";
 import { CardsSkeleton, EmptyState } from "@/components/page-intro";
 import { PatchCard } from "@/components/patch/patch-card";
 import { Button } from "@/components/ui/button";
 import { excerpt, listNews, newsDate } from "@/lib/news";
-import { listNovels } from "@/lib/novels";
+import { listFeaturedNovels, listNovels } from "@/lib/novels";
 import { formatDate, imageUrl, listPatches } from "@/lib/patches";
 import { getViewer } from "@/lib/viewer";
 
 export default function HomePage() {
   return (
     <>
+      <h1 className="sr-only">Saint Eresia : light novels et patchs de visual novels en français</h1>
+      <Suspense fallback={<div className="h-[30rem] animate-pulse border-b border-border bg-secondary md:h-[28rem]" />}>
+        <Recommended />
+      </Suspense>
       <section className="relative isolate overflow-hidden border-b border-border bg-secondary/60">
         <div
           aria-hidden
           className="absolute inset-0 -z-10 bg-[radial-gradient(50rem_25rem_at_15%_-5rem,hsl(349_74%_56%/0.16),transparent_70%)]"
         />
-        <h1 className="sr-only">Saint Eresia : light novels et patchs de visual novels en français</h1>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-10 sm:px-6 lg:h-[36rem] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:py-12">
           <Panel eyebrow="Feed" title="Nos projets">
             <Suspense fallback={<PanelSkeleton />}>
@@ -54,6 +58,28 @@ export default function HomePage() {
       </HomeSection>
     </>
   );
+}
+
+// Carrousel « Recommandé » : les novels cochés « Recommandé sur l’accueil » dans la gestion.
+async function Recommended() {
+  const novels = await listFeaturedNovels();
+  const slides: FeaturedSlide[] = novels.map((novel) => ({
+    key: `novel-${novel.id}`,
+    href: `/novels/${novel.slug}`,
+    title: novel.title,
+    author: novel.author,
+    status: novel.status,
+    summary: excerpt(novel.synopsis, 320),
+    quote: novel.quote,
+    // Sans arrière-plan, la couverture sert de fond (floutée par le carrousel).
+    background: novel.background ? imageUrl(novel.background) : novel.cover && imageUrl(novel.cover),
+    logo: novel.logo && imageUrl(novel.logo),
+    chapter: novel.latestChapter && {
+      href: `/novels/${novel.slug}/${novel.latestChapter.slug}`,
+      label: novel.latestChapter.label,
+    },
+  }));
+  return <FeaturedCarousel slides={slides} />;
 }
 
 // Panneau de l’en-tête de l’accueil : hauteur fixe sur grand écran, le contenu défile à l’intérieur.

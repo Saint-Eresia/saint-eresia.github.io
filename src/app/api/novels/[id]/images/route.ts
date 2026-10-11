@@ -9,11 +9,12 @@ export async function POST(req: Request, ctx: RouteContext<"/api/novels/[id]/ima
   const alts: Partial<Record<ImageKind, string>> = {
     cover: `Couverture de ${novel?.title}`,
     background: `Arrière-plan de ${novel?.title}`,
+    logo: `Logo de ${novel?.title}`,
   };
   const response = await handleImageUpload(req, {
     owner: { type: "novel", id },
     exists: !!novel,
-    kinds: ["cover", "background", "illustration"],
+    kinds: ["cover", "background", "logo", "illustration"],
     altFor: (kind) => alts[kind] ?? "Illustration",
   });
   if (response.ok) await db.prepare("UPDATE novel SET updatedAt = datetime('now') WHERE id = ?").run(id);

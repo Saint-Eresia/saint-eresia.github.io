@@ -9,10 +9,10 @@ import { db, UPLOAD_DIR } from "@/lib/db";
 export { fileUrl } from "@/lib/file-url";
 
 export const FILE_PATTERN = /^[0-9a-f-]{36}\.webp$/;
-const MAX_WIDTH = { cover: 1600, screenshot: 2560, illustration: 2000, background: 2560 } as const;
+const MAX_WIDTH = { cover: 1600, screenshot: 2560, illustration: 2000, background: 2560, logo: 1200 } as const;
 export type ImageKind = keyof typeof MAX_WIDTH;
 // Types d’image uniques par propriétaire : la nouvelle remplace l’ancienne.
-export const SINGLE_KINDS: readonly ImageKind[] = ["cover", "background"];
+export const SINGLE_KINDS: readonly ImageKind[] = ["cover", "background", "logo"];
 
 // Taille maximale d’un envoi. Sur Vercel, le corps d’une requête est limité à 4,5 Mo.
 export const MAX_UPLOAD_MB = process.env.VERCEL ? 4 : 25;

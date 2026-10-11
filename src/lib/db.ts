@@ -54,14 +54,17 @@ const SCHEMA = `
     artist TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL,
     synopsis TEXT NOT NULL DEFAULT '',
+    -- Carrousel « Recommandé » de l’accueil : citation affichée et novel mis en avant (1) ou non (0).
+    quote TEXT NOT NULL DEFAULT '',
+    featured INTEGER NOT NULL DEFAULT 0,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
-  -- Couverture du roman et illustrations insérées dans les chapitres.
+  -- Couverture du roman, arrière-plan, logo et illustrations insérées dans les chapitres.
   CREATE TABLE IF NOT EXISTS novel_image (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL CHECK (kind IN ('cover', 'illustration', 'background')),
+    kind TEXT NOT NULL CHECK (kind IN ('cover', 'illustration', 'background', 'logo')),
     file TEXT NOT NULL UNIQUE,
     alt TEXT NOT NULL DEFAULT '',
     width INTEGER NOT NULL,
@@ -163,17 +166,18 @@ async function linkMembersFromProjects(client: Client) {
   return statements.length;
 }
 
-// Les bases créées avant l’arrière-plan refusent kind = 'background' (contrainte CHECK).
-// SQLite ne sait pas modifier une contrainte : la table d’images est reconstruite, données comprises.
+// Types d’image acceptés par chaque table. Les bases plus anciennes refusent les types ajoutés depuis
+// (arrière-plan, logo) à cause de la contrainte CHECK. SQLite ne sait pas modifier une contrainte :
+// la table d’images est alors reconstruite, données comprises.
 const IMAGE_TABLES = [
   { table: "patch_image", owner: "patchId", parent: "patch", kinds: ["cover", "screenshot", "background"], index: "patch_image_patch ON patch_image (patchId, kind, position)" },
-  { table: "novel_image", owner: "novelId", parent: "novel", kinds: ["cover", "illustration", "background"], index: null },
+  { table: "novel_image", owner: "novelId", parent: "novel", kinds: ["cover", "illustration", "background", "logo"], index: null },
 ] as const;
 
-async function allowBackground(client: Client, spec: (typeof IMAGE_TABLES)[number]) {
+async function allowImageKinds(client: Client, spec: (typeof IMAGE_TABLES)[number]) {
   const rs = await client.execute({ sql: "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?", args: [spec.table] });
   const sql = String(rs.rows[0]?.sql ?? "");
-  if (!sql || sql.includes("'background'")) return false;
+  if (!sql || spec.kinds.every((kind) => sql.includes(`'${kind}'`))) return false;
   const columns = `id, ${spec.owner}, kind, file, alt, width, height, position`;
   await client.batch(
     [
@@ -217,8 +221,12 @@ export async function prepareSchema(client: Client) {
   if (!memberColumns.some((column) => column.name === "role")) {
     await client.execute("ALTER TABLE patch_member ADD COLUMN role TEXT NOT NULL DEFAULT ''");
   }
+  // Mise en avant sur l’accueil (carrousel « Recommandé ») : citation et choix des novels affichés.
+  const novelColumns = ((await client.execute("PRAGMA table_info(novel)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
+  if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   for (const spec of IMAGE_TABLES) {
-    if (await allowBackground(client, spec)) console.log(`✓ ${spec.table} : arrière-plan autorisé`);
+    if (await allowImageKinds(client, spec)) console.log(`✓ ${spec.table} : types d’image mis à jour (${spec.kinds.join(", ")})`);
   }
 }
 

@@ -5,7 +5,15 @@ import { slugify } from "@/lib/patches";
 
 export const NOVEL_STATUSES = ["En cours", "Terminé", "En pause", "Abandonné", "Licencié"] as const;
 
-export type NovelImage = { id: number; novelId: number; kind: "cover" | "illustration" | "background"; file: string; alt: string; width: number; height: number };
+export type NovelImage = {
+  id: number;
+  novelId: number;
+  kind: "cover" | "illustration" | "background" | "logo";
+  file: string;
+  alt: string;
+  width: number;
+  height: number;
+};
 export type Novel = {
   id: number;
   slug: string;
@@ -15,6 +23,8 @@ export type Novel = {
   artist: string;
   status: string;
   synopsis: string;
+  quote: string; // citation du carrousel « Recommandé »
+  featured: number; // 1 : affiché dans le carrousel de l’accueil
   createdAt: string;
   updatedAt: string;
 };
@@ -45,11 +55,40 @@ export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
 export const volumeHeading = (volume: Pick<Volume, "number" | "title">) =>
   volume.title ? `Tome ${volume.number} — ${volume.title}` : `Tome ${volume.number}`;
 
-const imageOf = async (novelId: number, kind: "cover" | "background") =>
+const imageOf = async (novelId: number, kind: "cover" | "background" | "logo") =>
   (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = ?").get<NovelImage>(novelId, kind)) ?? null;
 const coverOf = (novelId: number) => imageOf(novelId, "cover");
 // Image large affichée derrière l’en-tête de la fiche ; à défaut, la couverture floutée.
 const backgroundOf = (novelId: number) => imageOf(novelId, "background");
+// Logo (PNG détouré) affiché à droite dans le carrousel « Recommandé » de l’accueil.
+const logoOf = (novelId: number) => imageOf(novelId, "logo");
+
+// Dernier chapitre publié, dans l’ordre de lecture (tome puis position).
+async function latestChapterOf(novelId: number) {
+  return (
+    (await db
+      .prepare(
+        `SELECT c.slug, c.label, c.title FROM chapter c JOIN volume v ON v.id = c.volumeId
+         WHERE c.novelId = ? AND c.published = 1 ORDER BY v.number DESC, c.position DESC, c.id DESC LIMIT 1`,
+      )
+      .get<Pick<Chapter, "slug" | "label" | "title">>(novelId)) ?? null
+  );
+}
+
+// Novels du carrousel « Recommandé » de l’accueil, du plus récemment mis à jour au plus ancien.
+export async function listFeaturedNovels() {
+  await connection();
+  const novels = await db.prepare("SELECT * FROM novel WHERE featured = 1 ORDER BY updatedAt DESC, id DESC").all<Novel>();
+  return Promise.all(
+    novels.map(async (novel) => ({
+      ...novel,
+      cover: await coverOf(novel.id),
+      background: await backgroundOf(novel.id),
+      logo: await logoOf(novel.id),
+      latestChapter: await latestChapterOf(novel.id),
+    })),
+  );
+}
 
 async function volumesOf(novelId: number, publishedOnly: boolean): Promise<VolumeWithChapters[]> {
   const volumes = await db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all<Volume>(novelId);
@@ -98,6 +137,7 @@ export async function getNovelById(id: number) {
     ...novel,
     cover: await coverOf(novel.id),
     background: await backgroundOf(novel.id),
+    logo: await logoOf(novel.id),
     volumes: await volumesOf(novel.id, false),
   };
 }

@@ -41,21 +41,38 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
     artist: text(formData, "artist").slice(0, 120),
     status: text(formData, "status"),
     synopsis: text(formData, "synopsis"),
+    quote: text(formData, "quote"),
+    featured: formData.get("featured") === "1" ? 1 : 0,
   };
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
   if (!(NOVEL_STATUSES as readonly string[]).includes(fields.status)) return { error: "Statut invalide." };
   if (fields.synopsis.length > 20_000) return { error: "La présentation est trop longue (20 000 caractères maximum)." };
+  if (fields.quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   const id = Number(formData.get("id")) || null;
   if (id === null) {
     const { lastInsertRowid } = await db
-      .prepare("INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(await uniqueNovelSlug(title), title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis);
+      .prepare(
+        "INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
+      .run(
+        await uniqueNovelSlug(title),
+        title,
+        fields.originalTitle,
+        fields.author,
+        fields.artist,
+        fields.status,
+        fields.synopsis,
+        fields.quote,
+        fields.featured,
+      );
     redirect(`/gestion/novels/${lastInsertRowid}?cree=1`);
   }
   const { changes } = await db
-    .prepare("UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ? WHERE id = ?")
-    .run(title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, id);
+    .prepare(
+      "UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ?, quote = ?, featured = ? WHERE id = ?",
+    )
+    .run(title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, fields.quote, fields.featured, id);
   if (!changes) return { error: "Novel introuvable." };
   return await changed(id);
 }
@@ -80,16 +97,18 @@ export async function saveNovelMembers(novelId: number, memberIds: number[]): Pr
   return await changed(novelId);
 }
 
-// Retire l’arrière-plan : la fiche revient à la couverture floutée. Les illustrations ne sont jamais touchées.
-export async function deleteNovelBackground(novelId: number): Promise<ActionResult> {
+// Retire l’arrière-plan (la fiche revient à la couverture floutée) ou le logo du carrousel.
+// Seuls ces deux types sont acceptés : les illustrations des chapitres ne sont jamais touchées.
+export async function deleteNovelImage(novelId: number, kind: "background" | "logo"): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
+  if (kind !== "background" && kind !== "logo") return { error: "Type d’image invalide." };
 
   const images = await db
-    .prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = 'background'")
-    .all<{ file: string }>(novelId);
-  if (images.length === 0) return { error: "Aucun arrière-plan à supprimer." };
-  await db.prepare("DELETE FROM novel_image WHERE novelId = ? AND kind = 'background'").run(novelId);
+    .prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = ?")
+    .all<{ file: string }>(novelId, kind);
+  if (images.length === 0) return { error: "Aucune image à supprimer." };
+  await db.prepare("DELETE FROM novel_image WHERE novelId = ? AND kind = ?").run(novelId, kind);
   await Promise.all(images.map((image) => removeFile(image.file)));
   return await changed(novelId);
 }
