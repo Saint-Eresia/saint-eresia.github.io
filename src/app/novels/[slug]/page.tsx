@@ -56,7 +56,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
             <ArrowLeft className="size-4" /> Novels
           </Link>
           <div className="mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr]">
-            <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-white/10 shadow-[0_24px_60px_rgb(0_0_0/0.55)] sm:w-full">
+            <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-border shadow-[0_24px_60px_var(--shadow)] sm:w-full">
               {novel.cover ? (
                 <img
                   src={imageUrl(novel.cover)}

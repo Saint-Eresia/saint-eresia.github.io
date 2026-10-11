@@ -10,7 +10,7 @@ export function DiscordLoginButton({ callbackURL = "/" }: { callbackURL?: string
   return (
     <button
       type="button"
-      className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#5865F2] px-6 font-semibold text-white transition-colors hover:bg-[#4752c4] focus-visible:ring-3 focus-visible:ring-[#5865F2]/50 focus-visible:outline-none disabled:opacity-60"
+      className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-discord px-6 font-semibold text-on-discord transition-colors hover:bg-discord-hover focus-visible:ring-3 focus-visible:ring-discord/50 focus-visible:outline-none disabled:opacity-60"
       disabled={pending}
       onClick={async () => {
         setPending(true);

@@ -65,7 +65,7 @@ export function FeaturedCarousel({ slides, delaySeconds = 8 }: { slides: Feature
             type="button"
             onClick={() => go(index - 1)}
             aria-label="Recommandation précédente"
-            className="absolute top-1/2 left-3 z-20 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-background/70 text-foreground backdrop-blur transition-colors hover:bg-background md:grid"
+            className="absolute top-1/2 left-3 z-20 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-border bg-background/70 text-foreground backdrop-blur transition-colors hover:bg-background md:grid"
           >
             <ChevronLeft className="size-5" />
           </button>
@@ -73,7 +73,7 @@ export function FeaturedCarousel({ slides, delaySeconds = 8 }: { slides: Feature
             type="button"
             onClick={() => go(index + 1)}
             aria-label="Recommandation suivante"
-            className="absolute top-1/2 right-3 z-20 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-background/70 text-foreground backdrop-blur transition-colors hover:bg-background md:grid"
+            className="absolute top-1/2 right-3 z-20 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-border bg-background/70 text-foreground backdrop-blur transition-colors hover:bg-background md:grid"
           >
             <ChevronRight className="size-5" />
           </button>
@@ -181,7 +181,7 @@ function Slide({ slide, active, position }: { slide: FeaturedSlide; active: bool
                   href={slide.action.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-white"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   <ActionIcon className="size-4" aria-hidden />
                   {slide.action.label}
@@ -189,7 +189,7 @@ function Slide({ slide, active, position }: { slide: FeaturedSlide; active: bool
               ) : (
                 <Link
                   href={slide.action.href}
-                  className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-white"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   <ActionIcon className="size-4" aria-hidden />
                   {slide.action.label}
@@ -198,13 +198,13 @@ function Slide({ slide, active, position }: { slide: FeaturedSlide; active: bool
             ) : (
               <Link
                 href={slide.href}
-                className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-white"
+                className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-primary/70 bg-primary/10 px-5 text-sm font-bold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 Voir la fiche
               </Link>
             )}
             {slide.quote && (
-              <blockquote className="rounded-xl border border-white/15 bg-black/30 px-5 py-2 text-lg font-extrabold tracking-tight italic backdrop-blur-sm sm:text-xl">
+              <blockquote className="rounded-xl border border-border-strong bg-background/60 px-5 py-2 text-lg font-extrabold tracking-tight italic backdrop-blur-sm sm:text-xl">
                 « {slide.quote} »
               </blockquote>
             )}
@@ -212,7 +212,7 @@ function Slide({ slide, active, position }: { slide: FeaturedSlide; active: bool
         </div>
         {slide.logo && (
           <div className="hidden h-full max-h-[22rem] items-center justify-center lg:flex">
-            <img src={slide.logo} alt="" className="max-h-full max-w-full object-contain drop-shadow-[0_20px_40px_rgb(0_0_0/0.6)]" />
+            <img src={slide.logo} alt="" className="max-h-full max-w-full object-contain drop-shadow-[0_20px_40px_var(--shadow)]" />
           </div>
         )}
       </div>

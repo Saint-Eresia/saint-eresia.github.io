@@ -25,7 +25,7 @@ export function PatchTile({ patch }: { patch: PatchTileData }) {
       containerClassName="relative isolate h-full w-full"
       rotationFactor={0}
       borderRadius="1rem"
-      InteractiveColor="hsl(349 74% 56% / 0.18)"
+      InteractiveColor="color-mix(in srgb, var(--primary) 18%, transparent)"
       tailwindBgClass="bg-card"
     >
       <Link

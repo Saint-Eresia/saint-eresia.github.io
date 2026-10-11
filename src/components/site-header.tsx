@@ -1,6 +1,7 @@
 import { LogIn } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 import { Button } from "@/components/ui/button";
 import { getViewer } from "@/lib/viewer";
 import { LogoutButton } from "./auth-buttons";
@@ -42,14 +43,15 @@ function HeaderContent({
       >
         <NavLinks showTeam={showTeam} />
       </nav>
-      <div className="ml-auto flex shrink-0 items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        <ToggleTheme animationType="fade-in-out" duration={250} />
         {viewer ? (
           <>
             <span className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pr-3 pl-1">
               {viewer.image ? (
                 <img src={viewer.image} alt="" width={28} height={28} className="size-7 rounded-full" />
               ) : (
-                <span aria-hidden className="grid size-7 place-items-center rounded-full bg-primary text-xs font-bold text-white">
+                <span aria-hidden className="grid size-7 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {viewer.name.charAt(0).toUpperCase()}
                 </span>
               )}

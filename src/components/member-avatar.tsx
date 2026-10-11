@@ -23,7 +23,7 @@ export function MemberAvatar({
   return (
     <span
       aria-hidden
-      className={cn("grid shrink-0 place-items-center rounded-full bg-primary font-extrabold text-white", className)}
+      className={cn("grid shrink-0 place-items-center rounded-full bg-primary font-extrabold text-primary-foreground", className)}
     >
       {member.name.charAt(0).toUpperCase()}
     </span>

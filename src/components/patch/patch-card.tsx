@@ -8,7 +8,7 @@ export function PatchCard({ patch }: { patch: PatchWithImages }) {
       href={`/patchs/${patch.slug}`}
       className="group flex h-full flex-col rounded-2xl focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
     >
-      <div className="aspect-[3/4] shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_rgb(0_0_0/0.35)] transition-[transform,box-shadow,border-color] duration-300 group-hover:-translate-y-1 group-hover:border-primary/50 group-hover:shadow-[0_18px_40px_rgb(0_0_0/0.45)]">
+      <div className="aspect-[3/4] shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_var(--shadow)] transition-[transform,box-shadow,border-color] duration-300 group-hover:-translate-y-1 group-hover:border-primary/50 group-hover:shadow-[0_18px_40px_var(--shadow)]">
         {patch.cover ? (
           <img
             src={imageUrl(patch.cover)}

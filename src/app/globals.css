@@ -29,6 +29,17 @@
   --color-card: var(--card);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  /* Visionneuse d’images et fonds assombris : sombres dans les deux thèmes (ce sont des écrans de visionnage). */
+  --color-overlay: var(--overlay);
+  --color-on-overlay: var(--on-overlay);
+  --color-scrim: var(--scrim);
+  /* Encadrés d’avertissement (citations Markdown) et bouton de connexion Discord. */
+  --color-callout: var(--callout);
+  --color-callout-border: var(--callout-border);
+  --color-callout-foreground: var(--callout-foreground);
+  --color-discord: var(--discord);
+  --color-discord-hover: var(--discord-hover);
+  --color-on-discord: var(--on-discord);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -36,31 +47,86 @@
   --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-/* Palette reprise de l’ancien public/css/styles.css (thème sombre). */
+/* Thème : clair par défaut (:root), sombre avec la classe .dark sur <html>. Le choix est appliqué avant
+   l’affichage par le script de src/app/layout.tsx (préférence système, ou choix mémorisé sous la clé "theme").
+   Toutes les couleurs du site passent par ces variables. */
 :root {
+  --background: hsl(220 20% 97%);
+  --foreground: hsl(224 26% 12%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(224 26% 12%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(224 26% 12%);
+  --primary: hsl(349 72% 44%);
+  --primary-dark: hsl(349 72% 36%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 22% 93%);
+  --secondary-foreground: hsl(224 26% 12%);
+  --muted: hsl(220 18% 89%);
+  --muted-foreground: hsl(222 14% 36%);
+  --accent: hsl(349 75% 94%);
+  --accent-foreground: hsl(349 70% 32%);
+  --destructive: hsl(0 72% 42%);
+  --border: hsl(220 16% 85%);
+  --border-strong: hsl(220 12% 72%);
+  --input: hsl(220 10% 54%);
+  --ring: hsl(349 72% 44%);
+  --success: hsl(152 70% 25%);
+  --warning: hsl(32 95% 30%);
+  --prose: hsl(224 20% 22%);
+  --prose-reader: hsl(224 22% 16%);
+  --callout: hsl(40 90% 94%);
+  --callout-border: hsl(38 70% 70%);
+  --callout-foreground: hsl(32 80% 24%);
+  --shadow: hsl(224 30% 20% / 0.22);
+  --overlay: hsl(0 0% 0% / 0.92);
+  --on-overlay: hsl(0 0% 100%);
+  --scrim: hsl(224 30% 10% / 0.45);
+  --discord: hsl(235 60% 52%);
+  --discord-hover: hsl(235 55% 44%);
+  --on-discord: hsl(0 0% 100%);
+  --selection: hsl(349 72% 44% / 0.22);
+  --radius: 0.9rem;
+  color-scheme: light;
+}
+
+/* Palette sombre reprise de l’ancien site. */
+.dark {
   --background: hsl(224 18% 8%);
   --foreground: hsl(220 16% 92%);
   --card: hsl(224 16% 11%);
   --card-foreground: hsl(220 16% 92%);
   --popover: hsl(224 16% 11%);
   --popover-foreground: hsl(220 16% 92%);
-  --primary: hsl(349 74% 56%);
-  --primary-dark: hsl(349 74% 46%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: hsl(349 80% 64%);
+  --primary-dark: hsl(349 85% 72%);
+  --primary-foreground: hsl(224 30% 8%);
   --secondary: hsl(224 16% 14%);
   --secondary-foreground: hsl(220 16% 92%);
   --muted: hsl(224 14% 18%);
   --muted-foreground: hsl(220 10% 62%);
-  --accent: hsl(349 40% 18%);
+  --accent: hsl(349 40% 15%);
   --accent-foreground: hsl(349 80% 82%);
   --destructive: hsl(0 72% 62%);
   --border: hsl(224 14% 20%);
   --border-strong: hsl(224 12% 28%);
-  --input: hsl(224 12% 28%);
-  --ring: hsl(349 74% 56%);
+  --input: hsl(224 10% 44%);
+  --ring: hsl(349 80% 64%);
   --success: hsl(152 45% 52%);
   --warning: hsl(38 80% 60%);
-  --radius: 0.9rem;
+  --prose: hsl(220 16% 84%);
+  --prose-reader: hsl(220 16% 88%);
+  --callout: hsl(38 40% 15% / 0.45);
+  --callout-border: hsl(38 80% 60% / 0.25);
+  --callout-foreground: hsl(38 80% 85%);
+  --shadow: hsl(0 0% 0% / 0.5);
+  --overlay: hsl(0 0% 0% / 0.95);
+  --on-overlay: hsl(0 0% 100%);
+  --scrim: hsl(0 0% 0% / 0.5);
+  --discord: hsl(235 60% 52%);
+  --discord-hover: hsl(235 55% 44%);
+  --on-discord: hsl(0 0% 100%);
+  --selection: hsl(349 80% 64% / 0.35);
   color-scheme: dark;
 }
 
@@ -80,7 +146,7 @@
     cursor: pointer;
   }
   ::selection {
-    background: hsl(349 74% 56% / 0.35);
+    background: var(--selection);
   }
 }
 
@@ -88,7 +154,7 @@
   /* Texte Markdown des descriptions */
   .prose-patch {
     line-height: 1.75;
-    color: hsl(220 16% 84%);
+    color: var(--prose);
   }
   .prose-patch > * + * { margin-top: 0.9rem; }
   .prose-patch h1, .prose-patch h2, .prose-patch h3 {
@@ -101,7 +167,7 @@
   .prose-patch h1 { font-size: 1.5rem; }
   .prose-patch h2 { font-size: 1.25rem; }
   .prose-patch h3 { font-size: 1.1rem; }
-  .prose-patch a { color: var(--primary); font-weight: 600; text-decoration: underline; text-decoration-color: hsl(349 74% 56% / 0.4); text-underline-offset: 3px; }
+  .prose-patch a { color: var(--primary); font-weight: 600; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent); text-underline-offset: 3px; }
   .prose-patch a:hover { text-decoration-color: var(--primary); }
   .prose-patch ul { list-style: disc; padding-left: 1.3rem; }
   .prose-patch ol { list-style: decimal; padding-left: 1.4rem; }
@@ -110,10 +176,10 @@
   .prose-patch li + li { margin-top: 0.35rem; }
   .prose-patch blockquote {
     padding: 0.75rem 1rem;
-    border: 1px solid hsl(38 80% 60% / 0.25);
+    border: 1px solid var(--callout-border);
     border-radius: var(--radius);
-    background: hsl(38 40% 15% / 0.45);
-    color: hsl(38 80% 85%);
+    background: var(--callout);
+    color: var(--callout-foreground);
   }
   .prose-patch code { padding: 0.1rem 0.4rem; border-radius: 0.35rem; background: var(--muted); font-size: 0.88em; }
   .prose-patch pre { overflow-x: auto; padding: 1rem; border-radius: var(--radius); background: var(--muted); }
@@ -128,13 +194,13 @@
   .prose-reader {
     font-size: 1.15rem;
     line-height: 1.85;
-    color: hsl(220 16% 88%);
+    color: var(--prose-reader);
   }
   .prose-reader > * + * { margin-top: 1.1rem; }
   .prose-reader h2 { margin-top: 3rem; font-size: 1.5rem; text-align: center; }
   .prose-reader h3 { margin-top: 2.2rem; font-size: 1.2rem; }
   .prose-reader p:has(> img:only-child) { margin-block: 2rem; }
-  .prose-reader img { display: block; margin-inline: auto; max-height: 85vh; width: auto; box-shadow: 0 18px 40px rgb(0 0 0 / 0.45); }
+  .prose-reader img { display: block; margin-inline: auto; max-height: 85vh; width: auto; box-shadow: 0 18px 40px var(--shadow); }
   /* Séparation de scène */
   .prose-reader hr { margin-block: 2.5rem; border: 0; text-align: center; }
   .prose-reader hr::after { content: "* * *"; color: var(--primary); letter-spacing: 0.6em; }

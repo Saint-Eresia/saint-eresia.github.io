@@ -168,11 +168,11 @@ function SortableShot({ image, index }: { image: ManagedImage; index: number }) 
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn("space-y-2 rounded-xl border border-border bg-background/60 p-2", isDragging && "z-10 border-primary shadow-[0_18px_40px_rgb(0_0_0/0.5)]")}
+      className={cn("space-y-2 rounded-xl border border-border bg-background/60 p-2", isDragging && "z-10 border-primary shadow-[0_18px_40px_var(--shadow)]")}
     >
       <div className="relative">
         <img src={image.src} alt={image.alt} className="aspect-video w-full rounded-lg object-cover" />
-        <span className="absolute top-1.5 left-1.5 rounded-full bg-black/70 px-2 text-xs font-bold text-white/85 tabular-nums">
+        <span className="absolute top-1.5 left-1.5 rounded-full bg-overlay/70 px-2 text-xs font-bold text-on-overlay/85 tabular-nums">
           {index + 1}
         </span>
         <button
@@ -181,7 +181,7 @@ function SortableShot({ image, index }: { image: ManagedImage; index: number }) 
           {...attributes}
           {...listeners}
           aria-label={`Déplacer la capture ${index + 1}`}
-          className="absolute top-1.5 right-1.5 grid size-8 cursor-grab place-items-center rounded-full bg-black/70 text-white/85 hover:bg-black/90 hover:text-white focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none active:cursor-grabbing"
+          className="absolute top-1.5 right-1.5 grid size-8 cursor-grab place-items-center rounded-full bg-overlay/70 text-on-overlay/85 hover:bg-overlay hover:text-on-overlay focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none active:cursor-grabbing"
         >
           <GripVertical className="size-4" />
         </button>

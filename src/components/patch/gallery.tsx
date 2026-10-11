@@ -22,7 +22,7 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
               type="button"
               onClick={() => setIndex(i)}
               aria-label={`Agrandir : ${image.alt}`}
-              className="group block aspect-video w-full overflow-hidden rounded-xl border border-border bg-black transition-[border-color] hover:border-primary/60 focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
+              className="group block aspect-video w-full overflow-hidden rounded-xl border border-border bg-overlay transition-[border-color] hover:border-primary/60 focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
             >
               <img
                 src={image.src}
@@ -39,7 +39,7 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
 
       <DialogPrimitive.Root open={index !== null} onOpenChange={(open) => !open && setIndex(null)}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/95 data-open:animate-in data-open:fade-in-0" />
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-overlay data-open:animate-in data-open:fade-in-0" />
           <DialogPrimitive.Content
             className="fixed inset-0 z-50 flex flex-col outline-none data-open:animate-in data-open:fade-in-0"
             onKeyDown={(event) => {
@@ -70,8 +70,8 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
                     </>
                   )}
                 </div>
-                <div className="flex items-center justify-center gap-3 px-4 pt-2 pb-6 text-sm text-white/70">
-                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-semibold tabular-nums text-white">
+                <div className="flex items-center justify-center gap-3 px-4 pt-2 pb-6 text-sm text-on-overlay/70">
+                  <span className="rounded-full bg-on-overlay/10 px-2.5 py-0.5 font-semibold tabular-nums text-on-overlay">
                     {index! + 1} / {count}
                   </span>
                   <DialogPrimitive.Description>{current.alt || "Capture d’écran"}</DialogPrimitive.Description>
@@ -79,7 +79,7 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
               </>
             )}
             <DialogPrimitive.Close
-              className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white/85 transition-colors hover:bg-white/20 hover:text-white focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
+              className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full bg-on-overlay/10 px-4 py-2 text-sm font-semibold text-on-overlay/85 transition-colors hover:bg-on-overlay/20 hover:text-on-overlay focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
             >
               <X className="size-4" /> Fermer
             </DialogPrimitive.Close>
@@ -106,7 +106,7 @@ function NavButton({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`absolute top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white/85 transition-colors hover:bg-white/20 hover:text-white focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none ${className}`}
+      className={`absolute top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-on-overlay/10 text-on-overlay/85 transition-colors hover:bg-on-overlay/20 hover:text-on-overlay focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none ${className}`}
     >
       {children}
     </button>

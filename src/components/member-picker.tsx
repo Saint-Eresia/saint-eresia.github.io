@@ -60,7 +60,7 @@ export function MemberPicker({
                   aria-hidden
                   className={cn(
                     "grid size-5 shrink-0 place-items-center rounded-md border",
-                    checked ? "border-primary bg-primary text-white" : "border-border",
+                    checked ? "border-primary bg-primary text-primary-foreground" : "border-border",
                   )}
                 >
                   {checked && <Check className="size-3.5" />}
