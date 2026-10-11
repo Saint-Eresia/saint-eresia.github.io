@@ -21,7 +21,10 @@ export default function TeamPage() {
   return (
     <>
       <PageIntro eyebrow="Équipe" title="Les membres de Saint Eresia">
-        Traducteurs, développeurs et testeurs : les personnes derrière les novels et les patchs.
+        Traducteurs, développeurs et testeurs : les personnes derrière les novels et les patchs.{" "}
+        <Link href="/a-propos" className="font-semibold text-primary hover:underline">
+          Notre histoire et nos conventions
+        </Link>
       </PageIntro>
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
