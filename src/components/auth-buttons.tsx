@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -31,13 +32,16 @@ export function LogoutButton({ className }: { className?: string }) {
     <button
       type="button"
       className={className}
+      title="Déconnexion"
       onClick={async () => {
         await authClient.signOut();
         router.push("/");
         router.refresh();
       }}
     >
-      Déconnexion
+      {/* Sur petit écran, seule l’icône est affichée pour que l’en-tête tienne en largeur. */}
+      <LogOut className="size-4 sm:hidden" aria-hidden />
+      <span className="max-sm:sr-only">Déconnexion</span>
     </button>
   );
 }

@@ -1,4 +1,4 @@
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Newspaper, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -6,6 +6,7 @@ import { CoverPlaceholder, ProgressBar, StatusBadge } from "@/components/content
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { MemberAvatar } from "@/components/member-avatar";
+import { listNews, newsDate } from "@/lib/news";
 import { listNovels } from "@/lib/novels";
 import { formatDate, imageUrl, listPatches } from "@/lib/patches";
 import { listTeam } from "@/lib/team";
@@ -18,6 +19,7 @@ export default function ManagePage() {
       <TeamGate>
         <p className="text-xs font-extrabold tracking-[0.14em] text-primary uppercase">Espace équipe</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Gestion du contenu</h1>
+        <NewsList />
         <NovelList />
         <PatchList />
         <TeamList />
@@ -67,6 +69,41 @@ const listClass = "divide-y divide-border overflow-hidden rounded-2xl border bor
 const empty = (text: string) => (
   <p className="rounded-2xl border border-dashed border-border-strong p-8 text-center text-muted-foreground">{text}</p>
 );
+
+async function NewsList() {
+  const news = await listNews({ publishedOnly: false });
+  return (
+    <Section title="Actualités" newHref="/gestion/actualites/nouveau" newLabel="Nouvelle actualité">
+      {news.length === 0 ? (
+        empty("Aucune actualité pour l’instant.")
+      ) : (
+        <ul className={listClass}>
+          {news.map((item) => (
+            <li key={item.id}>
+              <Link
+                href={`/gestion/actualites/${item.id}`}
+                className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
+              >
+                <span className="grid size-12 shrink-0 place-items-center rounded-lg border border-border bg-secondary text-muted-foreground">
+                  <Newspaper className="size-5" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold group-hover:text-primary">{item.title}</p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                    {formatDate(newsDate(item))}
+                    {item.author && ` · ${item.author}`}
+                  </p>
+                </div>
+                <StatusBadge status={item.published ? "Publiée" : "Brouillon"} className="hidden sm:inline-flex" />
+                <ChevronRight className="size-5 text-muted-foreground group-hover:text-primary" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
 
 async function NovelList() {
   const novels = await listNovels();

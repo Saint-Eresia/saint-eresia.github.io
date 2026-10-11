@@ -112,6 +112,20 @@ const SCHEMA = `
     role TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (patchId, memberId)
   );
+  -- Actualités de la page d’accueil. content : Markdown. publishedAt : date de la première publication.
+  CREATE TABLE IF NOT EXISTS news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    author TEXT NOT NULL DEFAULT '',
+    published INTEGER NOT NULL DEFAULT 0,
+    publishedAt TEXT,
+    createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+    updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS news_published ON news (published, publishedAt);
+
   CREATE TABLE IF NOT EXISTS novel_member (
     novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
     memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,

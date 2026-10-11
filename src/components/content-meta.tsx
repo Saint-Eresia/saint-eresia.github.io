@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 
 const TONES: Record<string, string> = {
   Terminé: "bg-success/15 text-success",
+  Publiée: "bg-success/15 text-success",
+  Brouillon: "bg-muted text-muted-foreground",
   Stable: "bg-success/15 text-success",
   Obsolète: "bg-muted text-muted-foreground",
   Abandonné: "bg-muted text-muted-foreground",

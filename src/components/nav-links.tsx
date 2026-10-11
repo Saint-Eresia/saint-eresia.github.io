@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Gamepad2, House, Settings2, Users } from "lucide-react";
+import { BookOpen, Gamepad2, House, Newspaper, Settings2, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "Accueil", icon: House, match: (path: string) => path === "/" },
+  { href: "/actualites", label: "Actualités", icon: Newspaper, match: (path: string) => path.startsWith("/actualites") },
   { href: "/novels", label: "Novels", icon: BookOpen, match: (path: string) => path.startsWith("/novels") },
   { href: "/patchs", label: "Patchs VN", icon: Gamepad2, match: (path: string) => path.startsWith("/patchs") },
   { href: "/equipe", label: "Équipe", icon: Users, match: (path: string) => path.startsWith("/equipe") },
@@ -40,9 +41,9 @@ function Links({ showTeam, pathname }: { showTeam: boolean; pathname: string | n
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative flex items-center gap-2 rounded-full px-2.5 py-2 text-sm font-semibold transition-colors lg:px-3.5",
+              "relative flex shrink-0 items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold transition-colors sm:px-2.5 lg:px-3.5",
               active
-                ? "bg-accent text-primary after:absolute after:inset-x-2.5 after:bottom-1 after:h-0.5 after:rounded-full after:bg-primary lg:after:inset-x-3.5"
+                ? "bg-accent text-primary after:absolute after:inset-x-2 after:bottom-1 sm:after:inset-x-2.5 after:h-0.5 after:rounded-full after:bg-primary lg:after:inset-x-3.5"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
