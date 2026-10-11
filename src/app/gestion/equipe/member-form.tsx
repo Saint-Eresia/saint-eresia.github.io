@@ -18,13 +18,16 @@ type MemberFields = {
   position: number;
 };
 
-export function MemberForm({ member }: { member: MemberFields }) {
+type PatchRole = { patchId: number; title: string; role: string };
+
+export function MemberForm({ member, patchRoles = [] }: { member: MemberFields; patchRoles?: PatchRole[] }) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(saveMember, {});
   const [name, setName] = useState(member.name);
   const [roles, setRoles] = useState(member.roles.join("\n"));
   const [projects, setProjects] = useState(member.projects.join("\n"));
   const [position, setPosition] = useState(String(member.position));
   const [links, setLinks] = useState(member.links);
+  const [vnRoles, setVnRoles] = useState(() => Object.fromEntries(patchRoles.map((vn) => [vn.patchId, vn.role])));
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
@@ -74,6 +77,36 @@ export function MemberForm({ member }: { member: MemberFields }) {
           <p className="text-xs text-muted-foreground">Un projet par ligne.</p>
         </div>
       </div>
+
+      {member.id && (
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium">Rôles par VN</legend>
+          {patchRoles.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {patchRoles.map((vn) => (
+                <div key={vn.patchId} className="space-y-1.5">
+                  <Label htmlFor={`patchRole_${vn.patchId}`} className="text-xs text-muted-foreground">
+                    {vn.title}
+                  </Label>
+                  <Input
+                    id={`patchRole_${vn.patchId}`}
+                    name={`patchRole_${vn.patchId}`}
+                    maxLength={80}
+                    placeholder={roles.split("\n")[0].trim() || "Traduction"}
+                    value={vnRoles[vn.patchId] ?? ""}
+                    onChange={(e) => setVnRoles((current) => ({ ...current, [vn.patchId]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <p className="text-xs text-muted-foreground">
+            {patchRoles.length > 0
+              ? "Affiché sous le nom sur la fiche du VN. Vide : le premier rôle ci-dessus."
+              : "Ce membre ne participe à aucun VN. Cochez-le dans la section « Équipe du projet » d’un patch."}
+          </p>
+        </fieldset>
+      )}
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Liens (facultatifs)</legend>

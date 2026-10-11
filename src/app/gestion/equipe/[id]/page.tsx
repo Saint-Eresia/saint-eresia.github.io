@@ -8,7 +8,7 @@ import { ManageHeader, panel } from "@/components/manage-header";
 import { MemberAvatar } from "@/components/member-avatar";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
-import { getMember } from "@/lib/team";
+import { getMember, listMemberPatchRoles } from "@/lib/team";
 import { DeleteMemberButton } from "../delete-member-button";
 import { MemberForm } from "../member-form";
 
@@ -29,6 +29,7 @@ export default function EditMemberPage({ params, searchParams }: Props) {
 async function EditMember({ params, searchParams }: Pick<Props, "params" | "searchParams">) {
   const member = await getMember(Number((await params).id));
   if (!member) notFound();
+  const patchRoles = await listMemberPatchRoles(member.id);
   const created = (await searchParams).cree === "1";
 
   return (
@@ -47,7 +48,7 @@ async function EditMember({ params, searchParams }: Pick<Props, "params" | "sear
       />
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className={panel} aria-label="Informations du membre">
-          <MemberForm member={member} />
+          <MemberForm member={member} patchRoles={patchRoles} />
         </section>
         <section className={`${panel} space-y-4 self-start`}>
           <h2 className="text-lg font-extrabold">Avatar</h2>

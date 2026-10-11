@@ -41,6 +41,21 @@ export async function saveMember(_prev: ActionResult, formData: FormData): Promi
     .prepare("UPDATE team_member SET name = ?, roles = ?, projects = ?, links = ?, position = ? WHERE id = ?")
     .run(...values, id);
   if (!changes) return { error: "Membre introuvable." };
+
+  // Section « Rôles par VN » : seuls les patchs auxquels le membre participe déjà sont mis à jour.
+  const patchRoles = [...formData.entries()].flatMap(([key, value]) => {
+    const match = /^patchRole_(\d+)$/.exec(key);
+    return match ? [{ patchId: Number(match[1]), role: String(value).trim() }] : [];
+  });
+  if (patchRoles.some((vn) => vn.role.length > 80)) return { error: "Un rôle par VN ne doit pas dépasser 80 caractères." };
+  if (patchRoles.length) {
+    await db.batch(
+      patchRoles.map((vn) => ({
+        sql: "UPDATE patch_member SET role = ? WHERE patchId = ? AND memberId = ?",
+        args: [vn.role, vn.patchId, id],
+      })),
+    );
+  }
   refresh();
   return { savedAt: Date.now() };
 }

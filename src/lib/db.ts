@@ -105,9 +105,11 @@ const SCHEMA = `
   );
 
   -- Membres de l’équipe ayant participé à un patch ou à un novel (affichés sur la fiche).
+  -- role : rôle du membre sur ce VN ; vide, la fiche affiche son premier rôle de la page Équipe.
   CREATE TABLE IF NOT EXISTS patch_member (
     patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
     memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (patchId, memberId)
   );
   CREATE TABLE IF NOT EXISTS novel_member (
@@ -196,6 +198,10 @@ export async function prepareSchema(client: Client) {
   const columns = (await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[];
   if (!columns.some((column) => column.name === "progressSteps")) {
     await client.execute("ALTER TABLE patch ADD COLUMN progressSteps TEXT NOT NULL DEFAULT '[]'");
+  }
+  const memberColumns = (await client.execute("PRAGMA table_info(patch_member)")).rows as unknown as { name: string }[];
+  if (!memberColumns.some((column) => column.name === "role")) {
+    await client.execute("ALTER TABLE patch_member ADD COLUMN role TEXT NOT NULL DEFAULT ''");
   }
   for (const spec of IMAGE_TABLES) {
     if (await allowBackground(client, spec)) console.log(`✓ ${spec.table} : arrière-plan autorisé`);

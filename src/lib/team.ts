@@ -29,28 +29,36 @@ export async function listTeam() {
 
 // Participants d’un patch ou d’un novel, dans l’ordre de la page Équipe.
 export type ProjectType = "patch" | "novel";
+// role : rôle propre au projet (seuls les patchs en ont un).
 const PROJECT_LINKS = {
-  patch: { table: "patch_member", column: "patchId" },
-  novel: { table: "novel_member", column: "novelId" },
+  patch: { table: "patch_member", column: "patchId", role: "l.role" },
+  novel: { table: "novel_member", column: "novelId", role: "''" },
 } as const;
 
-export async function listProjectMembers(type: ProjectType, id: number) {
+export type ProjectMember = TeamMember & { projectRole: string };
+
+export async function listProjectMembers(type: ProjectType, id: number): Promise<ProjectMember[]> {
   await connection();
-  const { table, column } = PROJECT_LINKS[type];
+  const { table, column, role } = PROJECT_LINKS[type];
   const rows = await db
-    .prepare(`SELECT m.* FROM team_member m JOIN ${table} l ON l.memberId = m.id WHERE l.${column} = ? ORDER BY m.position, m.id`)
-    .all<Row>(id);
-  return rows.map(parse);
+    .prepare(
+      `SELECT m.*, ${role} AS projectRole FROM team_member m JOIN ${table} l ON l.memberId = m.id WHERE l.${column} = ? ORDER BY m.position, m.id`,
+    )
+    .all<Row & { projectRole: string }>(id);
+  return rows.map((row) => ({ ...parse(row), projectRole: String(row.projectRole) }));
 }
 
-export async function listProjectMemberIds(type: ProjectType, id: number) {
+export async function listProjectLinks(type: ProjectType, id: number) {
   await connection();
-  const { table, column } = PROJECT_LINKS[type];
-  const rows = await db.prepare(`SELECT memberId FROM ${table} WHERE ${column} = ?`).all<{ memberId: number }>(id);
-  return rows.map((row) => Number(row.memberId));
+  const { table, column, role } = PROJECT_LINKS[type];
+  const rows = await db
+    .prepare(`SELECT l.memberId, ${role} AS role FROM ${table} l WHERE l.${column} = ?`)
+    .all<{ memberId: number; role: string }>(id);
+  return rows.map((row) => ({ memberId: Number(row.memberId), role: String(row.role) }));
 }
 
 // Remplace la liste des participants (identifiants inconnus ignorés), en une seule transaction.
+// Les membres déjà présents restent en place, avec leur rôle sur le projet.
 export async function setProjectMembers(type: ProjectType, id: number, memberIds: number[]) {
   const { table, column } = PROJECT_LINKS[type];
   const known = new Set(
@@ -58,9 +66,21 @@ export async function setProjectMembers(type: ProjectType, id: number, memberIds
   );
   const ids = [...new Set(memberIds)].filter((memberId) => known.has(memberId));
   await db.batch([
-    { sql: `DELETE FROM ${table} WHERE ${column} = ?`, args: [id] },
-    ...ids.map((memberId) => ({ sql: `INSERT INTO ${table} (${column}, memberId) VALUES (?, ?)`, args: [id, memberId] })),
+    {
+      sql: `DELETE FROM ${table} WHERE ${column} = ? AND memberId NOT IN (${ids.map(() => "?").join(", ")})`,
+      args: [id, ...ids],
+    },
+    ...ids.map((memberId) => ({ sql: `INSERT OR IGNORE INTO ${table} (${column}, memberId) VALUES (?, ?)`, args: [id, memberId] })),
   ]);
+}
+
+// Section « Rôles par VN » de la fiche d’un membre : les patchs auxquels il participe.
+export async function listMemberPatchRoles(memberId: number) {
+  await connection();
+  const rows = await db
+    .prepare("SELECT p.id, p.title, l.role FROM patch_member l JOIN patch p ON p.id = l.patchId WHERE l.memberId = ? ORDER BY p.title")
+    .all<{ id: number; title: string; role: string }>(memberId);
+  return rows.map((row) => ({ patchId: Number(row.id), title: String(row.title), role: String(row.role) }));
 }
 
 export async function getMember(id: number) {

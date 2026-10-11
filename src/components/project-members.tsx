@@ -2,10 +2,10 @@ import Link from "next/link";
 import { MemberAvatar } from "@/components/member-avatar";
 import { cn } from "@/lib/utils";
 
-type Member = { id: number; name: string; avatarFile: string; roles: string[] };
+type Member = { id: number; name: string; avatarFile: string; roles: string[]; projectRole?: string };
 
 // Carte « Équipe » d’une fiche : les membres qui ont participé au patch ou au novel.
-// Chaque membre renvoie vers sa présentation sur la page Équipe.
+// Sous le nom : son rôle sur ce projet, sinon son premier rôle. Chaque membre renvoie vers sa présentation sur la page Équipe.
 export function ProjectMembers({ members, className }: { members: Member[]; className?: string }) {
   if (members.length === 0) return null;
   return (
@@ -23,7 +23,9 @@ export function ProjectMembers({ members, className }: { members: Member[]; clas
               <MemberAvatar member={member} className="size-10 text-base" />
               <span className="min-w-0">
                 <span className="block truncate font-bold">{member.name}</span>
-                {member.roles[0] && <span className="block truncate text-xs text-muted-foreground">{member.roles[0]}</span>}
+                {(member.projectRole || member.roles[0]) && (
+                  <span className="block truncate text-xs text-muted-foreground">{member.projectRole || member.roles[0]}</span>
+                )}
               </span>
             </Link>
           </li>
