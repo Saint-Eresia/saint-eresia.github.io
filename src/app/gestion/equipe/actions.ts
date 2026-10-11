@@ -50,7 +50,12 @@ export async function deleteMember(id: number): Promise<ActionResult> {
   if (denied) return denied;
   const member = await db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get(id) as { avatarFile: string } | undefined;
   if (!member) return { error: "Membre introuvable." };
-  await db.prepare("DELETE FROM team_member WHERE id = ?").run(id);
+  // Le membre disparaît aussi des fiches où il était indiqué comme participant.
+  await db.batch([
+    { sql: "DELETE FROM patch_member WHERE memberId = ?", args: [id] },
+    { sql: "DELETE FROM novel_member WHERE memberId = ?", args: [id] },
+    { sql: "DELETE FROM team_member WHERE id = ?", args: [id] },
+  ]);
   await removeFile(member.avatarFile);
   redirect("/gestion");
 }

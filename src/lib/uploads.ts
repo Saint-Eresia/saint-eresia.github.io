@@ -9,8 +9,10 @@ import { db, UPLOAD_DIR } from "@/lib/db";
 export { fileUrl } from "@/lib/file-url";
 
 export const FILE_PATTERN = /^[0-9a-f-]{36}\.webp$/;
-const MAX_WIDTH = { cover: 1600, screenshot: 2560, illustration: 2000 } as const;
+const MAX_WIDTH = { cover: 1600, screenshot: 2560, illustration: 2000, background: 2560 } as const;
 export type ImageKind = keyof typeof MAX_WIDTH;
+// Types d’image uniques par propriétaire : la nouvelle remplace l’ancienne.
+export const SINGLE_KINDS: readonly ImageKind[] = ["cover", "background"];
 
 // Taille maximale d’un envoi. Sur Vercel, le corps d’une requête est limité à 4,5 Mo.
 export const MAX_UPLOAD_MB = process.env.VERCEL ? 4 : 25;
@@ -53,10 +55,10 @@ export async function saveImage(owner: ImageOwner, kind: ImageKind, input: Buffe
 
   const file = await storeFile(data);
 
-  // Une seule couverture : la nouvelle remplace l’ancienne.
-  if (kind === "cover") {
-    const old = await db.prepare(`SELECT file FROM ${table} WHERE ${column} = ? AND kind = 'cover'`).all<{ file: string }>(owner.id);
-    await db.prepare(`DELETE FROM ${table} WHERE ${column} = ? AND kind = 'cover'`).run(owner.id);
+  // Une seule couverture et un seul arrière-plan : la nouvelle image remplace l’ancienne.
+  if (SINGLE_KINDS.includes(kind)) {
+    const old = await db.prepare(`SELECT file FROM ${table} WHERE ${column} = ? AND kind = ?`).all<{ file: string }>(owner.id, kind);
+    await db.prepare(`DELETE FROM ${table} WHERE ${column} = ? AND kind = ?`).run(owner.id, kind);
     await Promise.all(old.map((image) => removeFile(image.file)));
   }
   const { next } = (await db

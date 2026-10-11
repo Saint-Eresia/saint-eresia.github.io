@@ -35,7 +35,7 @@ async function Members() {
   return (
     <div className="grid gap-5 sm:grid-cols-2">
       {team.map((member) => (
-        <article key={member.id} className="rounded-2xl border border-border bg-card p-6">
+        <article key={member.id} id={`membre-${member.id}`} className="scroll-mt-24 rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center gap-4">
             <MemberAvatar member={member} className="size-16 text-2xl" />
             <div className="min-w-0 flex-1">

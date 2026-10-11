@@ -4,10 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CoverPlaceholder, StatusBadge } from "@/components/content-meta";
+import { HeroBackdrop } from "@/components/hero-backdrop";
 import { Markdown } from "@/components/markdown";
+import { projectLayout } from "@/components/project-layout";
+import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
 import { chapterHeading, getNovelBySlug, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
 import { formatDate, imageUrl } from "@/lib/patches";
+import { listProjectMembers } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
@@ -34,19 +38,17 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Illustrateur", novel.artist],
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
+  const members = await listProjectMembers("novel", novel.id);
+  const layout = projectLayout(members.length > 0);
 
   return (
     <article>
       <header className="relative isolate overflow-hidden border-b border-border">
-        {novel.cover && (
-          <img
-            src={imageUrl(novel.cover)}
-            alt=""
-            className="absolute inset-0 -z-20 h-full w-full scale-110 object-cover opacity-30 blur-3xl saturate-150"
-          />
-        )}
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 to-background" />
-        <div className="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6">
+        <HeroBackdrop
+          background={novel.background && imageUrl(novel.background)}
+          cover={novel.cover && imageUrl(novel.cover)}
+        />
+        <div className={layout.hero}>
           <Link
             href="/novels"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
@@ -78,9 +80,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <aside className="lg:order-last">
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-6 lg:sticky lg:top-24">
+      <div className={layout.body}>
+        <aside className="space-y-6 lg:order-2">
+          <div className={`space-y-5 rounded-2xl border border-border bg-card p-6 ${layout.sticky}`}>
             {first ? (
               <Button asChild size="pill" className="w-full">
                 <Link href={`/novels/${novel.slug}/${first.slug}`}>
@@ -104,9 +106,16 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               <EditLink id={novel.id} />
             </Suspense>
           </div>
+          <ProjectMembers members={members} className="2xl:hidden" />
         </aside>
 
-        <div className="min-w-0 space-y-12">
+        {members.length > 0 && (
+          <aside className="hidden 2xl:order-3 2xl:block">
+            <ProjectMembers members={members} className="sticky top-24" />
+          </aside>
+        )}
+
+        <div className="min-w-0 space-y-12 lg:order-1">
           {novel.synopsis && (
             <section>
               <h2 className="sr-only">Présentation</h2>

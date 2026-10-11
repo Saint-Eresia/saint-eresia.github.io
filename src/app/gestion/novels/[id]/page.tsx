@@ -5,10 +5,13 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Dropzone } from "@/components/dropzone";
 import { ManageHeader, panel } from "@/components/manage-header";
+import { ProjectMembersEditor } from "@/components/project-members-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { chapterHeading, getNovelById, NOVEL_STATUSES } from "@/lib/novels";
 import { imageUrl } from "@/lib/patches";
+import { saveNovelMembers } from "../actions";
+import { DeleteBackgroundButton } from "../delete-background-button";
 import { DeleteNovelButton } from "../delete-novel-button";
 import { NovelForm } from "../novel-form";
 import { VolumeManager } from "../volume-manager";
@@ -62,20 +65,47 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
             }}
           />
         </section>
-        <section className={`${panel} space-y-3 self-start`}>
-          <h2 className="text-lg font-extrabold">Couverture</h2>
-          {novel.cover && (
-            <img
-              src={imageUrl(novel.cover)}
-              alt={novel.cover.alt}
-              className="aspect-[3/4] w-40 rounded-lg border border-border object-cover"
+        <section className={`${panel} space-y-10 self-start`} aria-label="Images du novel">
+          <div className="space-y-3">
+            <h2 className="text-lg font-extrabold">Couverture</h2>
+            {novel.cover && (
+              <img
+                src={imageUrl(novel.cover)}
+                alt={novel.cover.alt}
+                className="aspect-[3/4] w-40 rounded-lg border border-border object-cover"
+              />
+            )}
+            <Dropzone
+              endpoint={`/api/novels/${novel.id}/images`}
+              kind="cover"
+              label={novel.cover ? "Remplacer la couverture" : "Ajouter une couverture"}
             />
-          )}
-          <Dropzone
-            endpoint={`/api/novels/${novel.id}/images`}
-            kind="cover"
-            label={novel.cover ? "Remplacer la couverture" : "Ajouter une couverture"}
-          />
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-extrabold">Arrière-plan</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Image large affichée derrière le titre de la fiche (une illustration en paysage). Sans arrière-plan, la
+                couverture floutée est utilisée.
+              </p>
+            </div>
+            {novel.background && (
+              <div className="space-y-2">
+                <img
+                  src={imageUrl(novel.background)}
+                  alt={novel.background.alt}
+                  className="aspect-[16/6] w-full rounded-lg border border-border object-cover"
+                />
+                <DeleteBackgroundButton novelId={novel.id} />
+              </div>
+            )}
+            <Dropzone
+              endpoint={`/api/novels/${novel.id}/images`}
+              kind="background"
+              label={novel.background ? "Remplacer l’arrière-plan" : "Ajouter un arrière-plan"}
+            />
+          </div>
         </section>
       </div>
 
@@ -91,6 +121,8 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
           }))}
         />
       </section>
+
+      <ProjectMembersEditor type="novel" id={novel.id} save={saveNovelMembers.bind(null, novel.id)} />
 
       <section className="mt-10 rounded-2xl border border-destructive/30 p-6">
         <h2 className="text-lg font-extrabold text-destructive">Zone de danger</h2>

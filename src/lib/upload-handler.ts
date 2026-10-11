@@ -1,5 +1,5 @@
 import "server-only";
-import { fileUrl, MAX_UPLOAD_MB, saveImage, type ImageKind, type ImageOwner } from "@/lib/uploads";
+import { fileUrl, MAX_UPLOAD_MB, saveImage, SINGLE_KINDS, type ImageKind, type ImageOwner } from "@/lib/uploads";
 import { getViewer } from "@/lib/viewer";
 
 const MAX_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
@@ -28,7 +28,7 @@ export async function handleImageUpload(
   if (!kinds.includes(kind)) return Response.json({ error: "Type d’image invalide." }, { status: 400 });
   const files = form.getAll("files").filter((entry): entry is File => entry instanceof File);
   if (files.length === 0) return Response.json({ error: "Aucun fichier reçu." }, { status: 400 });
-  if (kind === "cover" && files.length > 1) return Response.json({ error: "Une seule image de couverture." }, { status: 400 });
+  if (SINGLE_KINDS.includes(kind) && files.length > 1) return Response.json({ error: "Envoyez une seule image." }, { status: 400 });
 
   const errors: string[] = [];
   const images: { url: string; alt: string }[] = [];

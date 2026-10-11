@@ -5,7 +5,7 @@ import { slugify } from "@/lib/patches";
 
 export const NOVEL_STATUSES = ["En cours", "Terminé", "En pause", "Abandonné", "Licencié"] as const;
 
-export type NovelImage = { id: number; novelId: number; kind: "cover" | "illustration"; file: string; alt: string; width: number; height: number };
+export type NovelImage = { id: number; novelId: number; kind: "cover" | "illustration" | "background"; file: string; alt: string; width: number; height: number };
 export type Novel = {
   id: number;
   slug: string;
@@ -45,8 +45,11 @@ export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
 export const volumeHeading = (volume: Pick<Volume, "number" | "title">) =>
   volume.title ? `Tome ${volume.number} — ${volume.title}` : `Tome ${volume.number}`;
 
-const coverOf = async (novelId: number) =>
-  (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = 'cover'").get<NovelImage>(novelId)) ?? null;
+const imageOf = async (novelId: number, kind: "cover" | "background") =>
+  (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = ?").get<NovelImage>(novelId, kind)) ?? null;
+const coverOf = (novelId: number) => imageOf(novelId, "cover");
+// Image large affichée derrière l’en-tête de la fiche ; à défaut, la couverture floutée.
+const backgroundOf = (novelId: number) => imageOf(novelId, "background");
 
 async function volumesOf(novelId: number, publishedOnly: boolean): Promise<VolumeWithChapters[]> {
   const volumes = await db.prepare("SELECT * FROM volume WHERE novelId = ? ORDER BY number").all<Volume>(novelId);
@@ -78,7 +81,12 @@ export async function getNovelBySlug(slug: string) {
   await connection();
   const novel = await db.prepare("SELECT * FROM novel WHERE slug = ?").get<Novel>(slug);
   if (!novel) return null;
-  return { ...novel, cover: await coverOf(novel.id), volumes: await volumesOf(novel.id, true) };
+  return {
+    ...novel,
+    cover: await coverOf(novel.id),
+    background: await backgroundOf(novel.id),
+    volumes: await volumesOf(novel.id, true),
+  };
 }
 
 // Gestion : tous les chapitres, brouillons compris.
@@ -86,7 +94,12 @@ export async function getNovelById(id: number) {
   await connection();
   const novel = await db.prepare("SELECT * FROM novel WHERE id = ?").get<Novel>(id);
   if (!novel) return null;
-  return { ...novel, cover: await coverOf(novel.id), volumes: await volumesOf(novel.id, false) };
+  return {
+    ...novel,
+    cover: await coverOf(novel.id),
+    background: await backgroundOf(novel.id),
+    volumes: await volumesOf(novel.id, false),
+  };
 }
 
 // Lecture publique d’un chapitre, avec les chapitres publiés voisins.

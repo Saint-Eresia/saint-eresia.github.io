@@ -1,0 +1,11 @@
+# Jamais envoyé par `vercel deploy` (données locales, secrets, builds)
+data
+.env
+.env.*
+!.env.example
+.next
+node_modules
+_legacy_backup
+_reference
+dist
+server

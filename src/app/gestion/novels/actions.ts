@@ -6,6 +6,7 @@ import { guard, isHttpUrl, type ActionResult } from "@/lib/action-guard";
 import { db } from "@/lib/db";
 import { NOVEL_STATUSES, uniqueChapterSlug, type Chapter, type Volume } from "@/lib/novels";
 import { slugify } from "@/lib/patches";
+import { setProjectMembers } from "@/lib/team";
 import { removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
@@ -64,9 +65,33 @@ export async function deleteNovel(novelId: number): Promise<ActionResult> {
   if (denied) return denied;
 
   const images = await db.prepare("SELECT file FROM novel_image WHERE novelId = ?").all<{ file: string }>(novelId);
+  await db.prepare("DELETE FROM novel_member WHERE novelId = ?").run(novelId);
   await db.prepare("DELETE FROM novel WHERE id = ?").run(novelId); // tomes, chapitres et images suivent
   await Promise.all(images.map((image) => removeFile(image.file)));
   redirect("/gestion");
+}
+
+// Membres de l’équipe affichés sur la fiche du novel.
+export async function saveNovelMembers(novelId: number, memberIds: number[]): Promise<ActionResult> {
+  const denied = await guard();
+  if (denied) return denied;
+  if (!(await db.prepare("SELECT 1 FROM novel WHERE id = ?").get(novelId))) return { error: "Novel introuvable." };
+  await setProjectMembers("novel", novelId, memberIds);
+  return await changed(novelId);
+}
+
+// Retire l’arrière-plan : la fiche revient à la couverture floutée. Les illustrations ne sont jamais touchées.
+export async function deleteNovelBackground(novelId: number): Promise<ActionResult> {
+  const denied = await guard();
+  if (denied) return denied;
+
+  const images = await db
+    .prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = 'background'")
+    .all<{ file: string }>(novelId);
+  if (images.length === 0) return { error: "Aucun arrière-plan à supprimer." };
+  await db.prepare("DELETE FROM novel_image WHERE novelId = ? AND kind = 'background'").run(novelId);
+  await Promise.all(images.map((image) => removeFile(image.file)));
+  return await changed(novelId);
 }
 
 // ——— Tomes ———

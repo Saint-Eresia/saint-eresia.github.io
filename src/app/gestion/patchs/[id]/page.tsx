@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ProjectMembersEditor } from "@/components/project-members-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { getPatchById, imageUrl, STATUSES, type PatchImage } from "@/lib/patches";
+import { savePatchMembers } from "../actions";
 import { DeletePatchButton } from "../delete-patch-button";
 import { ImageManager, type ManagedImage } from "../image-manager";
 import { PatchForm } from "../patch-form";
@@ -75,10 +77,13 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
           <ImageManager
             patchId={patch.id}
             cover={patch.cover ? toManaged(patch.cover) : null}
+            background={patch.background ? toManaged(patch.background) : null}
             screenshots={patch.screenshots.map(toManaged)}
           />
         </section>
       </div>
+
+      <ProjectMembersEditor type="patch" id={patch.id} save={savePatchMembers.bind(null, patch.id)} />
 
       <section className="mt-10 rounded-2xl border border-destructive/30 p-6">
         <h2 className="text-lg font-extrabold text-destructive">Zone de danger</h2>

@@ -8,11 +8,11 @@ import { createClient, type InValue } from "@libsql/client";
 import { put } from "@vercel/blob";
 import { getMigrations } from "better-auth/db/migration";
 import { auth } from "../src/lib/auth";
-import { client as target, DATA_DIR, db, UPLOAD_DIR } from "../src/lib/db";
+import { client as target, DATA_DIR, db, prepareSchema, UPLOAD_DIR } from "../src/lib/db";
 
 const FILE_PATTERN = /^[0-9a-f-]{36}\.webp$/;
 // Ordre d’insertion : les tables référencées d’abord.
-const TABLES = ["patch", "patch_image", "novel", "novel_image", "volume", "chapter", "team_member"];
+const TABLES = ["patch", "patch_image", "novel", "novel_image", "volume", "chapter", "team_member", "patch_member", "novel_member"];
 const IMAGE_COLUMNS: [table: string, column: string][] = [
   ["patch_image", "file"],
   ["novel_image", "file"],
@@ -123,7 +123,7 @@ async function main() {
   });
   const source = createClient({ url: `file:${localDb.replace(/\\/g, "/")}` });
 
-  await db.ready();
+  await prepareSchema(target);
   const { runMigrations } = await getMigrations(auth.options);
   await runMigrations();
   console.log("✓ Tables prêtes sur Turso");

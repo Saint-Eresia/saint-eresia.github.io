@@ -36,7 +36,7 @@ const SCHEMA = `
   CREATE TABLE IF NOT EXISTS patch_image (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL CHECK (kind IN ('cover', 'screenshot')),
+    kind TEXT NOT NULL CHECK (kind IN ('cover', 'screenshot', 'background')),
     file TEXT NOT NULL UNIQUE,
     alt TEXT NOT NULL DEFAULT '',
     width INTEGER NOT NULL,
@@ -61,7 +61,7 @@ const SCHEMA = `
   CREATE TABLE IF NOT EXISTS novel_image (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL CHECK (kind IN ('cover', 'illustration')),
+    kind TEXT NOT NULL CHECK (kind IN ('cover', 'illustration', 'background')),
     file TEXT NOT NULL UNIQUE,
     alt TEXT NOT NULL DEFAULT '',
     width INTEGER NOT NULL,
@@ -103,16 +103,102 @@ const SCHEMA = `
     links TEXT NOT NULL DEFAULT '{}',
     position INTEGER NOT NULL DEFAULT 0
   );
+
+  -- Membres de l’équipe ayant participé à un patch ou à un novel (affichés sur la fiche).
+  CREATE TABLE IF NOT EXISTS patch_member (
+    patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
+    memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
+    PRIMARY KEY (patchId, memberId)
+  );
+  CREATE TABLE IF NOT EXISTS novel_member (
+    novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
+    memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
+    PRIMARY KEY (novelId, memberId)
+  );
 `;
 
-async function prepareSchema(client: Client) {
+// Mots d’un texte, sans accents ni ponctuation : « La Mélancolie d’Haruhi » → la, melancolie, d, haruhi.
+const words = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+
+// À la création des tables de participation : on relie chaque membre aux patchs et novels dont le titre
+// contient tous les mots d’un de ses projets (page Équipe). Ex. « Suzumiya Haruhi » → « La Mélancolie d’Haruhi Suzumiya ».
+async function linkMembersFromProjects(client: Client) {
+  const members = (await client.execute("SELECT id, projects FROM team_member")).rows as unknown as { id: number; projects: string }[];
+  const statements: { sql: string; args: number[] }[] = [];
+  for (const [table, link, owner] of [["patch", "patch_member", "patchId"], ["novel", "novel_member", "novelId"]] as const) {
+    const items = (await client.execute(`SELECT id, title FROM ${table}`)).rows as unknown as { id: number; title: string }[];
+    for (const item of items) {
+      const title = new Set(words(item.title));
+      for (const member of members) {
+        const projects = String(member.projects).split("\n").map(words).filter((project) => project.length > 0);
+        if (projects.some((project) => project.every((word) => title.has(word)))) {
+          statements.push({ sql: `INSERT OR IGNORE INTO ${link} (${owner}, memberId) VALUES (?, ?)`, args: [Number(item.id), Number(member.id)] });
+        }
+      }
+    }
+  }
+  if (statements.length) await client.batch(statements, "write");
+  return statements.length;
+}
+
+// Les bases créées avant l’arrière-plan refusent kind = 'background' (contrainte CHECK).
+// SQLite ne sait pas modifier une contrainte : la table d’images est reconstruite, données comprises.
+const IMAGE_TABLES = [
+  { table: "patch_image", owner: "patchId", parent: "patch", kinds: ["cover", "screenshot", "background"], index: "patch_image_patch ON patch_image (patchId, kind, position)" },
+  { table: "novel_image", owner: "novelId", parent: "novel", kinds: ["cover", "illustration", "background"], index: null },
+] as const;
+
+async function allowBackground(client: Client, spec: (typeof IMAGE_TABLES)[number]) {
+  const rs = await client.execute({ sql: "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?", args: [spec.table] });
+  const sql = String(rs.rows[0]?.sql ?? "");
+  if (!sql || sql.includes("'background'")) return false;
+  const columns = `id, ${spec.owner}, kind, file, alt, width, height, position`;
+  await client.batch(
+    [
+      `CREATE TABLE ${spec.table}_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${spec.owner} INTEGER NOT NULL REFERENCES ${spec.parent}(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK (kind IN (${spec.kinds.map((kind) => `'${kind}'`).join(", ")})),
+        file TEXT NOT NULL UNIQUE,
+        alt TEXT NOT NULL DEFAULT '',
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        position INTEGER NOT NULL DEFAULT 0
+      )`,
+      `INSERT INTO ${spec.table}_new (${columns}) SELECT ${columns} FROM ${spec.table}`,
+      `DROP TABLE ${spec.table}`,
+      `ALTER TABLE ${spec.table}_new RENAME TO ${spec.table}`,
+      ...(spec.index ? [`CREATE INDEX IF NOT EXISTS ${spec.index}`] : []),
+    ],
+    "write",
+  );
+  return true;
+}
+
+// Crée les tables du contenu et applique les mises à jour de structure. Appelée à l’ouverture en local,
+// et par `npm run db:migrate` / `db:cloud` pour la base Turso.
+export async function prepareSchema(client: Client) {
   // En local, une seule connexion : les pragmas restent actifs. Turso active déjà les clés étrangères.
   if (!TURSO_URL) await client.executeMultiple("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;");
+  const hadMembers = (await client.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'patch_member'")).rows.length > 0;
   await client.executeMultiple(SCHEMA);
+  if (!hadMembers) {
+    const links = await linkMembersFromProjects(client);
+    if (links) console.log(`✓ Participants : ${links} lien(s) repris des projets de la page Équipe`);
+  }
   // Colonne ajoutée après la création des premières bases.
   const columns = (await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[];
   if (!columns.some((column) => column.name === "progressSteps")) {
     await client.execute("ALTER TABLE patch ADD COLUMN progressSteps TEXT NOT NULL DEFAULT '[]'");
+  }
+  for (const spec of IMAGE_TABLES) {
+    if (await allowBackground(client, spec)) console.log(`✓ ${spec.table} : arrière-plan autorisé`);
   }
 }
 

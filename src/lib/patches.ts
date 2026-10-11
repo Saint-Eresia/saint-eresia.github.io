@@ -9,7 +9,7 @@ export const STATUSES = ["En développement", "Alpha", "Bêta", "Stable", "Termi
 export type PatchImage = {
   id: number;
   patchId: number;
-  kind: "cover" | "screenshot";
+  kind: "cover" | "screenshot" | "background";
   file: string;
   alt: string;
   width: number;
@@ -30,7 +30,13 @@ export type Patch = {
   updatedAt: string;
 };
 
-export type PatchWithImages = Patch & { cover: PatchImage | null; screenshots: PatchImage[]; steps: ProgressStep[] };
+export type PatchWithImages = Patch & {
+  cover: PatchImage | null;
+  // Image large affichée derrière l’en-tête de la fiche ; à défaut, la couverture floutée.
+  background: PatchImage | null;
+  screenshots: PatchImage[];
+  steps: ProgressStep[];
+};
 
 export const imageUrl = (image: Pick<PatchImage, "file">) => fileUrl(image.file);
 
@@ -42,6 +48,7 @@ async function withImages(patch: Patch): Promise<PatchWithImages> {
     ...patch,
     steps: parseSteps(patch.progressSteps),
     cover: images.find((image) => image.kind === "cover") ?? null,
+    background: images.find((image) => image.kind === "background") ?? null,
     screenshots: images.filter((image) => image.kind === "screenshot"),
   };
 }

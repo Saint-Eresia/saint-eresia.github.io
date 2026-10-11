@@ -30,10 +30,12 @@ function report(result: ActionResult, success: string) {
 export function ImageManager({
   patchId,
   cover,
+  background,
   screenshots,
 }: {
   patchId: number;
   cover: ManagedImage | null;
+  background: ManagedImage | null;
   screenshots: ManagedImage[];
 }) {
   return (
@@ -50,6 +52,31 @@ export function ImageManager({
           </div>
         )}
         <Dropzone endpoint={`/api/patches/${patchId}/images`} kind="cover" label={cover ? "Remplacer la couverture" : "Ajouter une couverture"} />
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h3 className="text-lg font-extrabold">Arrière-plan</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Image large affichée derrière le titre de la fiche (une capture ou un artwork en paysage). Sans arrière-plan,
+            la couverture floutée est utilisée.
+          </p>
+        </div>
+        {background && (
+          <div className="space-y-2">
+            <img
+              src={background.src}
+              alt={background.alt}
+              className="aspect-[16/6] w-full rounded-lg border border-border object-cover"
+            />
+            <DeleteImageButton image={background} />
+          </div>
+        )}
+        <Dropzone
+          endpoint={`/api/patches/${patchId}/images`}
+          kind="background"
+          label={background ? "Remplacer l’arrière-plan" : "Ajouter un arrière-plan"}
+        />
       </section>
 
       <section className="space-y-3">
