@@ -5,29 +5,23 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { LINK_KINDS, LINK_LABELS, type LinkKind } from "@/lib/team-links";
 import { saveMember, type ActionResult } from "./actions";
 
 type MemberFields = {
   id?: number;
   name: string;
-  roles: string[];
-  projects: string[];
+  title: string;
   links: Partial<Record<LinkKind, string>>;
   position: number;
 };
 
-type PatchRole = { patchId: number; title: string; role: string };
-
-export function MemberForm({ member, patchRoles = [] }: { member: MemberFields; patchRoles?: PatchRole[] }) {
+export function MemberForm({ member }: { member: MemberFields }) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(saveMember, {});
   const [name, setName] = useState(member.name);
-  const [roles, setRoles] = useState(member.roles.join("\n"));
-  const [projects, setProjects] = useState(member.projects.join("\n"));
+  const [title, setTitle] = useState(member.title);
   const [position, setPosition] = useState(String(member.position));
   const [links, setLinks] = useState(member.links);
-  const [vnRoles, setVnRoles] = useState(() => Object.fromEntries(patchRoles.map((vn) => [vn.patchId, vn.role])));
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
@@ -49,64 +43,20 @@ export function MemberForm({ member, patchRoles = [] }: { member: MemberFields; 
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="roles">Rôles</Label>
-          <Textarea
-            id="roles"
-            name="roles"
-            rows={5}
-            value={roles}
-            onChange={(e) => setRoles(e.target.value)}
-            placeholder={"Traduction (JA → FR)\nSite Internet"}
-            className="field-sizing-fixed"
-          />
-          <p className="text-xs text-muted-foreground">Un rôle par ligne. Le premier s’affiche sous le nom.</p>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="projects">Projets</Label>
-          <Textarea
-            id="projects"
-            name="projects"
-            rows={5}
-            value={projects}
-            onChange={(e) => setProjects(e.target.value)}
-            placeholder={"CHAOS;CHILD\nRance 01"}
-            className="field-sizing-fixed"
-          />
-          <p className="text-xs text-muted-foreground">Un projet par ligne.</p>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="title">Titre (facultatif)</Label>
+        <Input
+          id="title"
+          name="title"
+          maxLength={60}
+          placeholder="Ex. Fondateur"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Affiché sous le nom sur la page Équipe. Les rôles se règlent sur chaque patch, dans sa section « Équipe du patch ».
+        </p>
       </div>
-
-      {member.id && (
-        <fieldset className="space-y-3">
-          <legend className="text-sm font-medium">Rôles par VN</legend>
-          {patchRoles.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {patchRoles.map((vn) => (
-                <div key={vn.patchId} className="space-y-1.5">
-                  <Label htmlFor={`patchRole_${vn.patchId}`} className="text-xs text-muted-foreground">
-                    {vn.title}
-                  </Label>
-                  <Input
-                    id={`patchRole_${vn.patchId}`}
-                    name={`patchRole_${vn.patchId}`}
-                    maxLength={80}
-                    placeholder={roles.split("\n")[0].trim() || "Traduction"}
-                    value={vnRoles[vn.patchId] ?? ""}
-                    onChange={(e) => setVnRoles((current) => ({ ...current, [vn.patchId]: e.target.value }))}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : null}
-          <p className="text-xs text-muted-foreground">
-            {patchRoles.length > 0
-              ? "Affiché sous le nom sur la fiche du VN. Vide : le premier rôle ci-dessus."
-              : "Ce membre ne participe à aucun VN. Cochez-le dans la section « Équipe du projet » d’un patch."}
-          </p>
-        </fieldset>
-      )}
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Liens (facultatifs)</legend>

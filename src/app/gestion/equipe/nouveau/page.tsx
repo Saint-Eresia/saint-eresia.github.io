@@ -24,7 +24,7 @@ async function NewMember() {
     <>
       <ManageHeader back={{ href: "/gestion", label: "Gestion" }} title="Nouveau membre" />
       <div className={`mt-8 max-w-3xl ${panel}`}>
-        <MemberForm member={{ name: "", roles: [], projects: [], links: {}, position: nextPosition }} />
+        <MemberForm member={{ name: "", title: "", links: {}, position: nextPosition }} />
         <p className="mt-6 text-sm text-muted-foreground">Vous pourrez ajouter son avatar une fois le membre créé.</p>
       </div>
     </>

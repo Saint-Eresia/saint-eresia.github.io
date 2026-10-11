@@ -1,9 +1,10 @@
 import { Globe } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { EmptyState, PageIntro } from "@/components/page-intro";
-import { LINK_KINDS, LINK_LABELS, listTeam, type LinkKind } from "@/lib/team";
+import { LINK_KINDS, LINK_LABELS, listTeam, listTeamPatchRoles, memberAnchor, roleLabels, type LinkKind } from "@/lib/team";
 
 export const metadata: Metadata = { title: "Équipe" };
 
@@ -30,17 +31,24 @@ export default function TeamPage() {
 }
 
 async function Members() {
-  const team = await listTeam();
+  const [team, patchRoles] = await Promise.all([listTeam(), listTeamPatchRoles()]);
   if (team.length === 0) return <EmptyState>L’équipe n’a pas encore été présentée.</EmptyState>;
+  // Anciennes ancres (#membre-3) → nouvelles (#mekki), pour les liens déjà partagés.
+  const legacy = Object.fromEntries(team.map((member) => [`membre-${member.id}`, memberAnchor(member)]));
   return (
     <div className="grid gap-5 sm:grid-cols-2">
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){var m=${JSON.stringify(legacy).replace(/</g, "\\u003c")};var h=location.hash.slice(1);if(m[h]){history.replaceState(null,"","#"+m[h]);var e=document.getElementById(m[h]);if(e)e.scrollIntoView();}})();`,
+        }}
+      />
       {team.map((member) => (
-        <article key={member.id} id={`membre-${member.id}`} className="scroll-mt-24 rounded-2xl border border-border bg-card p-6">
+        <article key={member.id} id={memberAnchor(member)} className="scroll-mt-24 rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center gap-4">
             <MemberAvatar member={member} className="size-16 text-2xl" />
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-extrabold tracking-tight">{member.name}</h2>
-              {member.roles[0] && <p className="text-sm text-primary">{member.roles[0]}</p>}
+              {member.title && <p className="text-sm text-primary">{member.title}</p>}
             </div>
             <div className="flex flex-wrap justify-end gap-1">
               {LINK_KINDS.filter((kind) => member.links[kind]).map((kind) => (
@@ -58,26 +66,28 @@ async function Members() {
               ))}
             </div>
           </div>
-          {(member.roles.length > 0 || member.projects.length > 0) && (
+          {(patchRoles.get(member.id) ?? []).length > 0 && (
             <dl className="mt-5 space-y-3 text-sm">
-              {member.roles.length > 0 && (
-                <div>
-                  <dt className="font-semibold text-muted-foreground">Rôles</dt>
+              {(patchRoles.get(member.id) ?? []).map((patch) => (
+                <div key={patch.slug}>
+                  <dt>
+                    <Link href={`/patchs/${patch.slug}`} className="font-semibold text-muted-foreground hover:text-primary hover:underline">
+                      {patch.title}
+                    </Link>
+                  </dt>
                   <dd className="mt-1.5 flex flex-wrap gap-1.5">
-                    {member.roles.map((role) => (
-                      <span key={role} className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">
-                        {role}
-                      </span>
-                    ))}
+                    {patch.roles.length === 0 ? (
+                      <span className="text-xs text-muted-foreground">Participation</span>
+                    ) : (
+                      roleLabels(patch.roles).map((role) => (
+                        <span key={role} className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">
+                          {role}
+                        </span>
+                      ))
+                    )}
                   </dd>
                 </div>
-              )}
-              {member.projects.length > 0 && (
-                <div>
-                  <dt className="font-semibold text-muted-foreground">Projets</dt>
-                  <dd className="mt-1">{member.projects.join(" · ")}</dd>
-                </div>
-              )}
+              ))}
             </dl>
           )}
         </article>

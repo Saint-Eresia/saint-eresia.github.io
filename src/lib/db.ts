@@ -1,6 +1,7 @@
 import { createClient, type Client, type InStatement, type InValue, type Row } from "@libsql/client";
 import fs from "node:fs";
 import path from "node:path";
+import { normalizeRole, normalizeRoles } from "@/lib/roles";
 
 // En développement : base SQLite et images dans data/.
 // En production (Vercel) : base distante Turso (compatible SQLite) et images sur Vercel Blob.
@@ -134,7 +135,76 @@ const SCHEMA = `
     memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
     PRIMARY KEY (novelId, memberId)
   );
+
+  -- Rôles d’un membre sur un patch, choisis dans la liste fixe de src/lib/roles.ts (une ligne par rôle).
+  CREATE TABLE IF NOT EXISTS patch_member_role (
+    patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
+    memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    PRIMARY KEY (patchId, memberId, role)
+  );
 `;
+
+// Slug d’un nom de membre (ancre stable de la page Équipe) : « len. » → len, « Meruem_FGC » → meruem-fgc.
+function memberSlug(name: string, taken: Set<string>) {
+  const base = words(name).join("-").slice(0, 60) || "membre";
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+  taken.add(slug);
+  return slug;
+}
+
+// Rôles par membre et par patch : colonnes slug et title des membres, puis reprise des rôles libres
+// (patch_member.role, ex. « Traduction & Edition d'Images ») vers la liste fixe. Les anciennes colonnes
+// (team_member.roles / projects, patch_member.role) sont conservées telles quelles.
+async function migrateMemberRoles(client: Client, hadRoleTable: boolean) {
+  const columns = ((await client.execute("PRAGMA table_info(team_member)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!columns.includes("slug")) await client.execute("ALTER TABLE team_member ADD COLUMN slug TEXT");
+  if (!columns.includes("title")) await client.execute("ALTER TABLE team_member ADD COLUMN title TEXT NOT NULL DEFAULT ''");
+
+  const members = (await client.execute("SELECT id, name, roles, slug, title FROM team_member ORDER BY id")).rows as unknown as {
+    id: number;
+    name: string;
+    roles: string;
+    slug: string | null;
+    title: string;
+  }[];
+  const taken = new Set(members.flatMap((member) => (member.slug ? [String(member.slug)] : [])));
+  const updates: { sql: string; args: (string | number)[] }[] = [];
+  for (const member of members) {
+    if (!member.slug) updates.push({ sql: "UPDATE team_member SET slug = ? WHERE id = ?", args: [memberSlug(String(member.name), taken), Number(member.id)] });
+    // « Fondateur » (ou tout rôle global hors liste) devient le titre, si aucun titre n’est encore défini.
+    if (!columns.includes("title")) {
+      const title = String(member.roles).split("\n").map((r) => r.trim()).find((r) => r && normalizeRole(r) === null);
+      if (title) updates.push({ sql: "UPDATE team_member SET title = ? WHERE id = ?", args: [title, Number(member.id)] });
+    }
+  }
+  if (updates.length) await client.batch(updates, "write");
+  await client.execute("CREATE UNIQUE INDEX IF NOT EXISTS team_member_slug ON team_member (slug)");
+  if (updates.length) console.log(`✓ Membres : slugs et titres renseignés (${updates.length} mise(s) à jour)`);
+
+  if (hadRoleTable) return;
+  // Langue par défaut d’un « Traduction » sans précision : celle du rôle global du membre.
+  const translation = new Map(
+    members.map((member) => {
+      const keys = String(member.roles).split("\n").map((r) => normalizeRole(r));
+      return [Number(member.id), keys.includes("trad-ja") && !keys.includes("trad-en") ? ("trad-ja" as const) : ("trad-en" as const)];
+    }),
+  );
+  const links = (await client.execute("SELECT patchId, memberId, role FROM patch_member")).rows as unknown as {
+    patchId: number;
+    memberId: number;
+    role: string;
+  }[];
+  const inserts = links.flatMap((link) =>
+    normalizeRoles(String(link.role), translation.get(Number(link.memberId))).map((role) => ({
+      sql: "INSERT OR IGNORE INTO patch_member_role (patchId, memberId, role) VALUES (?, ?, ?)",
+      args: [Number(link.patchId), Number(link.memberId), role],
+    })),
+  );
+  if (inserts.length) await client.batch(inserts, "write");
+  console.log(`✓ Rôles par patch : ${inserts.length} rôle(s) repris de ${links.length} participation(s)`);
+}
 
 // Mots d’un texte, sans accents ni ponctuation : « La Mélancolie d’Haruhi » → la, melancolie, d, haruhi.
 const words = (text: string) =>
@@ -206,7 +276,10 @@ async function allowImageKinds(client: Client, spec: (typeof IMAGE_TABLES)[numbe
 export async function prepareSchema(client: Client) {
   // En local, une seule connexion : les pragmas restent actifs. Turso active déjà les clés étrangères.
   if (!TURSO_URL) await client.executeMultiple("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;");
-  const hadMembers = (await client.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'patch_member'")).rows.length > 0;
+  const tableExists = async (name: string) =>
+    (await client.execute({ sql: "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", args: [name] })).rows.length > 0;
+  const hadMembers = await tableExists("patch_member");
+  const hadRoleTable = await tableExists("patch_member_role");
   await client.executeMultiple(SCHEMA);
   if (!hadMembers) {
     const links = await linkMembersFromProjects(client);
@@ -221,6 +294,7 @@ export async function prepareSchema(client: Client) {
   if (!memberColumns.some((column) => column.name === "role")) {
     await client.execute("ALTER TABLE patch_member ADD COLUMN role TEXT NOT NULL DEFAULT ''");
   }
+  await migrateMemberRoles(client, hadRoleTable);
   // Mise en avant sur l’accueil (carrousel « Recommandé ») : citation et choix des novels affichés.
   const novelColumns = ((await client.execute("PRAGMA table_info(novel)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");

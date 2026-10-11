@@ -148,7 +148,7 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
         />
       </section>
 
-      <ProjectMembersEditor type="novel" id={novel.id} save={saveNovelMembers.bind(null, novel.id)} />
+      <ProjectMembersEditor id={novel.id} save={saveNovelMembers.bind(null, novel.id)} />
 
       <section className="mt-10 rounded-2xl border border-destructive/30 p-6">
         <h2 className="text-lg font-extrabold text-destructive">Zone de danger</h2>

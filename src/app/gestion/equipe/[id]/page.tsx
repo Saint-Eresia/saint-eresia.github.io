@@ -8,7 +8,7 @@ import { ManageHeader, panel } from "@/components/manage-header";
 import { MemberAvatar } from "@/components/member-avatar";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
-import { getMember, listMemberPatchRoles } from "@/lib/team";
+import { getMember, listTeamPatchRoles, roleLabels } from "@/lib/team";
 import { DeleteMemberButton } from "../delete-member-button";
 import { MemberForm } from "../member-form";
 
@@ -29,7 +29,7 @@ export default function EditMemberPage({ params, searchParams }: Props) {
 async function EditMember({ params, searchParams }: Pick<Props, "params" | "searchParams">) {
   const member = await getMember(Number((await params).id));
   if (!member) notFound();
-  const patchRoles = await listMemberPatchRoles(member.id);
+  const patches = (await listTeamPatchRoles()).get(member.id) ?? [];
   const created = (await searchParams).cree === "1";
 
   return (
@@ -48,7 +48,32 @@ async function EditMember({ params, searchParams }: Pick<Props, "params" | "sear
       />
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className={panel} aria-label="Informations du membre">
-          <MemberForm member={member} patchRoles={patchRoles} />
+          <MemberForm member={member} />
+          <div className="mt-8 border-t border-border pt-6">
+            <h2 className="text-sm font-semibold">Rôles par patch</h2>
+            {patches.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Ce membre ne participe à aucun patch. Ajoutez-le dans la section « Équipe du patch » d’un patch.
+              </p>
+            ) : (
+              <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
+                {patches.map((patch) => (
+                  <li key={patch.patchId} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{patch.title}</p>
+                      <p className="text-xs text-muted-foreground">{roleLabels(patch.roles).join(" · ") || "Aucun rôle coché"}</p>
+                    </div>
+                    <Link
+                      href={`/gestion/patchs/${patch.patchId}#equipe-patch`}
+                      className="text-sm font-semibold text-primary hover:underline"
+                    >
+                      Modifier
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
         <section className={`${panel} space-y-4 self-start`}>
           <h2 className="text-lg font-extrabold">Avatar</h2>

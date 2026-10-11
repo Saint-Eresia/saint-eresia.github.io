@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ProjectMembersEditor } from "@/components/project-members-editor";
+import { PatchTeamEditor } from "@/components/patch-team-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { getPatchById, imageUrl, STATUSES, type PatchImage } from "@/lib/patches";
-import { savePatchMembers } from "../actions";
+import { listPatchTeam, listTeam } from "@/lib/team";
+import { savePatchTeam } from "../actions";
 import { DeletePatchButton } from "../delete-patch-button";
 import { ImageManager, type ManagedImage } from "../image-manager";
 import { PatchForm } from "../patch-form";
@@ -83,7 +84,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
         </section>
       </div>
 
-      <ProjectMembersEditor type="patch" id={patch.id} save={savePatchMembers.bind(null, patch.id)} />
+      <PatchTeamSection patchId={patch.id} />
 
       <section className="mt-10 rounded-2xl border border-destructive/30 p-6">
         <h2 className="text-lg font-extrabold text-destructive">Zone de danger</h2>
@@ -91,5 +92,26 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
         <DeletePatchButton patchId={patch.id} title={patch.title} />
       </section>
     </>
+  );
+}
+
+// Équipe du patch : tableau membres × rôles (liste fixe). Affichée sur la fiche du patch et la page Équipe.
+async function PatchTeamSection({ patchId }: { patchId: number }) {
+  const [team, patchTeam] = await Promise.all([listTeam(), listPatchTeam(patchId)]);
+  return (
+    <section id="equipe-patch" className="mt-8 scroll-mt-24 rounded-2xl border border-border bg-card p-6 sm:p-8" aria-labelledby="equipe-patch-titre">
+      <h2 id="equipe-patch-titre" className="text-lg font-extrabold">
+        Équipe du patch
+      </h2>
+      <p className="mt-1 mb-5 text-sm text-muted-foreground">
+        Ajoutez les membres qui ont participé et cochez leurs rôles sur ce patch. Ils apparaissent sur la fiche publique
+        et sur la page Équipe.
+      </p>
+      <PatchTeamEditor
+        team={team.map((member) => ({ id: member.id, name: member.name, avatarFile: member.avatarFile }))}
+        initial={patchTeam.map((member) => ({ memberId: member.id, roles: member.roles }))}
+        save={savePatchTeam.bind(null, patchId)}
+      />
+    </section>
   );
 }

@@ -6,7 +6,7 @@ import { guard, isHttpUrl, type ActionResult } from "@/lib/action-guard";
 import { db } from "@/lib/db";
 import { NOVEL_STATUSES, uniqueChapterSlug, type Chapter, type Volume } from "@/lib/novels";
 import { slugify } from "@/lib/patches";
-import { setProjectMembers } from "@/lib/team";
+import { setNovelMembers } from "@/lib/team";
 import { removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
@@ -93,7 +93,7 @@ export async function saveNovelMembers(novelId: number, memberIds: number[]): Pr
   const denied = await guard();
   if (denied) return denied;
   if (!(await db.prepare("SELECT 1 FROM novel WHERE id = ?").get(novelId))) return { error: "Novel introuvable." };
-  await setProjectMembers("novel", novelId, memberIds);
+  await setNovelMembers(novelId, memberIds);
   return await changed(novelId);
 }
 

@@ -11,7 +11,7 @@ import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
 import { chapterHeading, getNovelBySlug, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
 import { formatDate, imageUrl } from "@/lib/patches";
-import { listProjectMembers } from "@/lib/team";
+import { listNovelMembers } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
@@ -38,7 +38,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Illustrateur", novel.artist],
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
-  const members = await listProjectMembers("novel", novel.id);
+  const members = await listNovelMembers(novel.id);
   const layout = projectLayout(members.length > 0);
 
   return (
@@ -81,7 +81,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
       </header>
 
       <div className={layout.body}>
-        <aside className="space-y-6 lg:order-2">
+        <aside className={layout.aside}>
           <div className={`space-y-5 rounded-2xl border border-border bg-card p-6 ${layout.sticky}`}>
             {first ? (
               <Button asChild size="pill" className="w-full">
@@ -106,16 +106,15 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               <EditLink id={novel.id} />
             </Suspense>
           </div>
-          <ProjectMembers members={members} className="2xl:hidden" />
         </aside>
 
         {members.length > 0 && (
-          <aside className="hidden 2xl:order-3 2xl:block">
-            <ProjectMembers members={members} className="sticky top-24" />
+          <aside className={layout.members}>
+            <ProjectMembers members={members} className="2xl:sticky 2xl:top-24" />
           </aside>
         )}
 
-        <div className="min-w-0 space-y-12 lg:order-1">
+        <div className={`space-y-12 ${layout.content}`}>
           {novel.synopsis && (
             <section>
               <h2 className="sr-only">Présentation</h2>

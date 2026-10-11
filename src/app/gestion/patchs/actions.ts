@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { STATUSES, uniqueSlug, type PatchImage } from "@/lib/patches";
 import { removeFile } from "@/lib/uploads";
 import { guard, type ActionResult } from "@/lib/action-guard";
-import { setProjectMembers } from "@/lib/team";
+import { isRoleKey } from "@/lib/roles";
+import { setPatchTeam, type PatchTeamEntry } from "@/lib/team";
 import { averageProgress, MAX_STEPS, parseSteps, type ProgressStep } from "@/lib/progress-steps";
 
 export type { ActionResult };
@@ -73,12 +74,18 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
   return { savedAt: Date.now() };
 }
 
-// Membres de l’équipe affichés sur la fiche du patch.
-export async function savePatchMembers(patchId: number, memberIds: number[]): Promise<ActionResult> {
+// Équipe du patch : ses membres et leurs rôles (liste fixe), affichés sur la fiche et la page Équipe.
+export async function savePatchTeam(patchId: number, entries: PatchTeamEntry[]): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
   if (!(await db.prepare("SELECT 1 FROM patch WHERE id = ?").get(patchId))) return { error: "Patch introuvable." };
-  await setProjectMembers("patch", patchId, memberIds);
+  if (!Array.isArray(entries) || entries.length > 100) return { error: "Équipe invalide." };
+  const clean = entries.map((entry) => ({
+    memberId: Number(entry?.memberId),
+    roles: (Array.isArray(entry?.roles) ? entry.roles : []).filter((role) => typeof role === "string" && isRoleKey(role)),
+  }));
+  if (clean.some((entry) => !Number.isInteger(entry.memberId))) return { error: "Membre invalide." };
+  await setPatchTeam(patchId, clean);
   return await changed(patchId);
 }
 
@@ -87,6 +94,7 @@ export async function deletePatch(patchId: number): Promise<ActionResult> {
   if (denied) return denied;
 
   const images = await db.prepare("SELECT file FROM patch_image WHERE patchId = ?").all<{ file: string }>(patchId);
+  await db.prepare("DELETE FROM patch_member_role WHERE patchId = ?").run(patchId);
   await db.prepare("DELETE FROM patch_member WHERE patchId = ?").run(patchId);
   await db.prepare("DELETE FROM patch WHERE id = ?").run(patchId); // les images suivent (ON DELETE CASCADE)
   await Promise.all(images.map((image) => removeFile(image.file)));

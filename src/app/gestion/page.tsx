@@ -178,7 +178,7 @@ async function TeamList() {
                 <MemberAvatar member={member} className="size-12 text-lg" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold group-hover:text-primary">{member.name}</p>
-                  <p className="mt-0.5 truncate text-sm text-muted-foreground">{member.roles.join(" · ") || "Aucun rôle"}</p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">{member.title || "Sans titre"}</p>
                 </div>
                 <ChevronRight className="size-5 text-muted-foreground group-hover:text-primary" />
               </Link>

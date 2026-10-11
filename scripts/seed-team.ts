@@ -46,11 +46,13 @@ export async function seedTeam() {
     return;
   }
   const insert = db.prepare(
-    "INSERT INTO team_member (name, avatarFile, roles, projects, links, position) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO team_member (slug, name, title, avatarFile, roles, projects, links, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
   );
   for (const [index, member] of TEAM.entries()) {
     const avatarFile = await saveAvatar(await fs.readFile(path.join(import.meta.dirname, "seed-data", "team", member.avatar)));
-    await insert.run(member.name, avatarFile, member.roles.join("\n"), member.projects.join("\n"), JSON.stringify(member.links), index + 1);
+    const slug = member.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const title = member.roles.includes("Fondateur") ? "Fondateur" : "";
+    await insert.run(slug, member.name, title, avatarFile, member.roles.join("\n"), member.projects.join("\n"), JSON.stringify(member.links), index + 1);
   }
   console.log(`✓ Équipe : ${TEAM.length} membres`);
 }

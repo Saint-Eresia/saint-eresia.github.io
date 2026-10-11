@@ -4,21 +4,22 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { guard, isHttpUrl, type ActionResult } from "@/lib/action-guard";
 import { db } from "@/lib/db";
-import { LINK_KINDS, LINK_LABELS, splitLines } from "@/lib/team";
+import { LINK_KINDS, LINK_LABELS, uniqueMemberSlug } from "@/lib/team";
 import { removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
 
+// Fiche d’un membre : nom, titre global facultatif (ex. Fondateur), ordre et liens.
+// Ses rôles se règlent sur chaque patch (tableau « Équipe du patch » dans la gestion du patch).
 export async function saveMember(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
 
   const name = String(formData.get("name") ?? "").trim();
-  const roles = splitLines(String(formData.get("roles") ?? ""));
-  const projects = splitLines(String(formData.get("projects") ?? ""));
+  const title = String(formData.get("title") ?? "").trim();
   const position = Number(formData.get("position"));
   if (!name || name.length > 80) return { error: "Le nom est requis (80 caractères maximum)." };
-  if (roles.length > 15 || projects.length > 30) return { error: "Trop de rôles ou de projets." };
+  if (title.length > 60) return { error: "Le titre est trop long (60 caractères maximum)." };
   if (!Number.isInteger(position) || position < 0) return { error: "L’ordre doit être un entier positif." };
 
   const links: Record<string, string> = {};
@@ -29,33 +30,18 @@ export async function saveMember(_prev: ActionResult, formData: FormData): Promi
     links[kind] = url;
   }
 
-  const values = [name, roles.join("\n"), projects.join("\n"), JSON.stringify(links), position];
   const id = Number(formData.get("id")) || null;
   if (id === null) {
     const { lastInsertRowid } = await db
-      .prepare("INSERT INTO team_member (name, roles, projects, links, position) VALUES (?, ?, ?, ?, ?)")
-      .run(...values);
+      .prepare("INSERT INTO team_member (slug, name, title, links, position) VALUES (?, ?, ?, ?, ?)")
+      .run(await uniqueMemberSlug(name), name, title, JSON.stringify(links), position);
     redirect(`/gestion/equipe/${lastInsertRowid}?cree=1`);
   }
+  // Le slug (ancre /equipe#slug) ne change pas quand le nom change : les liens existants restent valides.
   const { changes } = await db
-    .prepare("UPDATE team_member SET name = ?, roles = ?, projects = ?, links = ?, position = ? WHERE id = ?")
-    .run(...values, id);
+    .prepare("UPDATE team_member SET name = ?, title = ?, links = ?, position = ? WHERE id = ?")
+    .run(name, title, JSON.stringify(links), position, id);
   if (!changes) return { error: "Membre introuvable." };
-
-  // Section « Rôles par VN » : seuls les patchs auxquels le membre participe déjà sont mis à jour.
-  const patchRoles = [...formData.entries()].flatMap(([key, value]) => {
-    const match = /^patchRole_(\d+)$/.exec(key);
-    return match ? [{ patchId: Number(match[1]), role: String(value).trim() }] : [];
-  });
-  if (patchRoles.some((vn) => vn.role.length > 80)) return { error: "Un rôle par VN ne doit pas dépasser 80 caractères." };
-  if (patchRoles.length) {
-    await db.batch(
-      patchRoles.map((vn) => ({
-        sql: "UPDATE patch_member SET role = ? WHERE patchId = ? AND memberId = ?",
-        args: [vn.role, vn.patchId, id],
-      })),
-    );
-  }
   refresh();
   return { savedAt: Date.now() };
 }
@@ -63,10 +49,11 @@ export async function saveMember(_prev: ActionResult, formData: FormData): Promi
 export async function deleteMember(id: number): Promise<ActionResult> {
   const denied = await guard();
   if (denied) return denied;
-  const member = await db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get(id) as { avatarFile: string } | undefined;
+  const member = await db.prepare("SELECT avatarFile FROM team_member WHERE id = ?").get<{ avatarFile: string }>(id);
   if (!member) return { error: "Membre introuvable." };
   // Le membre disparaît aussi des fiches où il était indiqué comme participant.
   await db.batch([
+    { sql: "DELETE FROM patch_member_role WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM patch_member WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM novel_member WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM team_member WHERE id = ?", args: [id] },
