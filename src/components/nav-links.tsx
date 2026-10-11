@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Gamepad2, House, Joystick, Newspaper, Settings2, Users } from "lucide-react";
+import { BookOpen, Gamepad2, House, Joystick, Newspaper, Settings2, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/patchs", label: "Patchs VN", icon: Gamepad2, match: (path: string) => path.startsWith("/patchs") },
   { href: "/jeux", label: "Jeux", icon: Joystick, match: (path: string) => path.startsWith("/jeux") },
   { href: "/equipe", label: "Équipe", icon: Users, match: (path: string) => path.startsWith("/equipe") },
+  { href: "/plus", label: "Plus", icon: Sparkles, match: (path: string) => path.startsWith("/plus") },
 ];
 const TEAM_LINK = { href: "/gestion", label: "Gestion", icon: Settings2, match: (path: string) => path.startsWith("/gestion") };
 
@@ -43,15 +44,15 @@ function Links({ showTeam, pathname }: { showTeam: boolean; pathname: string | n
             aria-current={active ? "page" : undefined}
             title={label}
             className={cn(
-              "relative flex shrink-0 items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold transition-colors sm:px-2.5 lg:px-3.5",
+              "relative flex shrink-0 items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold transition-colors sm:px-2.5 xl:px-3.5",
               active
-                ? "bg-accent text-primary after:absolute after:inset-x-2 after:bottom-1 sm:after:inset-x-2.5 after:h-0.5 after:rounded-full after:bg-primary lg:after:inset-x-3.5"
+                ? "bg-accent text-primary after:absolute after:inset-x-2 after:bottom-1 sm:after:inset-x-2.5 after:h-0.5 after:rounded-full after:bg-primary xl:after:inset-x-3.5"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             <Icon className="size-4" aria-hidden />
-            {/* Avec l’onglet Gestion (7 liens), les libellés n’apparaissent qu’à partir de xl pour tenir sur une ligne. */}
-            <span className={showTeam ? "max-xl:sr-only" : "max-lg:sr-only"}>{label}</span>
+            {/* Libellés à partir de xl seulement : en dessous, les 7 ou 8 onglets ne tiennent pas sur une ligne avec leur texte. */}
+            <span className="max-xl:sr-only">{label}</span>
           </Link>
         );
       })}

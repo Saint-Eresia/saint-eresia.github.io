@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
+import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -35,7 +36,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <footer className="mt-20 border-t border-border">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="font-semibold text-foreground">Saint Eresia</p>
+            <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="font-semibold text-foreground">Saint Eresia</span>
+              <Link href="/a-propos" className="hover:text-foreground hover:underline">
+                À propos
+              </Link>
+              <Link href="/plus" className="hover:text-foreground hover:underline">
+                Outils
+              </Link>
+            </p>
             <p>Les œuvres originales appartiennent à leurs ayants droit. Nous encourageons leur achat.</p>
           </div>
         </footer>
