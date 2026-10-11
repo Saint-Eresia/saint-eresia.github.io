@@ -1,3 +1,5 @@
+import { Badge } from "@/components/lightswind/badge";
+import { Progress } from "@/components/lightswind/progress";
 import { cn } from "@/lib/utils";
 
 const TONES: Record<string, string> = {
@@ -14,36 +16,25 @@ const TONES: Record<string, string> = {
 // Couleurs des statuts, réutilisées par les badges Lightswind de l’accueil.
 export const statusTone = (status: string) => TONES[status] ?? "bg-accent text-accent-foreground";
 
+// Badge de statut (Lightswind, sans relief 3D) aux couleurs du statut.
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        TONES[status] ?? "bg-accent text-accent-foreground",
-        className,
-      )}
-    >
-      <span aria-hidden className="size-1.5 rounded-full bg-current" />
+    <Badge variant="unstyled" withDot className={cn("w-fit border-transparent", statusTone(status), className)}>
       {status}
-    </span>
+    </Badge>
   );
 }
 
+// Barre d’avancement (Lightswind) : couleur principale, verte une fois à 100 %.
 export function ProgressBar({ value, className }: { value: number; className?: string }) {
   return (
-    <div
-      role="progressbar"
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={100}
+    <Progress
+      value={value}
+      size="sm"
+      color={value >= 100 ? "success" : "primary"}
       aria-label="Avancement"
-      className={cn("h-1.5 overflow-hidden rounded-full bg-muted", className)}
-    >
-      <div
-        className={cn("h-full rounded-full", value >= 100 ? "bg-success" : "bg-primary")}
-        style={{ width: `${value}%` }}
-      />
-    </div>
+      className={cn("h-1.5 bg-muted", className)}
+    />
   );
 }
 

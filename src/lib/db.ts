@@ -146,6 +146,24 @@ const SCHEMA = `
     role TEXT NOT NULL,
     PRIMARY KEY (patchId, memberId, role)
   );
+
+  -- Journal d’activité de la gestion : une ligne par modification, écrite dans la même transaction que celle-ci.
+  -- actorId : identifiant du compte (Better Auth) ; entityId : élément concerné (peut ne plus exister) ;
+  -- changes : JSON [{ "field": "Avancement Traduction", "before": "90 %", "after": "100 %" }, …].
+  CREATE TABLE IF NOT EXISTS activity_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    at TEXT NOT NULL DEFAULT (datetime('now')),
+    actorId TEXT NOT NULL,
+    actorName TEXT NOT NULL,
+    entityType TEXT NOT NULL,
+    entityId INTEGER,
+    entityLabel TEXT NOT NULL,
+    action TEXT NOT NULL CHECK (action IN ('create', 'update', 'delete')),
+    changes TEXT NOT NULL DEFAULT '[]'
+  );
+  CREATE INDEX IF NOT EXISTS activity_log_at ON activity_log (at DESC, id DESC);
+  CREATE INDEX IF NOT EXISTS activity_log_actor ON activity_log (actorId, at DESC);
+  CREATE INDEX IF NOT EXISTS activity_log_type ON activity_log (entityType, at DESC);
 `;
 
 // Slug d’un nom de membre (ancre stable de la page Équipe) : « len. » → len, « Meruem_FGC » → meruem-fgc.
@@ -376,11 +394,13 @@ export const db = {
       },
     };
   },
-  // Plusieurs écritures dans une seule transaction.
-  async batch(statements: InStatement[]) {
+  // Plusieurs écritures dans une seule transaction (tout ou rien). Renvoie, pour chaque instruction,
+  // le nombre de lignes touchées et l’identifiant créé.
+  async batch(statements: InStatement[]): Promise<RunResult[]> {
     const { client, ready } = getShared();
     await ready;
-    await client.batch(statements, "write");
+    const results = await client.batch(statements, "write");
+    return results.map((rs) => ({ changes: rs.rowsAffected, lastInsertRowid: Number(rs.lastInsertRowid ?? 0) }));
   },
   // Attend la création des tables (utile dans les scripts).
   ready: () => getShared().ready,

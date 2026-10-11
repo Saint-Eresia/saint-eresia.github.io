@@ -2,6 +2,7 @@ import { ChevronRight, Newspaper, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { TabsContent } from "@/components/lightswind/tabs";
 import { CoverPlaceholder, ProgressBar, StatusBadge } from "@/components/content-meta";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
@@ -10,27 +11,70 @@ import { listNews, newsDate } from "@/lib/news";
 import { listNovels } from "@/lib/novels";
 import { formatDate, imageUrl, listPatches } from "@/lib/patches";
 import { listTeam } from "@/lib/team";
+import { ActivityFeed, type FeedParams } from "./activity-feed";
+import { GestionTabs } from "./gestion-tabs";
 
 export const metadata: Metadata = { title: "Gestion" };
 
-export default function ManagePage() {
+const TABS = ["activite", "actualites", "novels", "patchs", "equipe"] as const;
+type Tab = (typeof TABS)[number];
+const isTab = (value: unknown): value is Tab => TABS.includes(value as Tab);
+
+const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
+
+export default function ManagePage({ searchParams }: PageProps<"/gestion">) {
   return (
     <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
       <TeamGate>
         <p className="text-xs font-extrabold tracking-[0.14em] text-primary uppercase">Espace équipe</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Gestion du contenu</h1>
-        <NewsList />
-        <NovelList />
-        <PatchList />
-        <TeamList />
+        <Dashboard searchParams={searchParams} />
       </TeamGate>
     </Suspense>
   );
 }
 
+// Tableau de bord en onglets : le feed d’activité, puis une liste par type de contenu.
+// L’onglet ouvert vient de l’adresse (?onglet=…), le feed lit aussi ses filtres et sa page.
+async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">["searchParams"] }) {
+  const query = await searchParams;
+  const onglet = one(query.onglet);
+  const feed: FeedParams = { membre: one(query.membre), type: one(query.type), page: one(query.page) };
+  const [news, novels, patches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels(), listPatches(), listTeam()]);
+
+  return (
+    <GestionTabs
+      initial={isTab(onglet) ? onglet : "activite"}
+      tabs={[
+        { value: "activite", label: "Activité" },
+        { value: "actualites", label: "Actualités", count: news.length },
+        { value: "novels", label: "Novels", count: novels.length },
+        { value: "patchs", label: "Patchs", count: patches.length },
+        { value: "equipe", label: "Équipe", count: team.length },
+      ]}
+    >
+      <TabsContent value="activite">
+        <ActivityFeed params={feed} />
+      </TabsContent>
+      <TabsContent value="actualites">
+        <NewsList news={news} />
+      </TabsContent>
+      <TabsContent value="novels">
+        <NovelList novels={novels} />
+      </TabsContent>
+      <TabsContent value="patchs">
+        <PatchList patches={patches} />
+      </TabsContent>
+      <TabsContent value="equipe">
+        <TeamList team={team} />
+      </TabsContent>
+    </GestionTabs>
+  );
+}
+
 function Section({ title, newHref, newLabel, children }: { title: string; newHref: string; newLabel: string; children: React.ReactNode }) {
   return (
-    <section className="mt-10">
+    <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold tracking-tight">{title}</h2>
         <Button asChild size="pill">
@@ -70,8 +114,7 @@ const empty = (text: string) => (
   <p className="rounded-2xl border border-dashed border-border-strong p-8 text-center text-muted-foreground">{text}</p>
 );
 
-async function NewsList() {
-  const news = await listNews({ publishedOnly: false });
+function NewsList({ news }: { news: Awaited<ReturnType<typeof listNews>> }) {
   return (
     <Section title="Actualités" newHref="/gestion/actualites/nouveau" newLabel="Nouvelle actualité">
       {news.length === 0 ? (
@@ -105,8 +148,7 @@ async function NewsList() {
   );
 }
 
-async function NovelList() {
-  const novels = await listNovels();
+function NovelList({ novels }: { novels: Awaited<ReturnType<typeof listNovels>> }) {
   return (
     <Section title="Light novels" newHref="/gestion/novels/nouveau" newLabel="Nouveau novel">
       {novels.length === 0 ? (
@@ -129,8 +171,7 @@ async function NovelList() {
   );
 }
 
-async function PatchList() {
-  const patches = await listPatches();
+function PatchList({ patches }: { patches: Awaited<ReturnType<typeof listPatches>> }) {
   return (
     <Section title="Patchs VN" newHref="/gestion/patchs/nouveau" newLabel="Nouveau patch">
       {patches.length === 0 ? (
@@ -161,8 +202,7 @@ async function PatchList() {
   );
 }
 
-async function TeamList() {
-  const team = await listTeam();
+function TeamList({ team }: { team: Awaited<ReturnType<typeof listTeam>> }) {
   return (
     <Section title="Équipe" newHref="/gestion/equipe/nouveau" newLabel="Nouveau membre">
       {team.length === 0 ? (

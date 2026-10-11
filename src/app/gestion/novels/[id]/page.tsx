@@ -38,7 +38,7 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
   return (
     <>
       <ManageHeader
-        back={{ href: "/gestion", label: "Gestion" }}
+        back={{ href: "/gestion?onglet=novels", label: "Gestion" }}
         title={novel.title}
         created={created && "Novel créé. Ajoutez maintenant sa couverture et ses tomes."}
         actions={

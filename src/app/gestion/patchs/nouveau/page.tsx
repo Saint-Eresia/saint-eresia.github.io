@@ -12,7 +12,7 @@ export default function NewPatchPage() {
   return (
     <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
       <TeamGate>
-        <Link href="/gestion" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
+        <Link href="/gestion?onglet=patchs" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
           <ArrowLeft className="size-4" /> Gestion des patchs
         </Link>
         <h1 className="mt-4 mb-8 text-3xl font-extrabold tracking-tight">Nouveau patch</h1>

@@ -1,23 +1,33 @@
 "use server";
 
+import type { InStatement } from "@libsql/client";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { guard, isHttpUrl, type ActionResult } from "@/lib/action-guard";
+import { isHttpUrl, teamActor, type ActionResult } from "@/lib/action-guard";
+import { diff, logEntry, type Actor, type Change, type EntityType } from "@/lib/activity";
 import { db } from "@/lib/db";
-import { NOVEL_STATUSES, uniqueChapterSlug, type Chapter, type Volume } from "@/lib/novels";
+import { chapterHeading, NOVEL_STATUSES, uniqueChapterSlug, volumeHeading, type Chapter, type Novel, type Volume } from "@/lib/novels";
 import { slugify } from "@/lib/patches";
 import { setNovelMembers } from "@/lib/team";
-import { removeFile } from "@/lib/uploads";
+import { IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
 
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
+const touch = (novelId: number): InStatement => ({ sql: "UPDATE novel SET updatedAt = datetime('now') WHERE id = ?", args: [novelId] });
+const findNovel = (id: number) => db.prepare("SELECT * FROM novel WHERE id = ?").get<Novel>(id);
+const findVolume = (id: number) => db.prepare("SELECT * FROM volume WHERE id = ?").get<Volume>(id);
 
-// Date la modification du novel et rafraîchit la page affichée.
-async function changed(novelId: number): Promise<ActionResult> {
-  await db.prepare("UPDATE novel SET updatedAt = datetime('now') WHERE id = ?").run(novelId);
+// Modification : la modification, la date de mise à jour du novel et le journal, en une seule transaction.
+async function commit(
+  actor: Actor,
+  novelId: number,
+  statements: InStatement[],
+  entry: { type: EntityType; id: number | "last" | null; label: string; action: "create" | "update" | "delete"; changes?: Change[] },
+) {
+  const results = await db.batch([...statements, touch(novelId), logEntry(actor, entry)]);
   refresh();
-  return { savedAt: Date.now() };
+  return results;
 }
 
 async function uniqueNovelSlug(title: string) {
@@ -31,8 +41,8 @@ async function uniqueNovelSlug(title: string) {
 // ——— Novels ———
 
 export async function saveNovel(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
 
   const title = text(formData, "title");
   const fields = {
@@ -51,66 +61,123 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
 
   const id = Number(formData.get("id")) || null;
   if (id === null) {
-    const { lastInsertRowid } = await db
-      .prepare(
-        "INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      )
-      .run(
-        await uniqueNovelSlug(title),
-        title,
-        fields.originalTitle,
-        fields.author,
-        fields.artist,
-        fields.status,
-        fields.synopsis,
-        fields.quote,
-        fields.featured,
-      );
-    redirect(`/gestion/novels/${lastInsertRowid}?cree=1`);
+    const [created] = await db.batch([
+      {
+        sql: "INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [
+          await uniqueNovelSlug(title),
+          title,
+          fields.originalTitle,
+          fields.author,
+          fields.artist,
+          fields.status,
+          fields.synopsis,
+          fields.quote,
+          fields.featured,
+        ],
+      },
+      logEntry(actor, { type: "novel", id: "last", label: title, action: "create" }),
+    ]);
+    redirect(`/gestion/novels/${created.lastInsertRowid}?cree=1`);
   }
-  const { changes } = await db
-    .prepare(
-      "UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ?, quote = ?, featured = ? WHERE id = ?",
-    )
-    .run(title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, fields.quote, fields.featured, id);
-  if (!changes) return { error: "Novel introuvable." };
-  return await changed(id);
+
+  const before = await findNovel(id);
+  if (!before) return { error: "Novel introuvable." };
+  await commit(
+    actor,
+    id,
+    [
+      {
+        sql: "UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ?, quote = ?, featured = ? WHERE id = ?",
+        args: [title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, fields.quote, fields.featured, id],
+      },
+    ],
+    {
+      type: "novel",
+      id,
+      label: title,
+      action: "update",
+      changes: diff([
+        { label: "Titre", before: before.title, after: title },
+        { label: "Titre original", before: before.originalTitle, after: fields.originalTitle },
+        { label: "Auteur", before: before.author, after: fields.author },
+        { label: "Illustrateur", before: before.artist, after: fields.artist },
+        { label: "Statut", before: before.status, after: fields.status },
+        { label: "Citation", before: before.quote, after: fields.quote },
+        { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: fields.featured ? "Oui" : "Non" },
+        { label: "Présentation", before: before.synopsis, after: fields.synopsis, long: true },
+      ]),
+    },
+  );
+  return { savedAt: Date.now() };
 }
 
 export async function deleteNovel(novelId: number): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const novel = await findNovel(novelId);
+  if (!novel) return { error: "Novel introuvable." };
 
   const images = await db.prepare("SELECT file FROM novel_image WHERE novelId = ?").all<{ file: string }>(novelId);
-  await db.prepare("DELETE FROM novel_member WHERE novelId = ?").run(novelId);
-  await db.prepare("DELETE FROM novel WHERE id = ?").run(novelId); // tomes, chapitres et images suivent
+  await db.batch([
+    { sql: "DELETE FROM novel_member WHERE novelId = ?", args: [novelId] },
+    { sql: "DELETE FROM chapter WHERE novelId = ?", args: [novelId] },
+    { sql: "DELETE FROM volume WHERE novelId = ?", args: [novelId] },
+    { sql: "DELETE FROM novel_image WHERE novelId = ?", args: [novelId] },
+    { sql: "DELETE FROM novel WHERE id = ?", args: [novelId] },
+    logEntry(actor, { type: "novel", id: novelId, label: novel.title, action: "delete" }),
+  ]);
   await Promise.all(images.map((image) => removeFile(image.file)));
-  redirect("/gestion");
+  redirect("/gestion?onglet=novels");
 }
 
 // Membres de l’équipe affichés sur la fiche du novel.
 export async function saveNovelMembers(novelId: number, memberIds: number[]): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
-  if (!(await db.prepare("SELECT 1 FROM novel WHERE id = ?").get(novelId))) return { error: "Novel introuvable." };
-  await setNovelMembers(novelId, memberIds);
-  return await changed(novelId);
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const novel = await findNovel(novelId);
+  if (!novel) return { error: "Novel introuvable." };
+
+  const team = await db.prepare("SELECT id, name FROM team_member ORDER BY position, id").all<{ id: number; name: string }>();
+  const beforeIds = new Set(
+    (await db.prepare("SELECT memberId FROM novel_member WHERE novelId = ?").all<{ memberId: number }>(novelId)).map((r) => Number(r.memberId)),
+  );
+  const afterIds = new Set(memberIds.map(Number));
+  const names = (ids: Set<number>) => team.filter((m) => ids.has(Number(m.id))).map((m) => m.name).join(", ");
+  await setNovelMembers(novelId, memberIds, [
+    touch(novelId),
+    logEntry(actor, {
+      type: "novel",
+      id: novelId,
+      label: novel.title,
+      action: "update",
+      changes: diff([{ label: "Équipe", before: names(beforeIds), after: names(afterIds) }]),
+    }),
+  ]);
+  refresh();
+  return { savedAt: Date.now() };
 }
 
 // Retire l’arrière-plan (la fiche revient à la couverture floutée) ou le logo du carrousel.
 // Seuls ces deux types sont acceptés : les illustrations des chapitres ne sont jamais touchées.
 export async function deleteNovelImage(novelId: number, kind: "background" | "logo"): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
   if (kind !== "background" && kind !== "logo") return { error: "Type d’image invalide." };
+  const novel = await findNovel(novelId);
+  if (!novel) return { error: "Novel introuvable." };
 
-  const images = await db
-    .prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = ?")
-    .all<{ file: string }>(novelId, kind);
+  const images = await db.prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = ?").all<{ file: string }>(novelId, kind);
   if (images.length === 0) return { error: "Aucune image à supprimer." };
-  await db.prepare("DELETE FROM novel_image WHERE novelId = ? AND kind = ?").run(novelId, kind);
+  await commit(actor, novelId, [{ sql: "DELETE FROM novel_image WHERE novelId = ? AND kind = ?", args: [novelId, kind] }], {
+    type: "novel",
+    id: novelId,
+    label: novel.title,
+    action: "update",
+    changes: [{ field: IMAGE_KIND_LABELS[kind], before: "image", after: "(supprimée)" }],
+  });
   await Promise.all(images.map((image) => removeFile(image.file)));
-  return await changed(novelId);
+  return { savedAt: Date.now() };
 }
 
 // ——— Tomes ———
@@ -120,49 +187,79 @@ function readVolume(number: number, title: string) {
   return { title: title.trim().slice(0, 180) };
 }
 
+const volumeLabel = (novel: Pick<Novel, "title">, volume: Pick<Volume, "number" | "title">) => `${novel.title} — ${volumeHeading(volume)}`;
+
 export async function addVolume(novelId: number, number: number, title: string): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
   const parsed = readVolume(number, title);
   if (parsed.error) return parsed;
+  const novel = await findNovel(novelId);
+  if (!novel) return { error: "Novel introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ?").get(novelId, number)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
-  await db.prepare("INSERT INTO volume (novelId, number, title) VALUES (?, ?, ?)").run(novelId, number, parsed.title ?? "");
-  return await changed(novelId);
+  await db.batch([
+    { sql: "INSERT INTO volume (novelId, number, title) VALUES (?, ?, ?)", args: [novelId, number, parsed.title ?? ""] },
+    logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, { number, title: parsed.title ?? "" }), action: "create" }),
+    touch(novelId),
+  ]);
+  refresh();
+  return { savedAt: Date.now() };
 }
 
 export async function updateVolume(volumeId: number, number: number, title: string): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
   const parsed = readVolume(number, title);
   if (parsed.error) return parsed;
-  const volume = await db.prepare("SELECT * FROM volume WHERE id = ?").get(volumeId) as Volume | undefined;
+  const volume = await findVolume(volumeId);
   if (!volume) return { error: "Tome introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ? AND id != ?").get(volume.novelId, number, volumeId)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
-  await db.prepare("UPDATE volume SET number = ?, title = ? WHERE id = ?").run(number, parsed.title ?? "", volumeId);
-  return await changed(volume.novelId);
+  const novel = (await findNovel(volume.novelId))!;
+  await commit(actor, volume.novelId, [{ sql: "UPDATE volume SET number = ?, title = ? WHERE id = ?", args: [number, parsed.title ?? "", volumeId] }], {
+    type: "volume",
+    id: volumeId,
+    label: volumeLabel(novel, { number, title: parsed.title ?? "" }),
+    action: "update",
+    changes: diff([
+      { label: "Numéro", before: volume.number, after: number },
+      { label: "Titre", before: volume.title, after: parsed.title ?? "" },
+    ]),
+  });
+  return { savedAt: Date.now() };
 }
 
 export async function deleteVolume(volumeId: number): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
-  const volume = await db.prepare("SELECT * FROM volume WHERE id = ?").get(volumeId) as Volume | undefined;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const volume = await findVolume(volumeId);
   if (!volume) return { error: "Tome introuvable." };
-  await db.prepare("DELETE FROM volume WHERE id = ?").run(volumeId); // ses chapitres suivent
-  return await changed(volume.novelId);
+  const novel = (await findNovel(volume.novelId))!;
+  await commit(
+    actor,
+    volume.novelId,
+    [
+      { sql: "DELETE FROM chapter WHERE volumeId = ?", args: [volumeId] },
+      { sql: "DELETE FROM volume WHERE id = ?", args: [volumeId] },
+    ],
+    { type: "volume", id: volumeId, label: volumeLabel(novel, volume), action: "delete" },
+  );
+  return { savedAt: Date.now() };
 }
 
 // ——— Chapitres ———
 
+const chapterLabel = (novel: Pick<Novel, "title">, chapter: Pick<Chapter, "label" | "title">) => `${novel.title} — ${chapterHeading(chapter)}`;
+
 export async function saveChapter(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
 
   const volumeId = Number(formData.get("volumeId"));
-  const volume = await db.prepare("SELECT * FROM volume WHERE id = ?").get(volumeId) as Volume | undefined;
+  const volume = await findVolume(volumeId);
   if (!volume) return { error: "Choisissez un tome." };
 
   const label = text(formData, "label");
@@ -181,36 +278,72 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   if (content.length > 2_000_000) return { error: "Le texte est trop long." };
   if (published && !content) return { error: "Un chapitre publié ne peut pas être vide." };
 
+  const novel = (await findNovel(volume.novelId))!;
   const id = Number(formData.get("id")) || null;
   if (id === null) {
     const slug = await uniqueChapterSlug(volume.novelId, volume.number, label);
-    const { lastInsertRowid } = await db
-      .prepare(
-        `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .run(volume.novelId, volume.id, slug, position, label, title, content, published, translators, downloadUrl);
-    await db.prepare("UPDATE novel SET updatedAt = datetime('now') WHERE id = ?").run(volume.novelId);
-    redirect(`/gestion/chapitres/${lastInsertRowid}?cree=1`);
+    const [created] = await commit(
+      actor,
+      volume.novelId,
+      [
+        {
+          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, downloadUrl],
+        },
+      ],
+      // last_insert_rowid() reste celui du chapitre : la mise à jour de date intercalée n’est pas une insertion.
+      { type: "chapter", id: "last", label: chapterLabel(novel, { label, title }), action: "create" },
+    );
+    redirect(`/gestion/chapitres/${created.lastInsertRowid}?cree=1`);
   }
 
-  const chapter = await db.prepare("SELECT novelId FROM chapter WHERE id = ?").get(id) as Pick<Chapter, "novelId"> | undefined;
-  if (!chapter) return { error: "Chapitre introuvable." };
-  if (chapter.novelId !== volume.novelId) return { error: "Ce tome appartient à un autre novel." };
+  const before = await db.prepare("SELECT * FROM chapter WHERE id = ?").get<Chapter>(id);
+  if (!before) return { error: "Chapitre introuvable." };
+  if (before.novelId !== volume.novelId) return { error: "Ce tome appartient à un autre novel." };
+  const beforeVolume = before.volumeId === volume.id ? volume : await findVolume(before.volumeId);
   // L’adresse publique (slug) ne change pas après la création : les liens existants restent valides.
-  await db.prepare(
-    `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
-       downloadUrl = ?, updatedAt = datetime('now') WHERE id = ?`,
-  ).run(volume.id, position, label, title, content, published, translators, downloadUrl, id);
-  return await changed(chapter.novelId);
+  await commit(
+    actor,
+    before.novelId,
+    [
+      {
+        sql: `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
+                downloadUrl = ?, updatedAt = datetime('now') WHERE id = ?`,
+        args: [volume.id, position, label, title, content, published, translators, downloadUrl, id],
+      },
+    ],
+    {
+      type: "chapter",
+      id,
+      label: chapterLabel(novel, { label, title }),
+      action: "update",
+      changes: diff([
+        { label: "Libellé", before: before.label, after: label },
+        { label: "Titre", before: before.title, after: title },
+        { label: "Tome", before: beforeVolume ? volumeHeading(beforeVolume) : "", after: volumeHeading(volume) },
+        { label: "Ordre", before: before.position, after: position },
+        { label: "Statut", before: before.published ? "Publié" : "Brouillon", after: published ? "Publié" : "Brouillon" },
+        { label: "Traduction", before: before.translators, after: translators },
+        { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
+        { label: "Texte", before: before.content, after: content, long: true },
+      ]),
+    },
+  );
+  return { savedAt: Date.now() };
 }
 
 export async function deleteChapter(chapterId: number): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
-  const chapter = await db.prepare("SELECT novelId FROM chapter WHERE id = ?").get(chapterId) as Pick<Chapter, "novelId"> | undefined;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const chapter = await db.prepare("SELECT * FROM chapter WHERE id = ?").get<Chapter>(chapterId);
   if (!chapter) return { error: "Chapitre introuvable." };
-  await db.prepare("DELETE FROM chapter WHERE id = ?").run(chapterId);
-  await db.prepare("UPDATE novel SET updatedAt = datetime('now') WHERE id = ?").run(chapter.novelId);
+  const novel = (await findNovel(chapter.novelId))!;
+  await commit(actor, chapter.novelId, [{ sql: "DELETE FROM chapter WHERE id = ?", args: [chapterId] }], {
+    type: "chapter",
+    id: chapterId,
+    label: chapterLabel(novel, chapter),
+    action: "delete",
+  });
   redirect(`/gestion/novels/${chapter.novelId}`);
 }

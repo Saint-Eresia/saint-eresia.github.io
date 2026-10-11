@@ -60,9 +60,9 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       default: "bg-primary",
       primary: "bg-primary",
       secondary: "bg-secondary",
-      success: "bg-green-500",
-      warning: "bg-yellow-500",
-      danger: "bg-red-500"
+      success: "bg-success",
+      warning: "bg-warning",
+      danger: "bg-destructive"
     };
     
     // Size variants
@@ -90,10 +90,6 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
         className={cn(
           "relative w-full overflow-hidden rounded-full bg-secondary",
           "transition-colors", // Smooth colors/shadows transition for theme toggle
-          // 3D track recessed styling
-          "[.lw-3d_&]:shadow-[inset_0_1.5px_3px_0_rgba(0,0,0,0.15),0_1px_1px_0_rgba(255,255,255,0.05)]",
-          "dark:[.lw-3d_&]:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.3)]",
-          "[.lw-3d_&]:border [.lw-3d_&]:border-black/5 dark:[.lw-3d_&]:border-white/5",
           sizeVariants[size],
           className
         )}
@@ -103,10 +99,6 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
           className={cn(
             "h-full w-full flex-1",
             colorVariants[color],
-            // 3D indicator raised styling
-            "[.lw-3d_&]:bg-gradient-to-b [.lw-3d_&]:from-white/20 [.lw-3d_&]:to-black/10",
-            "[.lw-3d_&]:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.25),inset_0_-1px_0_0_rgba(0,0,0,0.15)]",
-            "dark:[.lw-3d_&]:shadow-[inset_0_1.5px_0_0_rgba(255,255,255,0.35),inset_0_-1.5px_0_0_rgba(0,0,0,0.3)]",
             indeterminate ? "animate-progress-indeterminate origin-left" : "",
             indicatorClassName
           )}

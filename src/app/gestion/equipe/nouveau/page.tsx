@@ -22,7 +22,7 @@ async function NewMember() {
   const nextPosition = Math.max(0, ...team.map((m) => m.position)) + 1;
   return (
     <>
-      <ManageHeader back={{ href: "/gestion", label: "Gestion" }} title="Nouveau membre" />
+      <ManageHeader back={{ href: "/gestion?onglet=equipe", label: "Gestion" }} title="Nouveau membre" />
       <div className={`mt-8 max-w-3xl ${panel}`}>
         <MemberForm member={{ name: "", title: "", links: {}, position: nextPosition }} />
         <p className="mt-6 text-sm text-muted-foreground">Vous pourrez ajouter son avatar une fois le membre créé.</p>

@@ -1,23 +1,29 @@
 "use server";
 
+import type { InStatement } from "@libsql/client";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { teamActor, type ActionResult } from "@/lib/action-guard";
+import { diff, logEntry, type Actor, type Change } from "@/lib/activity";
 import { db } from "@/lib/db";
-import { STATUSES, uniqueSlug, type PatchImage } from "@/lib/patches";
-import { removeFile } from "@/lib/uploads";
-import { guard, type ActionResult } from "@/lib/action-guard";
-import { isRoleKey } from "@/lib/roles";
-import { setPatchTeam, type PatchTeamEntry } from "@/lib/team";
+import { STATUSES, uniqueSlug, type Patch, type PatchImage } from "@/lib/patches";
 import { averageProgress, MAX_STEPS, parseSteps, type ProgressStep } from "@/lib/progress-steps";
+import { isRoleKey, ROLE_LABELS, sortRoles, type RoleKey } from "@/lib/roles";
+import { setPatchTeam, type PatchTeamEntry } from "@/lib/team";
+import { IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
 
-// Date la modification et rafraîchit la page affichée.
-async function changed(patchId: number): Promise<ActionResult> {
-  await db.prepare("UPDATE patch SET updatedAt = datetime('now') WHERE id = ?").run(patchId);
+const touch = (patchId: number): InStatement => ({ sql: "UPDATE patch SET updatedAt = datetime('now') WHERE id = ?", args: [patchId] });
+
+// Modification d’un patch : la modification, la date de mise à jour et le journal, en une seule transaction.
+async function commitUpdate(actor: Actor, patch: Pick<Patch, "id" | "title">, statements: InStatement[], changes: Change[]) {
+  await db.batch([...statements, touch(patch.id), logEntry(actor, { type: "patch", id: patch.id, label: patch.title, action: "update", changes })]);
   refresh();
   return { savedAt: Date.now() };
 }
+
+const findPatch = (id: number) => db.prepare("SELECT * FROM patch WHERE id = ?").get<Patch>(id);
 
 function readPatchForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -48,99 +54,181 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, progressSteps: JSON.stringify(steps), quote, featured } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured } };
+}
+
+// Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
+function stepChanges(before: ProgressStep[], after: ProgressStep[]): Change[] {
+  const old = new Map(before.map((step) => [step.label, step.value]));
+  const now = new Map(after.map((step) => [step.label, step.value]));
+  const labels = [...new Set([...old.keys(), ...now.keys()])];
+  return labels.flatMap((label) => {
+    const [b, a] = [old.get(label), now.get(label)];
+    if (b === a) return [];
+    return [{ field: `Avancement ${label}`, before: b === undefined ? "(absente)" : `${b} %`, after: a === undefined ? "(retirée)" : `${a} %` }];
+  });
 }
 
 export async function savePatch(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, progressSteps, quote, featured } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
-    const { lastInsertRowid } = await db
-      .prepare(
-        "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      )
-      .run(await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured);
-    redirect(`/gestion/patchs/${lastInsertRowid}?cree=1`);
+    const [created] = await db.batch([
+      {
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured],
+      },
+      logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
+    ]);
+    redirect(`/gestion/patchs/${created.lastInsertRowid}?cree=1`);
   }
 
-  const { changes } = await db
-    .prepare(
-      "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, updatedAt = datetime('now') WHERE id = ?",
-    )
-    .run(title, description, status, progress, downloadUrl, progressSteps, quote, featured, id);
-  if (!changes) return { error: "Patch introuvable." };
-  refresh();
-  return { savedAt: Date.now() };
+  const before = await findPatch(id);
+  if (!before) return { error: "Patch introuvable." };
+  const changes = [
+    ...diff([
+      { label: "Titre", before: before.title, after: title },
+      { label: "Statut", before: before.status, after: status },
+      { label: "Avancement global", before: `${before.progress} %`, after: `${progress} %` },
+    ]),
+    ...stepChanges(parseSteps(before.progressSteps), steps),
+    ...diff([
+      { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
+      { label: "Citation", before: before.quote, after: quote },
+      { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: featured ? "Oui" : "Non" },
+      { label: "Description", before: before.description, after: description, long: true },
+    ]),
+  ];
+  return commitUpdate(
+    actor,
+    { id, title },
+    [
+      {
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, id],
+      },
+    ],
+    changes,
+  );
 }
 
 // Équipe du patch : ses membres et leurs rôles (liste fixe), affichés sur la fiche et la page Équipe.
 export async function savePatchTeam(patchId: number, entries: PatchTeamEntry[]): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
-  if (!(await db.prepare("SELECT 1 FROM patch WHERE id = ?").get(patchId))) return { error: "Patch introuvable." };
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const patch = await findPatch(patchId);
+  if (!patch) return { error: "Patch introuvable." };
   if (!Array.isArray(entries) || entries.length > 100) return { error: "Équipe invalide." };
   const clean = entries.map((entry) => ({
     memberId: Number(entry?.memberId),
-    roles: (Array.isArray(entry?.roles) ? entry.roles : []).filter((role) => typeof role === "string" && isRoleKey(role)),
+    roles: (Array.isArray(entry?.roles) ? entry.roles : []).filter((role): role is RoleKey => typeof role === "string" && isRoleKey(role)),
   }));
   if (clean.some((entry) => !Number.isInteger(entry.memberId))) return { error: "Membre invalide." };
-  await setPatchTeam(patchId, clean);
-  return await changed(patchId);
+
+  // Journal : un changement par membre ajouté, retiré, ou dont les rôles changent.
+  const names = new Map(
+    (await db.prepare("SELECT id, name FROM team_member").all<{ id: number; name: string }>()).map((m) => [Number(m.id), String(m.name)]),
+  );
+  const beforeRows = await db
+    .prepare("SELECT l.memberId, r.role FROM patch_member l LEFT JOIN patch_member_role r ON r.patchId = l.patchId AND r.memberId = l.memberId WHERE l.patchId = ?")
+    .all<{ memberId: number; role: string | null }>(patchId);
+  const before = new Map<number, RoleKey[]>();
+  for (const row of beforeRows) {
+    const list = before.get(Number(row.memberId)) ?? [];
+    if (row.role && isRoleKey(row.role)) list.push(row.role);
+    before.set(Number(row.memberId), list);
+  }
+  const after = new Map(clean.filter((entry) => names.has(entry.memberId)).map((entry) => [entry.memberId, entry.roles]));
+  const describe = (roles: RoleKey[] | undefined) =>
+    roles === undefined ? "(absent)" : sortRoles(roles).map((role) => ROLE_LABELS[role]).join(", ") || "(aucun rôle)";
+  const changes = [...new Set([...before.keys(), ...after.keys()])].flatMap((memberId) => {
+    const [b, a] = [describe(before.get(memberId)), describe(after.get(memberId))];
+    return b === a ? [] : [{ field: `Équipe : ${names.get(memberId) ?? `membre ${memberId}`}`, before: b, after: a }];
+  });
+
+  await setPatchTeam(patchId, clean, [
+    touch(patchId),
+    logEntry(actor, { type: "patch", id: patchId, label: patch.title, action: "update", changes }),
+  ]);
+  refresh();
+  return { savedAt: Date.now() };
 }
 
 export async function deletePatch(patchId: number): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const patch = await findPatch(patchId);
+  if (!patch) return { error: "Patch introuvable." };
 
   const images = await db.prepare("SELECT file FROM patch_image WHERE patchId = ?").all<{ file: string }>(patchId);
-  await db.prepare("DELETE FROM patch_member_role WHERE patchId = ?").run(patchId);
-  await db.prepare("DELETE FROM patch_member WHERE patchId = ?").run(patchId);
-  await db.prepare("DELETE FROM patch WHERE id = ?").run(patchId); // les images suivent (ON DELETE CASCADE)
+  await db.batch([
+    { sql: "DELETE FROM patch_member_role WHERE patchId = ?", args: [patchId] },
+    { sql: "DELETE FROM patch_member WHERE patchId = ?", args: [patchId] },
+    { sql: "DELETE FROM patch_image WHERE patchId = ?", args: [patchId] },
+    { sql: "DELETE FROM patch WHERE id = ?", args: [patchId] },
+    logEntry(actor, { type: "patch", id: patchId, label: patch.title, action: "delete" }),
+  ]);
   await Promise.all(images.map((image) => removeFile(image.file)));
-  redirect("/gestion");
+  redirect("/gestion?onglet=patchs");
 }
 
 export async function updateImageAlt(imageId: number, alt: string): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
 
   const text = alt.trim().slice(0, 300);
-  const image = await db.prepare("SELECT patchId FROM patch_image WHERE id = ?").get(imageId) as { patchId: number } | undefined;
+  const image = await db.prepare("SELECT * FROM patch_image WHERE id = ?").get<PatchImage>(imageId);
   if (!image) return { error: "Image introuvable." };
-  await db.prepare("UPDATE patch_image SET alt = ? WHERE id = ?").run(text, imageId);
-  return await changed(image.patchId);
+  const patch = (await findPatch(image.patchId))!;
+  return commitUpdate(
+    actor,
+    patch,
+    [{ sql: "UPDATE patch_image SET alt = ? WHERE id = ?", args: [text, imageId] }],
+    diff([{ label: `Texte alternatif (${IMAGE_KIND_LABELS[image.kind]})`, before: image.alt, after: text }]),
+  );
 }
 
 export async function reorderScreenshots(patchId: number, orderedIds: number[]): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const patch = await findPatch(patchId);
+  if (!patch) return { error: "Patch introuvable." };
 
   const current = await db
-    .prepare("SELECT id FROM patch_image WHERE patchId = ? AND kind = 'screenshot'")
-    .all(patchId) as { id: number }[];
-  const known = new Set(current.map((row) => row.id));
+    .prepare("SELECT id FROM patch_image WHERE patchId = ? AND kind = 'screenshot' ORDER BY position, id")
+    .all<{ id: number }>(patchId);
+  const known = new Set(current.map((row) => Number(row.id)));
   if (orderedIds.length !== known.size || !orderedIds.every((id) => known.has(id))) {
     return { error: "L’ordre envoyé ne correspond pas aux images du patch. Rechargez la page." };
   }
-  await db.batch(
+  const position = (ids: number[]) => ids.map((id) => current.findIndex((row) => Number(row.id) === id) + 1).join(", ");
+  return commitUpdate(
+    actor,
+    patch,
     orderedIds.map((id, index) => ({ sql: "UPDATE patch_image SET position = ? WHERE id = ?", args: [index, id] })),
+    [{ field: "Ordre des captures d’écran", before: position(current.map((row) => Number(row.id))), after: position(orderedIds) }],
   );
-  return await changed(patchId);
 }
 
 export async function deleteImage(imageId: number): Promise<ActionResult> {
-  const denied = await guard();
-  if (denied) return denied;
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
 
-  const image = await db.prepare("SELECT * FROM patch_image WHERE id = ?").get(imageId) as PatchImage | undefined;
+  const image = await db.prepare("SELECT * FROM patch_image WHERE id = ?").get<PatchImage>(imageId);
   if (!image) return { error: "Image introuvable." };
-  await db.prepare("DELETE FROM patch_image WHERE id = ?").run(imageId);
+  const patch = (await findPatch(image.patchId))!;
+  const result = await commitUpdate(
+    actor,
+    patch,
+    [{ sql: "DELETE FROM patch_image WHERE id = ?", args: [imageId] }],
+    [{ field: IMAGE_KIND_LABELS[image.kind], before: image.alt || "image", after: "(supprimée)" }],
+  );
   await removeFile(image.file);
-  return await changed(image.patchId);
+  return result;
 }

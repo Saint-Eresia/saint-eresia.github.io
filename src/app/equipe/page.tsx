@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { EmptyState, PageIntro } from "@/components/page-intro";
+import { Badge } from "@/components/lightswind/badge";
 import { LINK_KINDS, LINK_LABELS, listTeam, listTeamPatchRoles, memberAnchor, roleLabels, type LinkKind } from "@/lib/team";
 
 export const metadata: Metadata = { title: "Équipe" };
@@ -80,9 +81,9 @@ async function Members() {
                       <span className="text-xs text-muted-foreground">Participation</span>
                     ) : (
                       roleLabels(patch.roles).map((role) => (
-                        <span key={role} className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">
+                        <Badge key={role} variant="unstyled" className="border-transparent bg-muted text-foreground">
                           {role}
-                        </span>
+                        </Badge>
                       ))
                     )}
                   </dd>

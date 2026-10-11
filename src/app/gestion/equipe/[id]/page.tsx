@@ -35,7 +35,7 @@ async function EditMember({ params, searchParams }: Pick<Props, "params" | "sear
   return (
     <>
       <ManageHeader
-        back={{ href: "/gestion", label: "Gestion" }}
+        back={{ href: "/gestion?onglet=equipe", label: "Gestion" }}
         title={member.name}
         created={created && "Membre ajouté. Ajoutez maintenant son avatar."}
         actions={

@@ -3,6 +3,7 @@
 import { Plus, X } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/lightswind/table";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
 import { ROLES, type RoleKey } from "@/lib/roles";
@@ -58,68 +59,63 @@ export function PatchTeamEditor({
           Aucun membre sur ce patch. Ajoutez-en un ci-dessous.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[56rem] border-collapse text-sm">
-            <caption className="sr-only">Rôles des membres sur ce patch</caption>
-            <thead className="bg-secondary">
-              <tr>
-                <th scope="col" className="sticky left-0 bg-secondary px-3 py-2.5 text-left font-semibold">
-                  Membre
-                </th>
-                {ROLES.map((role) => (
-                  <th key={role.key} scope="col" className="px-1.5 py-2.5 text-center text-xs font-semibold text-muted-foreground">
-                    <abbr title={role.label} className="no-underline">
-                      {role.short}
-                    </abbr>
-                  </th>
-                ))}
-                <th scope="col" className="px-2 py-2.5">
-                  <span className="sr-only">Retirer</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {rows.map((row) => {
-                const member = byId.get(row.memberId);
-                if (!member) return null;
-                return (
-                  <tr key={row.memberId} className="hover:bg-muted/40">
-                    <th scope="row" className="sticky left-0 bg-card px-3 py-2 text-left font-semibold">
-                      <span className="flex items-center gap-2.5">
-                        <MemberAvatar member={member} className="size-7 text-xs" />
-                        {member.name}
-                      </span>
-                    </th>
-                    {ROLES.map((role) => {
-                      const checked = row.roles.includes(role.key);
-                      return (
-                        <td key={role.key} className="px-1.5 py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggle(row.memberId, role.key)}
-                            aria-label={`${member.name} : ${role.label}`}
-                            className="size-4 cursor-pointer accent-[var(--primary)]"
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="px-2 py-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => setRows((current) => current.filter((r) => r.memberId !== row.memberId))}
-                        aria-label={`Retirer ${member.name} de l’équipe du patch`}
-                        className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Table dense className="min-w-[56rem]">
+          <TableCaption className="sr-only">Rôles des membres sur ce patch</TableCaption>
+          <TableHeader className="bg-secondary">
+            <TableRow className="hover:bg-transparent">
+              <TableHead scope="col" className="sticky left-0 bg-secondary text-sm text-foreground">
+                Membre
+              </TableHead>
+              {ROLES.map((role) => (
+                <TableHead key={role.key} scope="col" align="center" className="px-1.5">
+                  <abbr title={role.label} className="no-underline">
+                    {role.short}
+                  </abbr>
+                </TableHead>
+              ))}
+              <TableHead scope="col" className="px-2">
+                <span className="sr-only">Retirer</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row) => {
+              const member = byId.get(row.memberId);
+              if (!member) return null;
+              return (
+                <TableRow key={row.memberId} className="hover:bg-muted/40">
+                  <TableHead scope="row" className="sticky left-0 bg-background text-sm text-foreground">
+                    <span className="flex items-center gap-2.5">
+                      <MemberAvatar member={member} className="size-7 text-xs" />
+                      {member.name}
+                    </span>
+                  </TableHead>
+                  {ROLES.map((role) => (
+                    <TableCell key={role.key} align="center" className="px-1.5">
+                      <input
+                        type="checkbox"
+                        checked={row.roles.includes(role.key)}
+                        onChange={() => toggle(row.memberId, role.key)}
+                        aria-label={`${member.name} : ${role.label}`}
+                        className="size-4 cursor-pointer accent-[var(--primary)]"
+                      />
+                    </TableCell>
+                  ))}
+                  <TableCell align="center" className="px-2">
+                    <button
+                      type="button"
+                      onClick={() => setRows((current) => current.filter((r) => r.memberId !== row.memberId))}
+                      aria-label={`Retirer ${member.name} de l’équipe du patch`}
+                      className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       )}
 
       <div className="flex flex-wrap items-end gap-3">

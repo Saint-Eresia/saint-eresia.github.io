@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Badge } from "@/components/lightswind/badge";
 import { MemberAvatar } from "@/components/member-avatar";
 import { ROLE_LABELS, type RoleKey } from "@/lib/roles";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,6 @@ export function ProjectMembers({ members, className }: { members: Member[]; clas
       </h2>
       <ul className="mt-4 space-y-1">
         {members.map((member) => {
-          const detail = member.roles.length ? member.roles.map((role) => ROLE_LABELS[role]).join(" · ") : member.title;
           return (
             <li key={member.id}>
               <Link
@@ -26,7 +26,17 @@ export function ProjectMembers({ members, className }: { members: Member[]; clas
                 <MemberAvatar member={member} className="size-10 shrink-0 text-base" />
                 <span className="min-w-0">
                   <span className="block truncate font-bold">{member.name}</span>
-                  {detail && <span className="block text-xs text-muted-foreground">{detail}</span>}
+                  {member.roles.length > 0 ? (
+                    <span className="mt-1 flex flex-wrap gap-1">
+                      {member.roles.map((role) => (
+                        <Badge key={role} variant="unstyled" size="sm" className="border-border bg-muted px-2 text-[0.6875rem] text-foreground">
+                          {ROLE_LABELS[role]}
+                        </Badge>
+                      ))}
+                    </span>
+                  ) : (
+                    member.title && <span className="block text-xs text-muted-foreground">{member.title}</span>
+                  )}
                 </span>
               </Link>
             </li>

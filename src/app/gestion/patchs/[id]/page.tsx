@@ -42,7 +42,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <Link href="/gestion" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
+          <Link href="/gestion?onglet=patchs" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="size-4" /> Gestion des patchs
           </Link>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance">{patch.title}</h1>

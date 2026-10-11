@@ -13,7 +13,7 @@ export const InteractiveCard = ({
   transitionDuration = 0.3,
   transitionEasing = "easeInOut",
   // Add a prop to accept Tailwind background classes
-  // Example: "bg-gray-900 dark:bg-gray-800"
+  // Exemple : "bg-card"
   tailwindBgClass = "bg-transparent backdrop-blur-md",
   // Saint Eresia : taille réglable (à l’origine fixée à 320 px) ; mettre rotationFactor à 0 supprime l’inclinaison 3D.
   containerClassName = "relative w-[320px] aspect-[17/21] isolate",

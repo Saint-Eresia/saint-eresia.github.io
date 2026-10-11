@@ -1,4 +1,5 @@
 import "server-only";
+import type { InStatement } from "@libsql/client";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -44,8 +45,18 @@ export async function storeFile(data: Buffer): Promise<string> {
   return file;
 }
 
-// Convertit l’image en WebP, l’enregistre et l’ajoute à son propriétaire.
-export async function saveImage(owner: ImageOwner, kind: ImageKind, input: Buffer, alt: string) {
+// Libellés des types d’image (journal d’activité, gestion).
+export const IMAGE_KIND_LABELS: Record<ImageKind, string> = {
+  cover: "Couverture",
+  screenshot: "Capture d’écran",
+  illustration: "Illustration",
+  background: "Arrière-plan",
+  logo: "Logo",
+};
+
+// Convertit l’image en WebP, l’enregistre et l’ajoute à son propriétaire. `extra` : instructions exécutées
+// dans la même transaction que l’ajout (date de mise à jour, journal d’activité…).
+export async function saveImage(owner: ImageOwner, kind: ImageKind, input: Buffer, alt: string, extra: InStatement[] = []) {
   const { table, column } = TABLES[owner.type];
   const { data, info } = await sharp(input, { limitInputPixels: 100_000_000 })
     .rotate() // applique l’orientation EXIF
@@ -55,19 +66,25 @@ export async function saveImage(owner: ImageOwner, kind: ImageKind, input: Buffe
 
   const file = await storeFile(data);
 
-  // Une seule couverture et un seul arrière-plan : la nouvelle image remplace l’ancienne.
-  if (SINGLE_KINDS.includes(kind)) {
-    const old = await db.prepare(`SELECT file FROM ${table} WHERE ${column} = ? AND kind = ?`).all<{ file: string }>(owner.id, kind);
-    await db.prepare(`DELETE FROM ${table} WHERE ${column} = ? AND kind = ?`).run(owner.id, kind);
-    await Promise.all(old.map((image) => removeFile(image.file)));
-  }
+  // Une seule couverture, un seul arrière-plan, un seul logo : la nouvelle image remplace l’ancienne.
+  const single = SINGLE_KINDS.includes(kind);
+  const old = single
+    ? await db.prepare(`SELECT file FROM ${table} WHERE ${column} = ? AND kind = ?`).all<{ file: string }>(owner.id, kind)
+    : [];
   const { next } = (await db
     .prepare(`SELECT COALESCE(MAX(position), -1) + 1 AS next FROM ${table} WHERE ${column} = ? AND kind = ?`)
     .get<{ next: number }>(owner.id, kind))!;
-  const { lastInsertRowid } = await db
-    .prepare(`INSERT INTO ${table} (${column}, kind, file, alt, width, height, position) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-    .run(owner.id, kind, file, alt, info.width, info.height, next);
-  return { id: lastInsertRowid, file, width: info.width, height: info.height };
+  const results = await db.batch([
+    ...(single ? [{ sql: `DELETE FROM ${table} WHERE ${column} = ? AND kind = ?`, args: [owner.id, kind] }] : []),
+    {
+      sql: `INSERT INTO ${table} (${column}, kind, file, alt, width, height, position) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      args: [owner.id, kind, file, alt, info.width, info.height, single ? 0 : next],
+    },
+    ...extra,
+  ]);
+  await Promise.all(old.map((image) => removeFile(image.file)));
+  const inserted = results[single ? 1 : 0];
+  return { id: inserted.lastInsertRowid, file, width: info.width, height: info.height, replaced: old.length > 0 };
 }
 
 // Avatar d’un membre de l’équipe : recadré en carré 256 px, en WebP. Renvoie la valeur à garder en base.

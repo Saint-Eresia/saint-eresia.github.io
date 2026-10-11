@@ -1,4 +1,5 @@
 import "server-only";
+import type { InStatement } from "@libsql/client";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { isRoleKey, ROLE_LABELS, sortRoles, type RoleKey } from "@/lib/roles";
@@ -112,7 +113,8 @@ export async function listTeamPatchRoles() {
 export type PatchTeamEntry = { memberId: number; roles: RoleKey[] };
 
 // Remplace l’équipe d’un patch (membres et rôles) en une seule transaction. Membres et rôles inconnus ignorés.
-export async function setPatchTeam(patchId: number, entries: PatchTeamEntry[]) {
+// `extra` : instructions ajoutées à la même transaction (date de mise à jour, journal d’activité).
+export async function setPatchTeam(patchId: number, entries: PatchTeamEntry[], extra: InStatement[] = []) {
   const known = new Set((await db.prepare("SELECT id FROM team_member").all<{ id: number }>()).map((row) => Number(row.id)));
   const seen = new Set<number>();
   const clean = entries.filter((entry) => known.has(entry.memberId) && !seen.has(entry.memberId) && seen.add(entry.memberId));
@@ -130,6 +132,7 @@ export async function setPatchTeam(patchId: number, entries: PatchTeamEntry[]) {
         args: [patchId, entry.memberId, role],
       })),
     ]),
+    ...extra,
   ]);
 }
 
@@ -150,12 +153,14 @@ export async function listNovelMemberIds(novelId: number) {
 }
 
 // Remplace la liste des participants d’un novel (identifiants inconnus ignorés), en une seule transaction.
-export async function setNovelMembers(novelId: number, memberIds: number[]) {
+// `extra` : instructions ajoutées à la même transaction (date de mise à jour, journal d’activité).
+export async function setNovelMembers(novelId: number, memberIds: number[], extra: InStatement[] = []) {
   const known = new Set((await db.prepare("SELECT id FROM team_member").all<{ id: number }>()).map((row) => Number(row.id)));
   const ids = [...new Set(memberIds)].filter((memberId) => known.has(memberId));
   await db.batch([
     { sql: `DELETE FROM novel_member WHERE novelId = ? AND memberId NOT IN (${ids.map(() => "?").join(", ")})`, args: [novelId, ...ids] },
     ...ids.map((memberId) => ({ sql: "INSERT OR IGNORE INTO novel_member (novelId, memberId) VALUES (?, ?)", args: [novelId, memberId] })),
+    ...extra,
   ]);
 }
 

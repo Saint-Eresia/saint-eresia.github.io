@@ -45,7 +45,7 @@ const badgeVariants = cva(
 )
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {
   withDot?: boolean;
   dotColor?: string;
@@ -65,7 +65,7 @@ function Badge({
   ...props 
 }: BadgeProps) {
   return (
-    <div 
+    <span 
       className={cn(
         badgeVariants({ variant, size, shape }), 
         interactive && "cursor-pointer hover:opacity-80",
@@ -76,12 +76,13 @@ function Badge({
     >
       {withDot && (
         <span 
-          className="mr-1 h-1.5 w-1.5 rounded-full inline-block" 
+          aria-hidden
+          className="mr-1 h-1.5 w-1.5 rounded-full inline-block"
           style={{ backgroundColor: dotColor }}
         />
       )}
       {props.children}
-    </div>
+    </span>
   )
 }
 

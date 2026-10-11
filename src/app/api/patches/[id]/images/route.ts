@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { handleImageUpload } from "@/lib/upload-handler";
 import type { ImageKind } from "@/lib/uploads";
 
-// Envoi d’images d’un patch : une couverture, un arrière-plan ou plusieurs captures d’écran.
+// Envoi d’images d’un patch : une couverture, un arrière-plan, un logo ou plusieurs captures d’écran.
 export async function POST(req: Request, ctx: RouteContext<"/api/patches/[id]/images">) {
   const id = Number((await ctx.params).id);
   const patch = await db.prepare("SELECT title FROM patch WHERE id = ?").get<{ title: string }>(id);
@@ -11,12 +11,10 @@ export async function POST(req: Request, ctx: RouteContext<"/api/patches/[id]/im
     background: `Arrière-plan de ${patch?.title}`,
     logo: `Logo de ${patch?.title}`,
   };
-  const response = await handleImageUpload(req, {
+  return handleImageUpload(req, {
     owner: { type: "patch", id },
-    exists: !!patch,
+    label: patch ? patch.title : null,
     kinds: ["cover", "background", "logo", "screenshot"],
     altFor: (kind) => alts[kind] ?? `Capture d’écran de ${patch?.title}`,
   });
-  if (response.ok) await db.prepare("UPDATE patch SET updatedAt = datetime('now') WHERE id = ?").run(id);
-  return response;
 }

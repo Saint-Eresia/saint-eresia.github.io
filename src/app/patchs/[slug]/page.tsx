@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Gallery } from "@/components/patch/gallery";
 import { Markdown } from "@/components/markdown";
+import { CountUp } from "@/components/lightswind/count-up";
 import { CoverPlaceholder, ProgressBar, StatusBadge } from "@/components/content-meta";
 import { HeroBackdrop } from "@/components/hero-backdrop";
 import { projectLayout } from "@/components/project-layout";
@@ -78,7 +79,7 @@ async function PatchDetail({ params }: { params: PageProps<"/patchs/[slug]">["pa
             <div>
               <div className="flex items-baseline justify-between">
                 <span className="text-sm font-semibold text-muted-foreground">Avancement</span>
-                <span className="text-2xl font-extrabold tabular-nums">{patch.progress} %</span>
+                <CountUp value={patch.progress} suffix=" %" duration={1.2} className="text-2xl font-extrabold tabular-nums" />
               </div>
               <ProgressBar value={patch.progress} className="mt-2 h-2" />
               {patch.steps.length > 0 && (

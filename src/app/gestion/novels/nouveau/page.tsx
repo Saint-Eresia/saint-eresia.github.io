@@ -11,7 +11,7 @@ export default function NewNovelPage() {
   return (
     <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
       <TeamGate>
-        <ManageHeader back={{ href: "/gestion", label: "Gestion" }} title="Nouveau light novel" />
+        <ManageHeader back={{ href: "/gestion?onglet=novels", label: "Gestion" }} title="Nouveau light novel" />
         <div className={`mt-8 max-w-3xl ${panel}`}>
           <NovelForm
             statuses={NOVEL_STATUSES}

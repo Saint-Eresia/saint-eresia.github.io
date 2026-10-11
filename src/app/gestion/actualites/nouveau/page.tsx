@@ -10,7 +10,7 @@ export default function NewNewsPage() {
   return (
     <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
       <TeamGate>
-        <ManageHeader back={{ href: "/gestion", label: "Gestion" }} title="Nouvelle actualité" />
+        <ManageHeader back={{ href: "/gestion?onglet=actualites", label: "Gestion" }} title="Nouvelle actualité" />
         <div className={`mt-8 max-w-4xl ${panel}`}>
           <NewsForm news={{ title: "", content: "", published: false }} />
         </div>

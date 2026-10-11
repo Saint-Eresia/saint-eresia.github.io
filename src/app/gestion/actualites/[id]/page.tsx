@@ -33,7 +33,7 @@ async function EditNews({ params, searchParams }: Pick<Props, "params" | "search
   return (
     <>
       <ManageHeader
-        back={{ href: "/gestion", label: "Gestion" }}
+        back={{ href: "/gestion?onglet=actualites", label: "Gestion" }}
         title={news.title}
         created={created && "Actualité créée. Passez-la en « Publiée » pour l’afficher sur l’accueil."}
         actions={
