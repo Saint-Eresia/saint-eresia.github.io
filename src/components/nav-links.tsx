@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Gamepad2, House, Newspaper, Settings2, Users } from "lucide-react";
+import { BookOpen, Gamepad2, House, Joystick, Newspaper, Settings2, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/actualites", label: "Actualités", icon: Newspaper, match: (path: string) => path.startsWith("/actualites") },
   { href: "/novels", label: "Novels", icon: BookOpen, match: (path: string) => path.startsWith("/novels") },
   { href: "/patchs", label: "Patchs VN", icon: Gamepad2, match: (path: string) => path.startsWith("/patchs") },
+  { href: "/jeux", label: "Jeux", icon: Joystick, match: (path: string) => path.startsWith("/jeux") },
   { href: "/equipe", label: "Équipe", icon: Users, match: (path: string) => path.startsWith("/equipe") },
 ];
 const TEAM_LINK = { href: "/gestion", label: "Gestion", icon: Settings2, match: (path: string) => path.startsWith("/gestion") };
@@ -49,7 +50,8 @@ function Links({ showTeam, pathname }: { showTeam: boolean; pathname: string | n
             )}
           >
             <Icon className="size-4" aria-hidden />
-            <span className="max-lg:sr-only">{label}</span>
+            {/* Avec l’onglet Gestion (7 liens), les libellés n’apparaissent qu’à partir de xl pour tenir sur une ligne. */}
+            <span className={showTeam ? "max-xl:sr-only" : "max-lg:sr-only"}>{label}</span>
           </Link>
         );
       })}

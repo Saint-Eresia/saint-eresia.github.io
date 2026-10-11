@@ -16,7 +16,7 @@ import { GestionTabs } from "./gestion-tabs";
 
 export const metadata: Metadata = { title: "Gestion" };
 
-const TABS = ["activite", "actualites", "novels", "patchs", "equipe"] as const;
+const TABS = ["activite", "actualites", "novels", "patchs", "jeux", "equipe"] as const;
 type Tab = (typeof TABS)[number];
 const isTab = (value: unknown): value is Tab => TABS.includes(value as Tab);
 
@@ -40,7 +40,9 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">
   const query = await searchParams;
   const onglet = one(query.onglet);
   const feed: FeedParams = { membre: one(query.membre), type: one(query.type), page: one(query.page) };
-  const [news, novels, patches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels(), listPatches(), listTeam()]);
+  const [news, novels, allPatches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels(), listPatches(), listTeam()]);
+  const patches = allPatches.filter((patch) => patch.kind === "vn");
+  const games = allPatches.filter((patch) => patch.kind === "jeu");
 
   return (
     <GestionTabs
@@ -50,6 +52,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">
         { value: "actualites", label: "Actualités", count: news.length },
         { value: "novels", label: "Novels", count: novels.length },
         { value: "patchs", label: "Patchs", count: patches.length },
+        { value: "jeux", label: "Jeux", count: games.length },
         { value: "equipe", label: "Équipe", count: team.length },
       ]}
     >
@@ -63,7 +66,10 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">
         <NovelList novels={novels} />
       </TabsContent>
       <TabsContent value="patchs">
-        <PatchList patches={patches} />
+        <PatchList patches={patches} kind="vn" />
+      </TabsContent>
+      <TabsContent value="jeux">
+        <PatchList patches={games} kind="jeu" />
       </TabsContent>
       <TabsContent value="equipe">
         <TeamList team={team} />
@@ -171,11 +177,17 @@ function NovelList({ novels }: { novels: Awaited<ReturnType<typeof listNovels>> 
   );
 }
 
-function PatchList({ patches }: { patches: Awaited<ReturnType<typeof listPatches>> }) {
+const PATCH_SECTIONS = {
+  vn: { title: "Patchs VN", newHref: "/gestion/patchs/nouveau", newLabel: "Nouveau patch", empty: "Aucun patch pour l’instant." },
+  jeu: { title: "Jeux", newHref: "/gestion/patchs/nouveau?type=jeu", newLabel: "Nouveau jeu", empty: "Aucun jeu pour l’instant." },
+} as const;
+
+function PatchList({ patches, kind }: { patches: Awaited<ReturnType<typeof listPatches>>; kind: keyof typeof PATCH_SECTIONS }) {
+  const section = PATCH_SECTIONS[kind];
   return (
-    <Section title="Patchs VN" newHref="/gestion/patchs/nouveau" newLabel="Nouveau patch">
+    <Section title={section.title} newHref={section.newHref} newLabel={section.newLabel}>
       {patches.length === 0 ? (
-        empty("Aucun patch pour l’instant.")
+        empty(section.empty)
       ) : (
         <ul className={listClass}>
           {patches.map((patch) => (

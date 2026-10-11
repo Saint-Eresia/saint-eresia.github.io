@@ -7,6 +7,7 @@ import { teamActor, type ActionResult } from "@/lib/action-guard";
 import { diff, logEntry, type Actor, type Change } from "@/lib/activity";
 import { db } from "@/lib/db";
 import { STATUSES, uniqueSlug, type Patch, type PatchImage } from "@/lib/patches";
+import { isPatchKind, PATCH_KINDS } from "@/lib/patch-kinds";
 import { averageProgress, MAX_STEPS, parseSteps, type ProgressStep } from "@/lib/progress-steps";
 import { isRoleKey, ROLE_LABELS, sortRoles, type RoleKey } from "@/lib/roles";
 import { setPatchTeam, type PatchTeamEntry } from "@/lib/team";
@@ -33,6 +34,8 @@ function readPatchForm(formData: FormData) {
   const downloadUrl = String(formData.get("downloadUrl") ?? "").trim();
   const quote = String(formData.get("quote") ?? "").trim();
   const featured = formData.get("featured") === "1" ? 1 : 0;
+  const kind = String(formData.get("kind") ?? "vn");
+  if (!isPatchKind(kind)) return { error: "Rubrique invalide." };
   if (quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
@@ -54,7 +57,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, kind } };
 }
 
 // Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
@@ -75,14 +78,14 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, kind } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured],
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind],
       },
       logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
     ]);
@@ -94,6 +97,7 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
   const changes = [
     ...diff([
       { label: "Titre", before: before.title, after: title },
+      { label: "Rubrique", before: PATCH_KINDS[isPatchKind(before.kind) ? before.kind : "vn"].plural, after: PATCH_KINDS[kind].plural },
       { label: "Statut", before: before.status, after: status },
       { label: "Avancement global", before: `${before.progress} %`, after: `${progress} %` },
     ]),
@@ -110,8 +114,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     { id, title },
     [
       {
-        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ? WHERE id = ?",
-        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, id],
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, kind = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, id],
       },
     ],
     changes,
@@ -175,7 +179,7 @@ export async function deletePatch(patchId: number): Promise<ActionResult> {
     logEntry(actor, { type: "patch", id: patchId, label: patch.title, action: "delete" }),
   ]);
   await Promise.all(images.map((image) => removeFile(image.file)));
-  redirect("/gestion?onglet=patchs");
+  redirect(`/gestion?onglet=${PATCH_KINDS[isPatchKind(patch.kind) ? patch.kind : "vn"].tab}`);
 }
 
 export async function updateImageAlt(imageId: number, alt: string): Promise<ActionResult> {

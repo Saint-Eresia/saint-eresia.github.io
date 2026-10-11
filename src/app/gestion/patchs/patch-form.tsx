@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { PATCH_KINDS, type PatchKind } from "@/lib/patch-kinds";
 import { averageProgress, MAX_STEPS, SUGGESTED_STEPS, type ProgressStep } from "@/lib/progress-steps";
 import { savePatch, type ActionResult } from "./actions";
 
@@ -22,6 +23,7 @@ type PatchFields = {
   steps: ProgressStep[];
   quote: string;
   featured: boolean; // recommandé sur l’accueil
+  kind: PatchKind; // rubrique publique : Patchs VN ou Jeux
 };
 
 export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: readonly string[] }) {
@@ -34,6 +36,7 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
   const [steps, setSteps] = useState(patch.steps);
   const [quote, setQuote] = useState(patch.quote);
   const [featured, setFeatured] = useState(patch.featured ? "1" : "0");
+  const [kind, setKind] = useState<PatchKind>(patch.kind);
   const updateStep = (index: number, change: Partial<ProgressStep>) =>
     setSteps((current) => current.map((step, i) => (i === index ? { ...step, ...change } : step)));
   const addStep = (label: string) => setSteps((current) => [...current, { label, value: 0 }]);
@@ -52,6 +55,32 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
         <Label htmlFor="title">Titre</Label>
         <Input id="title" name="title" required maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Rubrique</legend>
+        <input type="hidden" name="kind" value={kind} />
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(PATCH_KINDS) as PatchKind[]).map((value) => (
+            <label
+              key={value}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-input px-4 py-2 text-sm font-semibold transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
+            >
+              <input
+                type="radio"
+                name="kind-choice"
+                value={value}
+                checked={kind === value}
+                onChange={() => setKind(value)}
+                className="sr-only"
+              />
+              {PATCH_KINDS[value].plural}
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Patchs VN pour les visual novels, Jeux pour les autres jeux vidéo. La fiche publique change d’adresse en conséquence.
+        </p>
+      </fieldset>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">

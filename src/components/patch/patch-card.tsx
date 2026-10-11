@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { patchHref } from "@/lib/patch-kinds";
 import { imageUrl, type PatchWithImages } from "@/lib/patches";
 import { CoverPlaceholder, ProgressBar, StatusBadge } from "@/components/content-meta";
 
 export function PatchCard({ patch }: { patch: PatchWithImages }) {
   return (
     <Link
-      href={`/patchs/${patch.slug}`}
+      href={patchHref(patch)}
       className="group flex h-full flex-col rounded-2xl focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
     >
       <div className="aspect-[3/4] shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_var(--shadow)] transition-[transform,box-shadow,border-color] duration-300 group-hover:-translate-y-1 group-hover:border-primary/50 group-hover:shadow-[0_18px_40px_var(--shadow)]">

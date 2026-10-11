@@ -2,6 +2,7 @@ import "server-only";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { fileUrl } from "@/lib/file-url";
+import type { PatchKind } from "@/lib/patch-kinds";
 import { parseSteps, type ProgressStep } from "@/lib/progress-steps";
 
 export const STATUSES = ["En développement", "Alpha", "Bêta", "Stable", "Terminé", "Obsolète", "Abandonné"] as const;
@@ -28,6 +29,7 @@ export type Patch = {
   progressSteps: string; // JSON, voir progress-steps.ts
   quote: string; // citation du carrousel « Recommandé »
   featured: number; // 1 : affiché dans le carrousel de l’accueil
+  kind: PatchKind; // 'vn' ou 'jeu', voir patch-kinds.ts
   createdAt: string;
   updatedAt: string;
 };
@@ -66,9 +68,12 @@ export async function listFeaturedPatches() {
 }
 
 // connection() empêche que ces lectures soient figées au build : la base change après le déploiement.
-export async function listPatches() {
+// Sans type : tous les patchs (VN et jeux).
+export async function listPatches(kind?: PatchKind) {
   await connection();
-  const patches = await db.prepare("SELECT * FROM patch ORDER BY updatedAt DESC, id DESC").all<Patch>();
+  const patches = kind
+    ? await db.prepare("SELECT * FROM patch WHERE kind = ? ORDER BY updatedAt DESC, id DESC").all<Patch>(kind)
+    : await db.prepare("SELECT * FROM patch ORDER BY updatedAt DESC, id DESC").all<Patch>();
   return Promise.all(patches.map(withImages));
 }
 

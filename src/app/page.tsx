@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/page-intro";
 import { Button } from "@/components/ui/button";
 import { excerpt, listNews, newsDate } from "@/lib/news";
 import { listFeaturedNovels, listNovels } from "@/lib/novels";
+import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
 import { formatDate, imageUrl, listFeaturedPatches, listPatches } from "@/lib/patches";
 import { getViewer } from "@/lib/viewer";
 
@@ -24,9 +25,14 @@ export default function HomePage() {
       <section aria-labelledby="patchs-titre" className="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
         <SectionHeading id="patchs-titre" title="Patchs VN" href="/patchs" link="Tous les patchs" />
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-muted" />}>
-          <Patches />
+          <Patches kind="vn" />
         </Suspense>
       </section>
+
+      {/* Jeux vidéo hors visual novels : la section n’apparaît que s’il y en a. */}
+      <Suspense fallback={null}>
+        <GamesSection />
+      </Suspense>
 
       {/* Light novels et actualités, en plus compact. */}
       <div className="mx-auto grid max-w-6xl gap-10 px-4 pt-14 sm:px-6 lg:grid-cols-2">
@@ -143,8 +149,8 @@ async function Recommended() {
   }));
   const patchSlides: FeaturedSlide[] = patchPool.map((patch) => ({
     key: `patch-${patch.id}`,
-    kindLabel: "Patch VN",
-    href: `/patchs/${patch.slug}`,
+    kindLabel: PATCH_KINDS[patch.kind].label,
+    href: patchHref(patch),
     title: patch.title,
     byline: "",
     status: patch.status,
@@ -162,10 +168,25 @@ async function Recommended() {
   return <FeaturedCarousel slides={slides} delaySeconds={RECOMMENDED_DELAY_SECONDS} />;
 }
 
-// Tous les patchs, du plus récemment mis à jour au plus ancien.
-async function Patches() {
-  const patches = await listPatches(); // déjà triés par dernière mise à jour
+async function GamesSection() {
+  const games = await listPatches("jeu");
+  if (games.length === 0) return null;
+  return (
+    <section aria-labelledby="jeux-titre" className="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
+      <SectionHeading id="jeux-titre" title="Jeux" href="/jeux" link="Tous les jeux" />
+      <PatchTiles patches={games} />
+    </section>
+  );
+}
+
+// Les patchs d’un type, du plus récemment mis à jour au plus ancien.
+async function Patches({ kind }: { kind: PatchKind }) {
+  const patches = await listPatches(kind); // déjà triés par dernière mise à jour
   if (patches.length === 0) return <EmptyState>Aucun patch n’est publié pour le moment.</EmptyState>;
+  return <PatchTiles patches={patches} />;
+}
+
+function PatchTiles({ patches }: { patches: Awaited<ReturnType<typeof listPatches>> }) {
   return (
     <div>
       {patches.length > 0 && (
@@ -175,7 +196,7 @@ async function Patches() {
               <PatchTile
                 patch={{
                   key: `patch-${patch.id}`,
-                  href: `/patchs/${patch.slug}`,
+                  href: patchHref(patch),
                   title: patch.title,
                   status: patch.status,
                   progress: patch.progress,

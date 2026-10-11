@@ -39,9 +39,9 @@ export function LogoutButton({ className }: { className?: string }) {
         router.refresh();
       }}
     >
-      {/* Sur petit écran, seule l’icône est affichée pour que l’en-tête tienne en largeur. */}
-      <LogOut className="size-4 sm:hidden" aria-hidden />
-      <span className="max-sm:sr-only">Déconnexion</span>
+      {/* Icône seule (libellé pour les lecteurs d’écran et en infobulle) : l’en-tête doit tenir avec tous les onglets. */}
+      <LogOut className="size-4" aria-hidden />
+      <span className="sr-only">Déconnexion</span>
     </button>
   );
 }

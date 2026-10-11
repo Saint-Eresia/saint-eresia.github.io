@@ -47,7 +47,7 @@ function HeaderContent({
         <ToggleTheme animationType="fade-in-out" duration={250} />
         {viewer ? (
           <>
-            <span className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pr-3 pl-1">
+            <span title={viewer.name} className="flex items-center rounded-full border border-border bg-card p-1">
               {viewer.image ? (
                 <img src={viewer.image} alt="" width={28} height={28} className="size-7 rounded-full" />
               ) : (
@@ -55,9 +55,9 @@ function HeaderContent({
                   {viewer.name.charAt(0).toUpperCase()}
                 </span>
               )}
-              <span className="hidden max-w-32 truncate text-sm font-semibold md:inline">{viewer.name}</span>
+              <span className="sr-only">Connecté en tant que {viewer.name}</span>
             </span>
-            <LogoutButton className="flex items-center rounded-full p-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:px-3" />
+            <LogoutButton className="grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" />
           </>
         ) : viewer === null ? (
           <Button asChild variant="outline" className="h-10 rounded-full px-3 font-semibold sm:px-4">

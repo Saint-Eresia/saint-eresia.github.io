@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { EmptyState, PageIntro } from "@/components/page-intro";
 import { Badge } from "@/components/lightswind/badge";
+import { patchHref } from "@/lib/patch-kinds";
 import { LINK_KINDS, LINK_LABELS, listTeam, listTeamPatchRoles, memberAnchor, roleLabels, type LinkKind } from "@/lib/team";
 
 export const metadata: Metadata = { title: "Équipe" };
@@ -72,7 +73,7 @@ async function Members() {
               {(patchRoles.get(member.id) ?? []).map((patch) => (
                 <div key={patch.slug}>
                   <dt>
-                    <Link href={`/patchs/${patch.slug}`} className="font-semibold text-muted-foreground hover:text-primary hover:underline">
+                    <Link href={patchHref(patch)} className="font-semibold text-muted-foreground hover:text-primary hover:underline">
                       {patch.title}
                     </Link>
                   </dt>

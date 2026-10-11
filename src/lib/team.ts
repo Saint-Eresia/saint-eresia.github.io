@@ -91,20 +91,20 @@ export async function listTeamPatchRoles() {
   const [links, roles] = await Promise.all([
     db
       .prepare(
-        `SELECT l.memberId, p.id AS patchId, p.slug, p.title FROM patch_member l JOIN patch p ON p.id = l.patchId
+        `SELECT l.memberId, p.id AS patchId, p.slug, p.title, p.kind FROM patch_member l JOIN patch p ON p.id = l.patchId
          ORDER BY p.title COLLATE NOCASE`,
       )
-      .all<{ memberId: number; patchId: number; slug: string; title: string }>(),
+      .all<{ memberId: number; patchId: number; slug: string; title: string; kind: string }>(),
     db.prepare("SELECT patchId, memberId, role FROM patch_member_role").all<{ patchId: number; memberId: number; role: string }>(),
   ]);
-  const result = new Map<number, { patchId: number; slug: string; title: string; roles: RoleKey[] }[]>();
+  const result = new Map<number, { patchId: number; slug: string; kind: string; title: string; roles: RoleKey[] }[]>();
   for (const link of links) {
     const keys = roles
       .filter((r) => Number(r.patchId) === Number(link.patchId) && Number(r.memberId) === Number(link.memberId))
       .map((r) => r.role)
       .filter(isRoleKey);
     const list = result.get(Number(link.memberId)) ?? [];
-    list.push({ patchId: Number(link.patchId), slug: String(link.slug), title: String(link.title), roles: sortRoles(keys) });
+    list.push({ patchId: Number(link.patchId), slug: String(link.slug), kind: String(link.kind), title: String(link.title), roles: sortRoles(keys) });
     result.set(Number(link.memberId), list);
   }
   return result;

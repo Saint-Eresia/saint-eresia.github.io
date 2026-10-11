@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { PatchTeamEditor } from "@/components/patch-team-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
+import { PATCH_KINDS, patchHref } from "@/lib/patch-kinds";
 import { getPatchById, imageUrl, STATUSES, type PatchImage } from "@/lib/patches";
 import { listPatchTeam, listTeam } from "@/lib/team";
 import { savePatchTeam } from "../actions";
@@ -42,13 +43,16 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <Link href="/gestion?onglet=patchs" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
-            <ArrowLeft className="size-4" /> Gestion des patchs
+          <Link
+            href={`/gestion?onglet=${PATCH_KINDS[patch.kind].tab}`}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" /> Gestion des {patch.kind === "jeu" ? "jeux" : "patchs"}
           </Link>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance">{patch.title}</h1>
         </div>
         <Button asChild variant="outline" size="pill">
-          <Link href={`/patchs/${patch.slug}`}>
+          <Link href={patchHref(patch)}>
             Voir la fiche publique <ExternalLink />
           </Link>
         </Button>
@@ -73,6 +77,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
               steps: patch.steps,
               quote: patch.quote,
               featured: patch.featured === 1,
+              kind: patch.kind,
             }}
           />
         </section>

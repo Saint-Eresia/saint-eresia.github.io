@@ -34,6 +34,8 @@ const SCHEMA = `
     -- Carrousel « Recommandé » de l’accueil : citation affichée et patch mis en avant (1) ou non (0).
     quote TEXT NOT NULL DEFAULT '',
     featured INTEGER NOT NULL DEFAULT 0,
+    -- Type : 'vn' (rubrique Patchs VN) ou 'jeu' (rubrique Jeux, jeux vidéo hors visual novels).
+    kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu')),
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -323,6 +325,9 @@ export async function prepareSchema(client: Client) {
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
+  if (!patchColumns.includes("kind")) {
+    await client.execute("ALTER TABLE patch ADD COLUMN kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu'))");
+  }
   for (const spec of IMAGE_TABLES) {
     if (await allowImageKinds(client, spec)) console.log(`✓ ${spec.table} : types d’image mis à jour (${spec.kinds.join(", ")})`);
   }
