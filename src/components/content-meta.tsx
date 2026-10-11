@@ -11,6 +11,9 @@ const TONES: Record<string, string> = {
   Licencié: "bg-muted text-muted-foreground",
 };
 
+// Couleurs des statuts, réutilisées par les badges Lightswind de l’accueil.
+export const statusTone = (status: string) => TONES[status] ?? "bg-accent text-accent-foreground";
+
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   return (
     <span

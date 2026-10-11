@@ -25,6 +25,9 @@ function readPatchForm(formData: FormData) {
   const status = String(formData.get("status") ?? "");
   const manualProgress = Number(formData.get("progress"));
   const downloadUrl = String(formData.get("downloadUrl") ?? "").trim();
+  const quote = String(formData.get("quote") ?? "").trim();
+  const featured = formData.get("featured") === "1" ? 1 : 0;
+  if (quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
   if (description.length > 20_000) return { error: "La description est trop longue (20 000 caractères maximum)." };
@@ -45,7 +48,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, progressSteps: JSON.stringify(steps) } };
+  return { data: { title, description, status, progress, downloadUrl, progressSteps: JSON.stringify(steps), quote, featured } };
 }
 
 export async function savePatch(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -54,21 +57,23 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, progressSteps } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, progressSteps, quote, featured } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const { lastInsertRowid } = await db
-      .prepare("INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps);
+      .prepare(
+        "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
+      .run(await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured);
     redirect(`/gestion/patchs/${lastInsertRowid}?cree=1`);
   }
 
   const { changes } = await db
     .prepare(
-      "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, updatedAt = datetime('now') WHERE id = ?",
+      "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, updatedAt = datetime('now') WHERE id = ?",
     )
-    .run(title, description, status, progress, downloadUrl, progressSteps, id);
+    .run(title, description, status, progress, downloadUrl, progressSteps, quote, featured, id);
   if (!changes) return { error: "Patch introuvable." };
   refresh();
   return { savedAt: Date.now() };

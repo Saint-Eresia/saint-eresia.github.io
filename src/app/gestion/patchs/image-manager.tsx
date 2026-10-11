@@ -31,11 +31,13 @@ export function ImageManager({
   patchId,
   cover,
   background,
+  logo,
   screenshots,
 }: {
   patchId: number;
   cover: ManagedImage | null;
   background: ManagedImage | null;
+  logo: ManagedImage | null;
   screenshots: ManagedImage[];
 }) {
   return (
@@ -77,6 +79,26 @@ export function ImageManager({
           kind="background"
           label={background ? "Remplacer l’arrière-plan" : "Ajouter un arrière-plan"}
         />
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h3 className="text-lg font-extrabold">Logo</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Affiché à droite dans le carrousel « Recommandé » de l’accueil. Utilisez un PNG à fond transparent (logo du
+            jeu ou personnage détouré).
+          </p>
+        </div>
+        {logo && (
+          <div className="space-y-2">
+            {/* Damier : la transparence du logo reste visible. */}
+            <div className="grid h-40 place-items-center rounded-lg border border-border bg-[repeating-conic-gradient(var(--muted)_0_25%,transparent_0_50%)] bg-[length:20px_20px] p-3">
+              <img src={logo.src} alt={logo.alt} className="max-h-full max-w-full object-contain" />
+            </div>
+            <DeleteImageButton image={logo} />
+          </div>
+        )}
+        <Dropzone endpoint={`/api/patches/${patchId}/images`} kind="logo" label={logo ? "Remplacer le logo" : "Ajouter un logo"} />
       </section>
 
       <section className="space-y-3">

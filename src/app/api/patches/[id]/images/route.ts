@@ -9,11 +9,12 @@ export async function POST(req: Request, ctx: RouteContext<"/api/patches/[id]/im
   const alts: Partial<Record<ImageKind, string>> = {
     cover: `Couverture de ${patch?.title}`,
     background: `Arrière-plan de ${patch?.title}`,
+    logo: `Logo de ${patch?.title}`,
   };
   const response = await handleImageUpload(req, {
     owner: { type: "patch", id },
     exists: !!patch,
-    kinds: ["cover", "background", "screenshot"],
+    kinds: ["cover", "background", "logo", "screenshot"],
     altFor: (kind) => alts[kind] ?? `Capture d’écran de ${patch?.title}`,
   });
   if (response.ok) await db.prepare("UPDATE patch SET updatedAt = datetime('now') WHERE id = ?").run(id);

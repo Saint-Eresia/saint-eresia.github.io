@@ -31,13 +31,16 @@ const SCHEMA = `
     progress INTEGER NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
     downloadUrl TEXT NOT NULL DEFAULT '',
     progressSteps TEXT NOT NULL DEFAULT '[]',
+    -- Carrousel « Recommandé » de l’accueil : citation affichée et patch mis en avant (1) ou non (0).
+    quote TEXT NOT NULL DEFAULT '',
+    featured INTEGER NOT NULL DEFAULT 0,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
   CREATE TABLE IF NOT EXISTS patch_image (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL CHECK (kind IN ('cover', 'screenshot', 'background')),
+    kind TEXT NOT NULL CHECK (kind IN ('cover', 'screenshot', 'background', 'logo')),
     file TEXT NOT NULL UNIQUE,
     alt TEXT NOT NULL DEFAULT '',
     width INTEGER NOT NULL,
@@ -240,7 +243,7 @@ async function linkMembersFromProjects(client: Client) {
 // (arrière-plan, logo) à cause de la contrainte CHECK. SQLite ne sait pas modifier une contrainte :
 // la table d’images est alors reconstruite, données comprises.
 const IMAGE_TABLES = [
-  { table: "patch_image", owner: "patchId", parent: "patch", kinds: ["cover", "screenshot", "background"], index: "patch_image_patch ON patch_image (patchId, kind, position)" },
+  { table: "patch_image", owner: "patchId", parent: "patch", kinds: ["cover", "screenshot", "background", "logo"], index: "patch_image_patch ON patch_image (patchId, kind, position)" },
   { table: "novel_image", owner: "novelId", parent: "novel", kinds: ["cover", "illustration", "background", "logo"], index: null },
 ] as const;
 
@@ -299,6 +302,9 @@ export async function prepareSchema(client: Client) {
   const novelColumns = ((await client.execute("PRAGMA table_info(novel)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
+  const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
+  if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   for (const spec of IMAGE_TABLES) {
     if (await allowImageKinds(client, spec)) console.log(`✓ ${spec.table} : types d’image mis à jour (${spec.kinds.join(", ")})`);
   }

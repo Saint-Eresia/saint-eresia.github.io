@@ -19,7 +19,7 @@ export default function NewPatchPage() {
         <div className="max-w-3xl rounded-2xl border border-border bg-card p-6 sm:p-8">
           <PatchForm
             statuses={STATUSES}
-            patch={{ title: "", description: "", status: "En développement", progress: 0, downloadUrl: "", steps: [] }}
+            patch={{ title: "", description: "", status: "En développement", progress: 0, downloadUrl: "", steps: [], quote: "", featured: false }}
           />
           <p className="mt-6 text-sm text-muted-foreground">
             Vous pourrez ajouter la couverture et les captures d’écran une fois le patch créé.

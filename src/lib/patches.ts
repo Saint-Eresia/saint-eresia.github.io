@@ -9,7 +9,7 @@ export const STATUSES = ["En développement", "Alpha", "Bêta", "Stable", "Termi
 export type PatchImage = {
   id: number;
   patchId: number;
-  kind: "cover" | "screenshot" | "background";
+  kind: "cover" | "screenshot" | "background" | "logo";
   file: string;
   alt: string;
   width: number;
@@ -26,6 +26,8 @@ export type Patch = {
   progress: number;
   downloadUrl: string;
   progressSteps: string; // JSON, voir progress-steps.ts
+  quote: string; // citation du carrousel « Recommandé »
+  featured: number; // 1 : affiché dans le carrousel de l’accueil
   createdAt: string;
   updatedAt: string;
 };
@@ -34,6 +36,8 @@ export type PatchWithImages = Patch & {
   cover: PatchImage | null;
   // Image large affichée derrière l’en-tête de la fiche ; à défaut, la couverture floutée.
   background: PatchImage | null;
+  // Logo (PNG détouré) affiché à droite dans le carrousel « Recommandé ».
+  logo: PatchImage | null;
   screenshots: PatchImage[];
   steps: ProgressStep[];
 };
@@ -49,8 +53,16 @@ async function withImages(patch: Patch): Promise<PatchWithImages> {
     steps: parseSteps(patch.progressSteps),
     cover: images.find((image) => image.kind === "cover") ?? null,
     background: images.find((image) => image.kind === "background") ?? null,
+    logo: images.find((image) => image.kind === "logo") ?? null,
     screenshots: images.filter((image) => image.kind === "screenshot"),
   };
+}
+
+// Patchs du carrousel « Recommandé » de l’accueil.
+export async function listFeaturedPatches() {
+  await connection();
+  const patches = await db.prepare("SELECT * FROM patch WHERE featured = 1 ORDER BY updatedAt DESC, id DESC").all<Patch>();
+  return Promise.all(patches.map(withImages));
 }
 
 // connection() empêche que ces lectures soient figées au build : la base change après le déploiement.

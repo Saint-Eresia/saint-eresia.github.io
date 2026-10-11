@@ -40,6 +40,7 @@ function Links({ showTeam, pathname }: { showTeam: boolean; pathname: string | n
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
+            title={label}
             className={cn(
               "relative flex shrink-0 items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold transition-colors sm:px-2.5 lg:px-3.5",
               active
@@ -48,7 +49,7 @@ function Links({ showTeam, pathname }: { showTeam: boolean; pathname: string | n
             )}
           >
             <Icon className="size-4" aria-hidden />
-            <span className="max-md:sr-only">{label}</span>
+            <span className="max-lg:sr-only">{label}</span>
           </Link>
         );
       })}

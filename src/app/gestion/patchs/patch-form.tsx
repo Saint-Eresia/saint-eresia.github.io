@@ -20,6 +20,8 @@ type PatchFields = {
   progress: number;
   downloadUrl: string;
   steps: ProgressStep[];
+  quote: string;
+  featured: boolean; // recommandé sur l’accueil
 };
 
 export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: readonly string[] }) {
@@ -30,6 +32,8 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
   const [downloadUrl, setDownloadUrl] = useState(patch.downloadUrl);
   const [description, setDescription] = useState(patch.description);
   const [steps, setSteps] = useState(patch.steps);
+  const [quote, setQuote] = useState(patch.quote);
+  const [featured, setFeatured] = useState(patch.featured ? "1" : "0");
   const updateStep = (index: number, change: Partial<ProgressStep>) =>
     setSteps((current) => current.map((step, i) => (i === index ? { ...step, ...change } : step)));
   const addStep = (label: string) => setSteps((current) => [...current, { label, value: 0 }]);
@@ -167,6 +171,33 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
           placeholder="Présentation, prérequis, installation…"
         />
       </div>
+
+      <fieldset className="space-y-4 rounded-xl border border-border p-4">
+        <legend className="px-1 text-sm font-bold">Carrousel « Recommandé » de l’accueil</legend>
+        <div className="grid gap-6 sm:grid-cols-[1fr_16rem]">
+          <div className="space-y-2">
+            <Label htmlFor="quote">Citation</Label>
+            <Input id="quote" name="quote" maxLength={120} placeholder="Ex. El Psy Kongroo." value={quote} onChange={(e) => setQuote(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="featured">Affichage</Label>
+            <input type="hidden" name="featured" value={featured} />
+            <Select value={featured} onValueChange={setFeatured}>
+              <SelectTrigger id="featured" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Pas sur l’accueil</SelectItem>
+                <SelectItem value="1">Recommandé sur l’accueil</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          La diapositive montre l’arrière-plan et le logo du patch (section Images), le début de la description, son
+          avancement et le bouton de téléchargement.
+        </p>
+      </fieldset>
 
       {state.error && (
         <p role="alert" className="text-sm font-semibold text-destructive">

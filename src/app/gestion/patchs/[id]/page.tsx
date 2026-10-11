@@ -71,6 +71,8 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
               progress: patch.progress,
               downloadUrl: patch.downloadUrl,
               steps: patch.steps,
+              quote: patch.quote,
+              featured: patch.featured === 1,
             }}
           />
         </section>
@@ -79,6 +81,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
             patchId={patch.id}
             cover={patch.cover ? toManaged(patch.cover) : null}
             background={patch.background ? toManaged(patch.background) : null}
+            logo={patch.logo ? toManaged(patch.logo) : null}
             screenshots={patch.screenshots.map(toManaged)}
           />
         </section>
