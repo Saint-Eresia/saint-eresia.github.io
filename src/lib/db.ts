@@ -63,6 +63,8 @@ const SCHEMA = `
     -- Carrousel « Recommandé » de l’accueil : citation affichée et novel mis en avant (1) ou non (0).
     quote TEXT NOT NULL DEFAULT '',
     featured INTEGER NOT NULL DEFAULT 0,
+    -- Brouillon (1) : invisible du public (listes, fiche, chapitres, accueil, page Équipe), visible par l’équipe.
+    draft INTEGER NOT NULL DEFAULT 0,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -147,6 +149,14 @@ const SCHEMA = `
     memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
     role TEXT NOT NULL,
     PRIMARY KEY (patchId, memberId, role)
+  );
+
+  -- Rôles d’un membre sur un novel (sous-ensemble NOVEL_ROLE_KEYS de src/lib/roles.ts).
+  CREATE TABLE IF NOT EXISTS novel_member_role (
+    novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
+    memberId INTEGER NOT NULL REFERENCES team_member(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    PRIMARY KEY (novelId, memberId, role)
   );
 
   -- Journal d’activité de la gestion : une ligne par modification, écrite dans la même transaction que celle-ci.
@@ -322,6 +332,7 @@ export async function prepareSchema(client: Client) {
   const novelColumns = ((await client.execute("PRAGMA table_info(novel)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
+  if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");

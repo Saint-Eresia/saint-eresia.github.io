@@ -8,7 +8,7 @@ import { ManageHeader, panel } from "@/components/manage-header";
 import { MemberAvatar } from "@/components/member-avatar";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
-import { getMember, listTeamPatchRoles, roleLabels } from "@/lib/team";
+import { getMember, listTeamProjectRoles, roleLabels } from "@/lib/team";
 import { DeleteMemberButton } from "../delete-member-button";
 import { MemberForm } from "../member-form";
 
@@ -29,7 +29,7 @@ export default function EditMemberPage({ params, searchParams }: Props) {
 async function EditMember({ params, searchParams }: Pick<Props, "params" | "searchParams">) {
   const member = await getMember(Number((await params).id));
   if (!member) notFound();
-  const patches = (await listTeamPatchRoles()).get(member.id) ?? [];
+  const projects = (await listTeamProjectRoles({ drafts: true })).get(member.id) ?? [];
   const created = (await searchParams).cree === "1";
 
   return (
@@ -50,21 +50,24 @@ async function EditMember({ params, searchParams }: Pick<Props, "params" | "sear
         <section className={panel} aria-label="Informations du membre">
           <MemberForm member={member} />
           <div className="mt-8 border-t border-border pt-6">
-            <h2 className="text-sm font-semibold">Rôles par patch</h2>
-            {patches.length === 0 ? (
+            <h2 className="text-sm font-semibold">Rôles par projet</h2>
+            {projects.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">
-                Ce membre ne participe à aucun patch. Ajoutez-le dans la section « Équipe du patch » d’un patch.
+                Ce membre ne participe à aucun projet. Ajoutez-le dans la section « Équipe » d’un patch ou d’un novel.
               </p>
             ) : (
               <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
-                {patches.map((patch) => (
-                  <li key={patch.patchId} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                {projects.map((project) => (
+                  <li key={project.key} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="font-semibold">{patch.title}</p>
-                      <p className="text-xs text-muted-foreground">{roleLabels(patch.roles).join(" · ") || "Aucun rôle coché"}</p>
+                      <p className="font-semibold">
+                        {project.title}
+                        {project.draft && <span className="ml-1.5 text-xs font-normal text-muted-foreground">(brouillon)</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{roleLabels(project.roles).join(" · ") || "Aucun rôle coché"}</p>
                     </div>
                     <Link
-                      href={`/gestion/patchs/${patch.patchId}#equipe-patch`}
+                      href={project.editHref}
                       className="text-sm font-semibold text-primary hover:underline"
                     >
                       Modifier

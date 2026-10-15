@@ -5,13 +5,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
-import { chapterHeading, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
+import { canSeeNovel, chapterHeading, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
 
 type Props = PageProps<"/novels/[slug]/[chapitre]">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, chapitre } = await params;
   const data = await getPublishedChapter(slug, chapitre);
+  if (data && !(await canSeeNovel(data.novel))) return { title: "Chapitre introuvable" };
   return { title: data ? `${chapterHeading(data.chapter)} · ${data.novel.title}` : "Chapitre introuvable" };
 }
 
@@ -26,7 +27,8 @@ export default function ReaderPage({ params }: Props) {
 async function Reader({ params }: { params: Props["params"] }) {
   const { slug, chapitre } = await params;
   const data = await getPublishedChapter(slug, chapitre);
-  if (!data) notFound();
+  // Chapitre d’un novel en brouillon : réservé à l’équipe.
+  if (!data || !(await canSeeNovel(data.novel))) notFound();
   const { novel, volume, chapter, previous, next } = data;
 
   return (

@@ -9,8 +9,8 @@ import { db } from "@/lib/db";
 import { STATUSES, uniqueSlug, type Patch, type PatchImage } from "@/lib/patches";
 import { isPatchKind, PATCH_KINDS } from "@/lib/patch-kinds";
 import { averageProgress, MAX_STEPS, parseSteps, type ProgressStep } from "@/lib/progress-steps";
-import { isRoleKey, ROLE_LABELS, sortRoles, type RoleKey } from "@/lib/roles";
-import { setPatchTeam, type PatchTeamEntry } from "@/lib/team";
+import { isRoleKey, ROLE_KEYS, type RoleKey } from "@/lib/roles";
+import { setProjectTeam, type TeamEntry } from "@/lib/team";
 import { IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
@@ -123,7 +123,7 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 }
 
 // Équipe du patch : ses membres et leurs rôles (liste fixe), affichés sur la fiche et la page Équipe.
-export async function savePatchTeam(patchId: number, entries: PatchTeamEntry[]): Promise<ActionResult> {
+export async function savePatchTeam(patchId: number, entries: TeamEntry[]): Promise<ActionResult> {
   const actor = await teamActor();
   if ("error" in actor) return actor;
   const patch = await findPatch(patchId);
@@ -135,28 +135,7 @@ export async function savePatchTeam(patchId: number, entries: PatchTeamEntry[]):
   }));
   if (clean.some((entry) => !Number.isInteger(entry.memberId))) return { error: "Membre invalide." };
 
-  // Journal : un changement par membre ajouté, retiré, ou dont les rôles changent.
-  const names = new Map(
-    (await db.prepare("SELECT id, name FROM team_member").all<{ id: number; name: string }>()).map((m) => [Number(m.id), String(m.name)]),
-  );
-  const beforeRows = await db
-    .prepare("SELECT l.memberId, r.role FROM patch_member l LEFT JOIN patch_member_role r ON r.patchId = l.patchId AND r.memberId = l.memberId WHERE l.patchId = ?")
-    .all<{ memberId: number; role: string | null }>(patchId);
-  const before = new Map<number, RoleKey[]>();
-  for (const row of beforeRows) {
-    const list = before.get(Number(row.memberId)) ?? [];
-    if (row.role && isRoleKey(row.role)) list.push(row.role);
-    before.set(Number(row.memberId), list);
-  }
-  const after = new Map(clean.filter((entry) => names.has(entry.memberId)).map((entry) => [entry.memberId, entry.roles]));
-  const describe = (roles: RoleKey[] | undefined) =>
-    roles === undefined ? "(absent)" : sortRoles(roles).map((role) => ROLE_LABELS[role]).join(", ") || "(aucun rôle)";
-  const changes = [...new Set([...before.keys(), ...after.keys()])].flatMap((memberId) => {
-    const [b, a] = [describe(before.get(memberId)), describe(after.get(memberId))];
-    return b === a ? [] : [{ field: `Équipe : ${names.get(memberId) ?? `membre ${memberId}`}`, before: b, after: a }];
-  });
-
-  await setPatchTeam(patchId, clean, [
+  await setProjectTeam("patch", patchId, clean, ROLE_KEYS, (changes) => [
     touch(patchId),
     logEntry(actor, { type: "patch", id: patchId, label: patch.title, action: "update", changes }),
   ]);

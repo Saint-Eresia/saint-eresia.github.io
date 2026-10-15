@@ -18,6 +18,10 @@ export const ROLE_KEYS = ROLES.map((role) => role.key) as RoleKey[];
 export const ROLE_LABELS = Object.fromEntries(ROLES.map((role) => [role.key, role.label])) as Record<RoleKey, string>;
 export const isRoleKey = (value: string): value is RoleKey => (ROLE_KEYS as string[]).includes(value);
 
+// Rôles proposés sur un light novel : ceux qui ont un sens pour un texte (pas de programmation ni de hacking).
+export const NOVEL_ROLE_KEYS: RoleKey[] = ["trad-ja", "trad-en", "correction", "harmonisation", "images", "communication"];
+export const NOVEL_ROLES = ROLES.filter((role) => NOVEL_ROLE_KEYS.includes(role.key));
+
 // Rôles triés dans l’ordre de la liste, pour un affichage stable.
 export const sortRoles = (keys: RoleKey[]) => ROLE_KEYS.filter((key) => keys.includes(key));
 

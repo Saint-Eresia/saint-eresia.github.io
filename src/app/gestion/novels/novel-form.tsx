@@ -19,7 +19,13 @@ type NovelFields = {
   synopsis: string;
   quote: string;
   featured: string; // "1" : recommandé sur l’accueil
+  draft: string; // "1" : brouillon, invisible du public
 };
+
+const VISIBILITY = [
+  { value: "0", label: "Publié", hint: "Visible par tout le monde." },
+  { value: "1", label: "Brouillon", hint: "Visible seulement par l’équipe : absent des listes, de l’accueil et de la page Équipe." },
+];
 
 export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: readonly string[] }) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(saveNovel, {});
@@ -39,6 +45,30 @@ export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: r
         <Label htmlFor="title">Titre</Label>
         <Input id="title" name="title" required maxLength={180} value={fields.title} onChange={(e) => set("title")(e.target.value)} />
       </div>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Visibilité</legend>
+        <input type="hidden" name="draft" value={fields.draft} />
+        <div className="flex flex-wrap gap-2">
+          {VISIBILITY.map((option) => (
+            <label
+              key={option.value}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-input px-4 py-2 text-sm font-semibold transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
+            >
+              <input
+                type="radio"
+                name="draft-choice"
+                value={option.value}
+                checked={fields.draft === option.value}
+                onChange={() => set("draft")(option.value)}
+                className="sr-only"
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">{VISIBILITY.find((option) => option.value === fields.draft)?.hint}</p>
+      </fieldset>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">

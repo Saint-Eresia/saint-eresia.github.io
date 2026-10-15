@@ -85,6 +85,7 @@ export async function deleteMember(id: number): Promise<ActionResult> {
   await db.batch([
     { sql: "DELETE FROM patch_member_role WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM patch_member WHERE memberId = ?", args: [id] },
+    { sql: "DELETE FROM novel_member_role WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM novel_member WHERE memberId = ?", args: [id] },
     { sql: "DELETE FROM team_member WHERE id = ?", args: [id] },
     logEntry(actor, { type: "member", id, label: member.name, action: "delete" }),

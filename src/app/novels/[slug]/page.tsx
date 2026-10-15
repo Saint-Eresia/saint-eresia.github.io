@@ -9,14 +9,15 @@ import { Markdown } from "@/components/markdown";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
-import { chapterHeading, getNovelBySlug, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
+import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
 import { formatDate, imageUrl } from "@/lib/patches";
-import { listNovelMembers } from "@/lib/team";
+import { listNovelTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
   const novel = await getNovelBySlug((await params).slug);
-  return { title: novel?.title ?? "Light novel introuvable" };
+  if (!novel || !(await canSeeNovel(novel))) return { title: "Light novel introuvable" };
+  return isPublicNovel(novel) ? { title: novel.title } : { title: `${novel.title} (brouillon)`, robots: { index: false } };
 }
 
 export default function NovelPage({ params }: PageProps<"/novels/[slug]">) {
@@ -29,7 +30,7 @@ export default function NovelPage({ params }: PageProps<"/novels/[slug]">) {
 
 async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["params"] }) {
   const novel = await getNovelBySlug((await params).slug);
-  if (!novel) notFound();
+  if (!novel || !(await canSeeNovel(novel))) notFound();
   const first = novel.volumes[0]?.chapters[0];
   const chapterCount = novel.volumes.reduce((total, volume) => total + volume.chapters.length, 0);
   const facts = [
@@ -38,7 +39,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Illustrateur", novel.artist],
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
-  const members = await listNovelMembers(novel.id);
+  const members = await listNovelTeam(novel.id);
   const layout = projectLayout(members.length > 0);
 
   return (
@@ -55,6 +56,11 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
           >
             <ArrowLeft className="size-4" /> Novels
           </Link>
+          {!isPublicNovel(novel) && (
+            <p role="status" className="mt-4 w-fit rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
+              Brouillon : ce novel n’est visible que par l’équipe.
+            </p>
+          )}
           <div className="mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr]">
             <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-border shadow-[0_24px_60px_var(--shadow)] sm:w-full">
               {novel.cover ? (

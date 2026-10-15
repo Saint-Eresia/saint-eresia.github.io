@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PatchTeamEditor } from "@/components/patch-team-editor";
+import { TeamEditor } from "@/components/team-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { PATCH_KINDS, patchHref } from "@/lib/patch-kinds";
@@ -115,7 +115,8 @@ async function PatchTeamSection({ patchId }: { patchId: number }) {
         Ajoutez les membres qui ont participé et cochez leurs rôles sur ce patch. Ils apparaissent sur la fiche publique
         et sur la page Équipe.
       </p>
-      <PatchTeamEditor
+      <TeamEditor
+        project="patch"
         team={team.map((member) => ({ id: member.id, name: member.name, avatarFile: member.avatarFile }))}
         initial={patchTeam.map((member) => ({ memberId: member.id, roles: member.roles }))}
         save={savePatchTeam.bind(null, patchId)}

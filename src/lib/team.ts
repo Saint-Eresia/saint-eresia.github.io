@@ -2,6 +2,8 @@ import "server-only";
 import type { InStatement } from "@libsql/client";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
+import type { Change } from "@/lib/activity";
+import { patchHref } from "@/lib/patch-kinds";
 import { isRoleKey, ROLE_LABELS, sortRoles, type RoleKey } from "@/lib/roles";
 import type { LinkKind } from "@/lib/team-links";
 
@@ -69,14 +71,22 @@ const rolesByMember = (rows: { memberId: number; role: string }[]) => {
   return map;
 };
 
-// Équipe d’un patch : ses membres (ordre de la page Équipe) et leurs rôles sur ce patch.
-export async function listPatchTeam(patchId: number) {
+// Équipe d’un projet (patch ou novel) : table des participants et table des rôles.
+const PROJECTS = {
+  patch: { table: "patch", members: "patch_member", roles: "patch_member_role", owner: "patchId", edit: "/gestion/patchs", anchor: "equipe-patch" },
+  novel: { table: "novel", members: "novel_member", roles: "novel_member_role", owner: "novelId", edit: "/gestion/novels", anchor: "equipe-novel" },
+} as const;
+export type ProjectType = keyof typeof PROJECTS;
+
+// Équipe d’un projet : ses membres (ordre de la page Équipe) et leurs rôles sur ce projet.
+export async function listProjectTeam(type: ProjectType, projectId: number) {
   await connection();
+  const p = PROJECTS[type];
   const [members, roles] = await Promise.all([
     db
-      .prepare("SELECT m.* FROM team_member m JOIN patch_member l ON l.memberId = m.id WHERE l.patchId = ? ORDER BY m.position, m.id")
-      .all<Row>(patchId),
-    db.prepare("SELECT memberId, role FROM patch_member_role WHERE patchId = ?").all<{ memberId: number; role: string }>(patchId),
+      .prepare(`SELECT m.* FROM team_member m JOIN ${p.members} l ON l.memberId = m.id WHERE l.${p.owner} = ? ORDER BY m.position, m.id`)
+      .all<Row>(projectId),
+    db.prepare(`SELECT memberId, role FROM ${p.roles} WHERE ${p.owner} = ?`).all<{ memberId: number; role: string }>(projectId),
   ]);
   const byMember = rolesByMember(roles);
   return members.map((row) => {
@@ -85,82 +95,133 @@ export async function listPatchTeam(patchId: number) {
   });
 }
 
-// Page Équipe : pour chaque membre, ses patchs (ordre alphabétique) et ses rôles sur chacun.
-export async function listTeamPatchRoles() {
+export const listPatchTeam = (patchId: number) => listProjectTeam("patch", patchId);
+export const listNovelTeam = (novelId: number) => listProjectTeam("novel", novelId);
+
+export type MemberProjectRoles = {
+  key: string;
+  type: ProjectType;
+  projectId: number;
+  title: string;
+  href: string; // fiche publique
+  editHref: string; // section Équipe de la gestion du projet
+  draft: boolean;
+  roles: RoleKey[];
+};
+
+// Page Équipe et gestion d’un membre : pour chaque membre, ses projets (patchs puis novels, ordre alphabétique)
+// et ses rôles sur chacun. `drafts` : inclure les novels en brouillon (gestion seulement).
+export async function listTeamProjectRoles({ drafts = false }: { drafts?: boolean } = {}) {
   await connection();
-  const [links, roles] = await Promise.all([
+  const [patchLinks, novelLinks, patchRoles, novelRoles] = await Promise.all([
     db
       .prepare(
-        `SELECT l.memberId, p.id AS patchId, p.slug, p.title, p.kind FROM patch_member l JOIN patch p ON p.id = l.patchId
+        `SELECT l.memberId, p.id AS projectId, p.slug, p.title, p.kind, 0 AS draft FROM patch_member l JOIN patch p ON p.id = l.patchId
          ORDER BY p.title COLLATE NOCASE`,
       )
-      .all<{ memberId: number; patchId: number; slug: string; title: string; kind: string }>(),
-    db.prepare("SELECT patchId, memberId, role FROM patch_member_role").all<{ patchId: number; memberId: number; role: string }>(),
+      .all<{ memberId: number; projectId: number; slug: string; title: string; kind: string; draft: number }>(),
+    db
+      .prepare(
+        `SELECT l.memberId, n.id AS projectId, n.slug, n.title, '' AS kind, n.draft FROM novel_member l JOIN novel n ON n.id = l.novelId
+         ${drafts ? "" : "WHERE n.draft = 0"} ORDER BY n.title COLLATE NOCASE`,
+      )
+      .all<{ memberId: number; projectId: number; slug: string; title: string; kind: string; draft: number }>(),
+    db.prepare("SELECT patchId AS projectId, memberId, role FROM patch_member_role").all<{ projectId: number; memberId: number; role: string }>(),
+    db.prepare("SELECT novelId AS projectId, memberId, role FROM novel_member_role").all<{ projectId: number; memberId: number; role: string }>(),
   ]);
-  const result = new Map<number, { patchId: number; slug: string; kind: string; title: string; roles: RoleKey[] }[]>();
-  for (const link of links) {
-    const keys = roles
-      .filter((r) => Number(r.patchId) === Number(link.patchId) && Number(r.memberId) === Number(link.memberId))
-      .map((r) => r.role)
-      .filter(isRoleKey);
-    const list = result.get(Number(link.memberId)) ?? [];
-    list.push({ patchId: Number(link.patchId), slug: String(link.slug), kind: String(link.kind), title: String(link.title), roles: sortRoles(keys) });
-    result.set(Number(link.memberId), list);
-  }
+  const result = new Map<number, MemberProjectRoles[]>();
+  const add = (type: ProjectType, links: typeof patchLinks, roles: typeof patchRoles) => {
+    for (const link of links) {
+      const projectId = Number(link.projectId);
+      const memberId = Number(link.memberId);
+      const keys = roles
+        .filter((r) => Number(r.projectId) === projectId && Number(r.memberId) === memberId)
+        .map((r) => r.role)
+        .filter(isRoleKey);
+      const list = result.get(memberId) ?? [];
+      list.push({
+        key: `${type}-${projectId}`,
+        type,
+        projectId,
+        title: String(link.title),
+        href: type === "patch" ? patchHref({ kind: String(link.kind), slug: String(link.slug) }) : `/novels/${link.slug}`,
+        editHref: `${PROJECTS[type].edit}/${projectId}#${PROJECTS[type].anchor}`,
+        draft: Number(link.draft) === 1,
+        roles: sortRoles(keys),
+      });
+      result.set(memberId, list);
+    }
+  };
+  add("patch", patchLinks, patchRoles);
+  add("novel", novelLinks, novelRoles);
   return result;
 }
 
-export type PatchTeamEntry = { memberId: number; roles: RoleKey[] };
+export type TeamEntry = { memberId: number; roles: RoleKey[] };
 
-// Remplace l’équipe d’un patch (membres et rôles) en une seule transaction. Membres et rôles inconnus ignorés.
-// `extra` : instructions ajoutées à la même transaction (date de mise à jour, journal d’activité).
-export async function setPatchTeam(patchId: number, entries: PatchTeamEntry[], extra: InStatement[] = []) {
+// Nettoie une équipe envoyée par le navigateur : membres existants, sans doublon, rôles autorisés seulement.
+async function cleanTeam(entries: TeamEntry[], allowed: readonly RoleKey[]) {
   const known = new Set((await db.prepare("SELECT id FROM team_member").all<{ id: number }>()).map((row) => Number(row.id)));
   const seen = new Set<number>();
-  const clean = entries.filter((entry) => known.has(entry.memberId) && !seen.has(entry.memberId) && seen.add(entry.memberId));
+  return entries
+    .filter((entry) => known.has(entry.memberId) && !seen.has(entry.memberId) && seen.add(entry.memberId))
+    .map((entry) => ({ memberId: entry.memberId, roles: sortRoles(entry.roles.filter((role) => isRoleKey(role) && allowed.includes(role))) }));
+}
+
+// Changements pour le journal : un par membre ajouté, retiré, ou dont les rôles changent.
+async function teamChanges(type: ProjectType, projectId: number, after: TeamEntry[]): Promise<Change[]> {
+  const p = PROJECTS[type];
+  const names = new Map(
+    (await db.prepare("SELECT id, name FROM team_member").all<{ id: number; name: string }>()).map((m) => [Number(m.id), String(m.name)]),
+  );
+  const rows = await db
+    .prepare(
+      `SELECT l.memberId, r.role FROM ${p.members} l LEFT JOIN ${p.roles} r ON r.${p.owner} = l.${p.owner} AND r.memberId = l.memberId
+       WHERE l.${p.owner} = ?`,
+    )
+    .all<{ memberId: number; role: string | null }>(projectId);
+  const before = new Map<number, RoleKey[]>();
+  for (const row of rows) {
+    const list = before.get(Number(row.memberId)) ?? [];
+    if (row.role && isRoleKey(row.role)) list.push(row.role);
+    before.set(Number(row.memberId), list);
+  }
+  const now = new Map(after.map((entry) => [entry.memberId, entry.roles]));
+  const describe = (roles: RoleKey[] | undefined) =>
+    roles === undefined ? "(absent)" : sortRoles(roles).map((role) => ROLE_LABELS[role]).join(", ") || "(aucun rôle)";
+  return [...new Set([...before.keys(), ...now.keys()])].flatMap((memberId) => {
+    const [b, a] = [describe(before.get(memberId)), describe(now.get(memberId))];
+    return b === a ? [] : [{ field: `Équipe : ${names.get(memberId) ?? `membre ${memberId}`}`, before: b, after: a }];
+  });
+}
+
+// Remplace l’équipe d’un projet (membres et rôles) en une seule transaction, avec son entrée au journal.
+// `extra(changes)` : instructions ajoutées à la même transaction (date de mise à jour, journal d’activité).
+export async function setProjectTeam(
+  type: ProjectType,
+  projectId: number,
+  entries: TeamEntry[],
+  allowed: readonly RoleKey[],
+  extra: (changes: Change[]) => InStatement[],
+) {
+  const p = PROJECTS[type];
+  const clean = await cleanTeam(entries, allowed);
+  const changes = await teamChanges(type, projectId, clean);
   const ids = clean.map((entry) => entry.memberId);
   await db.batch([
-    { sql: "DELETE FROM patch_member_role WHERE patchId = ?", args: [patchId] },
+    { sql: `DELETE FROM ${p.roles} WHERE ${p.owner} = ?`, args: [projectId] },
     {
-      sql: `DELETE FROM patch_member WHERE patchId = ? AND memberId NOT IN (${ids.map(() => "?").join(", ")})`,
-      args: [patchId, ...ids],
+      sql: `DELETE FROM ${p.members} WHERE ${p.owner} = ? AND memberId NOT IN (${ids.map(() => "?").join(", ")})`,
+      args: [projectId, ...ids],
     },
     ...clean.flatMap((entry) => [
-      { sql: "INSERT OR IGNORE INTO patch_member (patchId, memberId) VALUES (?, ?)", args: [patchId, entry.memberId] },
-      ...sortRoles(entry.roles.filter(isRoleKey)).map((role) => ({
-        sql: "INSERT INTO patch_member_role (patchId, memberId, role) VALUES (?, ?, ?)",
-        args: [patchId, entry.memberId, role],
+      { sql: `INSERT OR IGNORE INTO ${p.members} (${p.owner}, memberId) VALUES (?, ?)`, args: [projectId, entry.memberId] },
+      ...entry.roles.map((role) => ({
+        sql: `INSERT INTO ${p.roles} (${p.owner}, memberId, role) VALUES (?, ?, ?)`,
+        args: [projectId, entry.memberId, role],
       })),
     ]),
-    ...extra,
-  ]);
-}
-
-// ——— Participants des novels (sans rôle par projet) ———
-
-export async function listNovelMembers(novelId: number) {
-  await connection();
-  const rows = await db
-    .prepare("SELECT m.* FROM team_member m JOIN novel_member l ON l.memberId = m.id WHERE l.novelId = ? ORDER BY m.position, m.id")
-    .all<Row>(novelId);
-  return rows.map((row) => ({ ...parse(row), roles: [] as RoleKey[] }));
-}
-
-export async function listNovelMemberIds(novelId: number) {
-  await connection();
-  const rows = await db.prepare("SELECT memberId FROM novel_member WHERE novelId = ?").all<{ memberId: number }>(novelId);
-  return rows.map((row) => Number(row.memberId));
-}
-
-// Remplace la liste des participants d’un novel (identifiants inconnus ignorés), en une seule transaction.
-// `extra` : instructions ajoutées à la même transaction (date de mise à jour, journal d’activité).
-export async function setNovelMembers(novelId: number, memberIds: number[], extra: InStatement[] = []) {
-  const known = new Set((await db.prepare("SELECT id FROM team_member").all<{ id: number }>()).map((row) => Number(row.id)));
-  const ids = [...new Set(memberIds)].filter((memberId) => known.has(memberId));
-  await db.batch([
-    { sql: `DELETE FROM novel_member WHERE novelId = ? AND memberId NOT IN (${ids.map(() => "?").join(", ")})`, args: [novelId, ...ids] },
-    ...ids.map((memberId) => ({ sql: "INSERT OR IGNORE INTO novel_member (novelId, memberId) VALUES (?, ?)", args: [novelId, memberId] })),
-    ...extra,
+    ...extra(changes),
   ]);
 }
 

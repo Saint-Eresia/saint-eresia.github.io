@@ -40,7 +40,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">
   const query = await searchParams;
   const onglet = one(query.onglet);
   const feed: FeedParams = { membre: one(query.membre), type: one(query.type), page: one(query.page) };
-  const [news, novels, allPatches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels(), listPatches(), listTeam()]);
+  const [news, novels, allPatches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels({ drafts: true }), listPatches(), listTeam()]);
   const patches = allPatches.filter((patch) => patch.kind === "vn");
   const games = allPatches.filter((patch) => patch.kind === "jeu");
 
@@ -168,7 +168,12 @@ function NovelList({ novels }: { novels: Awaited<ReturnType<typeof listNovels>> 
               cover={novel.cover && imageUrl(novel.cover)}
               title={novel.title}
               meta={`${novel.publishedCount} publié(s) sur ${novel.chapterCount} chapitre(s) · mis à jour le ${formatDate(novel.updatedAt)}`}
-              side={<StatusBadge status={novel.status} />}
+              side={
+                <span className="flex flex-wrap gap-1.5">
+                  {novel.draft ? <StatusBadge status="Brouillon" /> : null}
+                  <StatusBadge status={novel.status} />
+                </span>
+              }
             />
           ))}
         </ul>

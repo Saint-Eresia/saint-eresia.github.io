@@ -2,6 +2,7 @@ import "server-only";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/patches";
+import { getViewer } from "@/lib/viewer";
 
 export const NOVEL_STATUSES = ["En cours", "Terminé", "En pause", "Abandonné", "Licencié"] as const;
 
@@ -25,6 +26,7 @@ export type Novel = {
   synopsis: string;
   quote: string; // citation du carrousel « Recommandé »
   featured: number; // 1 : affiché dans le carrousel de l’accueil
+  draft: number; // 1 : brouillon, invisible du public (voir isPublicNovel)
   createdAt: string;
   updatedAt: string;
 };
@@ -78,7 +80,7 @@ async function latestChapterOf(novelId: number) {
 // Novels du carrousel « Recommandé » de l’accueil, du plus récemment mis à jour au plus ancien.
 export async function listFeaturedNovels() {
   await connection();
-  const novels = await db.prepare("SELECT * FROM novel WHERE featured = 1 ORDER BY updatedAt DESC, id DESC").all<Novel>();
+  const novels = await db.prepare("SELECT * FROM novel WHERE featured = 1 AND draft = 0 ORDER BY updatedAt DESC, id DESC").all<Novel>();
   return Promise.all(
     novels.map(async (novel) => ({
       ...novel,
@@ -104,9 +106,12 @@ async function volumesOf(novelId: number, publishedOnly: boolean): Promise<Volum
 }
 
 // connection() empêche que ces lectures soient figées au build : la base change après le déploiement.
-export async function listNovels() {
+// Par défaut, les novels publics seulement ; `drafts: true` ajoute les brouillons (gestion).
+export async function listNovels({ drafts = false }: { drafts?: boolean } = {}) {
   await connection();
-  const novels = await db.prepare("SELECT * FROM novel ORDER BY updatedAt DESC, id DESC").all<Novel>();
+  const novels = await db
+    .prepare(`SELECT * FROM novel ${drafts ? "" : "WHERE draft = 0"} ORDER BY updatedAt DESC, id DESC`)
+    .all<Novel>();
   const count = db.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(published), 0) AS published FROM chapter WHERE novelId = ?");
   return Promise.all(
     novels.map(async (novel) => {
@@ -114,6 +119,12 @@ export async function listNovels() {
       return { ...novel, cover: await coverOf(novel.id), chapterCount: total, publishedCount: published };
     }),
   );
+}
+
+// Un brouillon n’est visible que par l’équipe : les pages publiques vérifient `canSeeNovel` avant d’afficher.
+export const isPublicNovel = (novel: Pick<Novel, "draft">) => Number(novel.draft) === 0;
+export async function canSeeNovel(novel: Pick<Novel, "draft">) {
+  return isPublicNovel(novel) || Boolean((await getViewer())?.isTeam);
 }
 
 export async function getNovelBySlug(slug: string) {

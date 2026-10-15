@@ -12,12 +12,21 @@ import { cn } from "@/lib/utils";
 type Member = { id: number; name: string; avatarFile: string };
 type Row = { memberId: number; roles: RoleKey[] };
 
-// Tableau membres × rôles d’un patch : ajouter un membre, cocher ses rôles, enregistrer.
-export function PatchTeamEditor({
+type RoleOption = { key: RoleKey; label: string; short: string };
+const NOUNS = { patch: "ce patch", novel: "ce novel" } as const;
+const TEAMS = { patch: "l’équipe du patch", novel: "l’équipe du novel" } as const;
+
+// Tableau membres × rôles d’un patch ou d’un novel : ajouter un membre, cocher ses rôles, enregistrer.
+// `roles` : colonnes proposées (toute la liste pour un patch, NOVEL_ROLES pour un novel).
+export function TeamEditor({
+  project,
+  roles = ROLES,
   team,
   initial,
   save,
 }: {
+  project: keyof typeof NOUNS;
+  roles?: readonly RoleOption[];
   team: Member[];
   initial: Row[];
   save: (entries: Row[]) => Promise<{ error?: string }>;
@@ -56,17 +65,17 @@ export function PatchTeamEditor({
     <div className="space-y-4">
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border-strong p-6 text-center text-sm text-muted-foreground">
-          Aucun membre sur ce patch. Ajoutez-en un ci-dessous.
+          Aucun membre sur {NOUNS[project]}. Ajoutez-en un ci-dessous.
         </p>
       ) : (
-        <Table dense className="min-w-[56rem]">
-          <TableCaption className="sr-only">Rôles des membres sur ce patch</TableCaption>
+        <Table dense style={{ minWidth: `${14 + roles.length * 4.2}rem` }}>
+          <TableCaption className="sr-only">Rôles des membres sur {NOUNS[project]}</TableCaption>
           <TableHeader className="bg-secondary">
             <TableRow className="hover:bg-transparent">
               <TableHead scope="col" className="sticky left-0 bg-secondary text-sm text-foreground">
                 Membre
               </TableHead>
-              {ROLES.map((role) => (
+              {roles.map((role) => (
                 <TableHead key={role.key} scope="col" align="center" className="px-1.5">
                   <abbr title={role.label} className="no-underline">
                     {role.short}
@@ -90,7 +99,7 @@ export function PatchTeamEditor({
                       {member.name}
                     </span>
                   </TableHead>
-                  {ROLES.map((role) => (
+                  {roles.map((role) => (
                     <TableCell key={role.key} align="center" className="px-1.5">
                       <input
                         type="checkbox"
@@ -105,7 +114,7 @@ export function PatchTeamEditor({
                     <button
                       type="button"
                       onClick={() => setRows((current) => current.filter((r) => r.memberId !== row.memberId))}
-                      aria-label={`Retirer ${member.name} de l’équipe du patch`}
+                      aria-label={`Retirer ${member.name} de ${TEAMS[project]}`}
                       className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
                     >
                       <X className="size-4" />
@@ -156,7 +165,7 @@ export function PatchTeamEditor({
                 return;
               }
               setSaved(JSON.stringify(rows));
-              toast.success("Équipe du patch enregistrée.");
+              toast.success(project === "novel" ? "Équipe du novel enregistrée." : "Équipe du patch enregistrée.");
             })
           }
         >

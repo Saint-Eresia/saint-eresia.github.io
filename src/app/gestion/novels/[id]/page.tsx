@@ -5,12 +5,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Dropzone } from "@/components/dropzone";
 import { ManageHeader, panel } from "@/components/manage-header";
-import { ProjectMembersEditor } from "@/components/project-members-editor";
+import { TeamEditor } from "@/components/team-editor";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
 import { chapterHeading, getNovelById, NOVEL_STATUSES } from "@/lib/novels";
 import { imageUrl } from "@/lib/patches";
-import { saveNovelMembers } from "../actions";
+import { NOVEL_ROLES } from "@/lib/roles";
+import { listNovelTeam, listTeam } from "@/lib/team";
+import { saveNovelTeam } from "../actions";
 import { DeleteNovelImageButton } from "../delete-background-button";
 import { DeleteNovelButton } from "../delete-novel-button";
 import { NovelForm } from "../novel-form";
@@ -64,6 +66,7 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
               synopsis: novel.synopsis,
               quote: novel.quote,
               featured: novel.featured ? "1" : "0",
+              draft: novel.draft ? "1" : "0",
             }}
           />
         </section>
@@ -148,7 +151,9 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
         />
       </section>
 
-      <ProjectMembersEditor id={novel.id} save={saveNovelMembers.bind(null, novel.id)} />
+      <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-2xl bg-muted" />}>
+        <NovelTeamSection novelId={novel.id} />
+      </Suspense>
 
       <section className="mt-10 rounded-2xl border border-destructive/30 p-6">
         <h2 className="text-lg font-extrabold text-destructive">Zone de danger</h2>
@@ -156,5 +161,28 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
         <DeleteNovelButton novelId={novel.id} title={novel.title} />
       </section>
     </>
+  );
+}
+
+// Équipe du novel : tableau membres × rôles (rôles adaptés aux light novels). Affichée sur la fiche et la page Équipe.
+async function NovelTeamSection({ novelId }: { novelId: number }) {
+  const [team, novelTeam] = await Promise.all([listTeam(), listNovelTeam(novelId)]);
+  return (
+    <section id="equipe-novel" className="mt-8 scroll-mt-24 rounded-2xl border border-border bg-card p-6 sm:p-8" aria-labelledby="equipe-novel-titre">
+      <h2 id="equipe-novel-titre" className="text-lg font-extrabold">
+        Équipe du novel
+      </h2>
+      <p className="mt-1 mb-5 text-sm text-muted-foreground">
+        Ajoutez les membres qui ont participé et cochez leurs rôles sur ce novel. Ils apparaissent sur la fiche publique
+        et sur la page Équipe.
+      </p>
+      <TeamEditor
+        project="novel"
+        roles={NOVEL_ROLES}
+        team={team.map((member) => ({ id: member.id, name: member.name, avatarFile: member.avatarFile }))}
+        initial={novelTeam.map((member) => ({ memberId: member.id, roles: member.roles }))}
+        save={saveNovelTeam.bind(null, novelId)}
+      />
+    </section>
   );
 }

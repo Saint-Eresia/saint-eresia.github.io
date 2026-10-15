@@ -12,7 +12,7 @@ import { client as target, DATA_DIR, db, prepareSchema, UPLOAD_DIR } from "../sr
 
 const FILE_PATTERN = /^[0-9a-f-]{36}\.webp$/;
 // Ordre d’insertion : les tables référencées d’abord.
-const TABLES = ["patch", "patch_image", "novel", "novel_image", "volume", "chapter", "team_member", "patch_member", "novel_member", "patch_member_role", "news", "activity_log"];
+const TABLES = ["patch", "patch_image", "novel", "novel_image", "volume", "chapter", "team_member", "patch_member", "novel_member", "patch_member_role", "novel_member_role", "news", "activity_log"];
 const IMAGE_COLUMNS: [table: string, column: string][] = [
   ["patch_image", "file"],
   ["novel_image", "file"],

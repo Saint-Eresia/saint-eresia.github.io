@@ -5,8 +5,7 @@ import { Suspense } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { EmptyState, PageIntro } from "@/components/page-intro";
 import { Badge } from "@/components/lightswind/badge";
-import { patchHref } from "@/lib/patch-kinds";
-import { LINK_KINDS, LINK_LABELS, listTeam, listTeamPatchRoles, memberAnchor, roleLabels, type LinkKind } from "@/lib/team";
+import { LINK_KINDS, LINK_LABELS, listTeam, listTeamProjectRoles, memberAnchor, roleLabels, type LinkKind } from "@/lib/team";
 
 export const metadata: Metadata = { title: "Équipe" };
 
@@ -36,7 +35,7 @@ export default function TeamPage() {
 }
 
 async function Members() {
-  const [team, patchRoles] = await Promise.all([listTeam(), listTeamPatchRoles()]);
+  const [team, projectRoles] = await Promise.all([listTeam(), listTeamProjectRoles()]);
   if (team.length === 0) return <EmptyState>L’équipe n’a pas encore été présentée.</EmptyState>;
   // Anciennes ancres (#membre-3) → nouvelles (#mekki), pour les liens déjà partagés.
   const legacy = Object.fromEntries(team.map((member) => [`membre-${member.id}`, memberAnchor(member)]));
@@ -71,20 +70,20 @@ async function Members() {
               ))}
             </div>
           </div>
-          {(patchRoles.get(member.id) ?? []).length > 0 && (
+          {(projectRoles.get(member.id) ?? []).length > 0 && (
             <dl className="mt-5 space-y-3 text-sm">
-              {(patchRoles.get(member.id) ?? []).map((patch) => (
-                <div key={patch.slug}>
+              {(projectRoles.get(member.id) ?? []).map((project) => (
+                <div key={project.key}>
                   <dt>
-                    <Link href={patchHref(patch)} className="font-semibold text-muted-foreground hover:text-primary hover:underline">
-                      {patch.title}
+                    <Link href={project.href} className="font-semibold text-muted-foreground hover:text-primary hover:underline">
+                      {project.title}
                     </Link>
                   </dt>
                   <dd className="mt-1.5 flex flex-wrap gap-1.5">
-                    {patch.roles.length === 0 ? (
+                    {project.roles.length === 0 ? (
                       <span className="text-xs text-muted-foreground">Participation</span>
                     ) : (
-                      roleLabels(patch.roles).map((role) => (
+                      roleLabels(project.roles).map((role) => (
                         <Badge key={role} variant="unstyled" className="border-transparent bg-muted text-foreground">
                           {role}
                         </Badge>
