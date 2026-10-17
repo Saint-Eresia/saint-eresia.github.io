@@ -62,6 +62,8 @@ const SCHEMA = `
     synopsis TEXT NOT NULL DEFAULT '',
     -- Carrousel « Recommandé » de l’accueil : citation affichée et novel mis en avant (1) ou non (0).
     quote TEXT NOT NULL DEFAULT '',
+    -- Commentaire de la citation, affiché au survol sur la fiche (ex. sa provenance).
+    quoteNote TEXT NOT NULL DEFAULT '',
     featured INTEGER NOT NULL DEFAULT 0,
     -- Brouillon (1) : invisible du public (listes, fiche, chapitres, accueil, page Équipe), visible par l’équipe.
     draft INTEGER NOT NULL DEFAULT 0,
@@ -337,6 +339,7 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
+  if (!novelColumns.includes("quoteNote")) await client.execute("ALTER TABLE novel ADD COLUMN quoteNote TEXT NOT NULL DEFAULT ''");
   const volumeColumns = ((await client.execute("PRAGMA table_info(volume)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!volumeColumns.includes("label")) await client.execute("ALTER TABLE volume ADD COLUMN label TEXT NOT NULL DEFAULT ''");
   if (!volumeColumns.includes("note")) await client.execute("ALTER TABLE volume ADD COLUMN note TEXT NOT NULL DEFAULT ''");

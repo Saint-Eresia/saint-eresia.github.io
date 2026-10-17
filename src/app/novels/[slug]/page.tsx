@@ -84,7 +84,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               </h1>
               {novel.author && <p className="mt-3 text-muted-foreground">par {novel.author}</p>}
             </div>
-            {novel.quote && <HeroQuote quote={novel.quote} />}
+            {novel.quote && <HeroQuote quote={novel.quote} note={novel.quoteNote} />}
           </div>
         </div>
       </header>
@@ -180,9 +180,14 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
 
 // Citation (ex. accroche de la couverture du light novel original) en bas à droite de l’en-tête,
 // en serif comme sur le livre, fondue dans l’arrière-plan par un halo sombre aux bords estompés.
-function HeroQuote({ quote }: { quote: string }) {
+// Son commentaire éventuel (ex. sa provenance) s’affiche dans une bulle au survol ou au focus.
+function HeroQuote({ quote, note }: { quote: string; note: string }) {
   return (
-    <figure className="relative isolate pb-2 sm:col-span-2 lg:col-span-1">
+    <figure
+      tabIndex={note ? 0 : undefined}
+      aria-describedby={note ? "citation-commentaire" : undefined}
+      className={`group relative isolate pb-2 outline-none sm:col-span-2 lg:col-span-1 ${note ? "cursor-help" : ""}`}
+    >
       <div
         aria-hidden
         className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[50%] bg-background/55 blur-2xl"
@@ -190,6 +195,15 @@ function HeroQuote({ quote }: { quote: string }) {
       <blockquote className="font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 [text-shadow:0_1px_12px_var(--background)] lg:text-right lg:text-xl">
         {quote}
       </blockquote>
+      {note && (
+        <figcaption
+          id="citation-commentaire"
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-0 z-10 mb-3 w-max max-w-72 translate-y-1 rounded-lg border border-border bg-popover px-3 py-2 text-sm text-popover-foreground opacity-0 shadow-[0_12px_40px_var(--shadow)] transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 lg:right-0 lg:left-auto"
+        >
+          {note}
+        </figcaption>
+      )}
     </figure>
   );
 }

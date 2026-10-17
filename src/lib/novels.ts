@@ -24,7 +24,8 @@ export type Novel = {
   artist: string;
   status: string;
   synopsis: string;
-  quote: string; // citation du carrousel « Recommandé »
+  quote: string; // citation du carrousel « Recommandé » et de l’en-tête de la fiche
+  quoteNote: string; // commentaire de la citation, affiché au survol sur la fiche
   featured: number; // 1 : affiché dans le carrousel de l’accueil
   draft: number; // 1 : brouillon, invisible du public (voir isPublicNovel)
   createdAt: string;

@@ -53,6 +53,7 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
     status: text(formData, "status"),
     synopsis: text(formData, "synopsis"),
     quote: text(formData, "quote"),
+    quoteNote: text(formData, "quoteNote"),
     featured: formData.get("featured") === "1" ? 1 : 0,
     draft: formData.get("draft") === "1" ? 1 : 0,
   };
@@ -60,12 +61,13 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
   if (!(NOVEL_STATUSES as readonly string[]).includes(fields.status)) return { error: "Statut invalide." };
   if (fields.synopsis.length > 20_000) return { error: "La présentation est trop longue (20 000 caractères maximum)." };
   if (fields.quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
+  if (fields.quoteNote.length > 200) return { error: "Le commentaire de la citation est trop long (200 caractères maximum)." };
 
   const id = Number(formData.get("id")) || null;
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis, quote, featured, draft) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sql: "INSERT INTO novel (slug, title, originalTitle, author, artist, status, synopsis, quote, quoteNote, featured, draft) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args: [
           await uniqueNovelSlug(title),
           title,
@@ -75,6 +77,7 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
           fields.status,
           fields.synopsis,
           fields.quote,
+          fields.quoteNote,
           fields.featured,
           fields.draft,
         ],
@@ -91,8 +94,8 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
     id,
     [
       {
-        sql: "UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ?, quote = ?, featured = ?, draft = ? WHERE id = ?",
-        args: [title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, fields.quote, fields.featured, fields.draft, id],
+        sql: "UPDATE novel SET title = ?, originalTitle = ?, author = ?, artist = ?, status = ?, synopsis = ?, quote = ?, quoteNote = ?, featured = ?, draft = ? WHERE id = ?",
+        args: [title, fields.originalTitle, fields.author, fields.artist, fields.status, fields.synopsis, fields.quote, fields.quoteNote, fields.featured, fields.draft, id],
       },
     ],
     {
@@ -108,6 +111,7 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
         { label: "Illustrateur", before: before.artist, after: fields.artist },
         { label: "Statut", before: before.status, after: fields.status },
         { label: "Citation", before: before.quote, after: fields.quote },
+        { label: "Commentaire de la citation", before: before.quoteNote, after: fields.quoteNote },
         { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: fields.featured ? "Oui" : "Non" },
         { label: "Présentation", before: before.synopsis, after: fields.synopsis, long: true },
       ]),

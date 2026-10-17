@@ -18,6 +18,7 @@ type NovelFields = {
   status: string;
   synopsis: string;
   quote: string;
+  quoteNote: string;
   featured: string; // "1" : recommandé sur l’accueil
   draft: string; // "1" : brouillon, invisible du public
 };
@@ -132,6 +133,17 @@ export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: r
               placeholder="Ex. Live Alive !"
               value={fields.quote}
               onChange={(e) => set("quote")(e.target.value)}
+            />
+            <Label htmlFor="quoteNote" className="pt-2">
+              Commentaire de la citation <span className="font-normal text-muted-foreground">(au survol, sur la fiche)</span>
+            </Label>
+            <Input
+              id="quoteNote"
+              name="quoteNote"
+              maxLength={200}
+              placeholder="Ex. Sous-titre de la couverture du light novel original"
+              value={fields.quoteNote}
+              onChange={(e) => set("quoteNote")(e.target.value)}
             />
           </div>
           <div className="space-y-2">
