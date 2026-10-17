@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { fileUrl } from "@/lib/file-url";
 import type { PatchKind } from "@/lib/patch-kinds";
 import { parseSteps, type ProgressStep } from "@/lib/progress-steps";
+import { getViewer } from "@/lib/viewer";
 
 export const STATUSES = ["En développement", "Alpha", "Bêta", "Stable", "Terminé", "Obsolète", "Abandonné"] as const;
 
@@ -30,6 +31,7 @@ export type Patch = {
   quote: string; // citation du carrousel « Recommandé »
   featured: number; // 1 : affiché dans le carrousel de l’accueil
   kind: PatchKind; // 'vn' ou 'jeu', voir patch-kinds.ts
+  draft: number; // 1 : brouillon, invisible du public (voir isPublicPatch)
   steamAppId: number | null; // pour le launcher : détection du jeu installé
   gogId: number | null;
   createdAt: string;
@@ -65,18 +67,26 @@ async function withImages(patch: Patch): Promise<PatchWithImages> {
 // Patchs du carrousel « Recommandé » de l’accueil.
 export async function listFeaturedPatches() {
   await connection();
-  const patches = await db.prepare("SELECT * FROM patch WHERE featured = 1 ORDER BY updatedAt DESC, id DESC").all<Patch>();
+  const patches = await db.prepare("SELECT * FROM patch WHERE featured = 1 AND draft = 0 ORDER BY updatedAt DESC, id DESC").all<Patch>();
   return Promise.all(patches.map(withImages));
 }
 
 // connection() empêche que ces lectures soient figées au build : la base change après le déploiement.
-// Sans type : tous les patchs (VN et jeux).
-export async function listPatches(kind?: PatchKind) {
+// Sans type : tous les patchs (VN et jeux). Par défaut, les patchs publics seulement ; `drafts: true` ajoute les
+// brouillons (gestion).
+export async function listPatches(kind?: PatchKind, { drafts = false }: { drafts?: boolean } = {}) {
   await connection();
-  const patches = kind
-    ? await db.prepare("SELECT * FROM patch WHERE kind = ? ORDER BY updatedAt DESC, id DESC").all<Patch>(kind)
-    : await db.prepare("SELECT * FROM patch ORDER BY updatedAt DESC, id DESC").all<Patch>();
+  const where = [kind ? "kind = ?" : "", drafts ? "" : "draft = 0"].filter(Boolean);
+  const patches = await db
+    .prepare(`SELECT * FROM patch ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY updatedAt DESC, id DESC`)
+    .all<Patch>(...(kind ? [kind] : []));
   return Promise.all(patches.map(withImages));
+}
+
+// Un brouillon n’est visible que par l’équipe : la fiche vérifie `canSeePatch` avant d’afficher.
+export const isPublicPatch = (patch: Pick<Patch, "draft">) => Number(patch.draft) === 0;
+export async function canSeePatch(patch: Pick<Patch, "draft">) {
+  return isPublicPatch(patch) || Boolean((await getViewer())?.isTeam);
 }
 
 export async function getPatchBySlug(slug: string) {

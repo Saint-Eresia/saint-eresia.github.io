@@ -116,8 +116,8 @@ export async function listTeamProjectRoles({ drafts = false }: { drafts?: boolea
   const [patchLinks, novelLinks, patchRoles, novelRoles] = await Promise.all([
     db
       .prepare(
-        `SELECT l.memberId, p.id AS projectId, p.slug, p.title, p.kind, 0 AS draft FROM patch_member l JOIN patch p ON p.id = l.patchId
-         ORDER BY p.title COLLATE NOCASE`,
+        `SELECT l.memberId, p.id AS projectId, p.slug, p.title, p.kind, p.draft FROM patch_member l JOIN patch p ON p.id = l.patchId
+         ${drafts ? "" : "WHERE p.draft = 0"} ORDER BY p.title COLLATE NOCASE`,
       )
       .all<{ memberId: number; projectId: number; slug: string; title: string; kind: string; draft: number }>(),
     db

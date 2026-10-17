@@ -25,8 +25,14 @@ type PatchFields = {
   steps: ProgressStep[];
   quote: string;
   featured: boolean; // recommandé sur l’accueil
+  draft: boolean; // brouillon : invisible du public
   kind: PatchKind; // rubrique publique : Patchs VN ou Jeux
 };
+
+const VISIBILITY = [
+  { value: "0", label: "Publié", hint: "Visible par tout le monde." },
+  { value: "1", label: "Brouillon", hint: "Visible seulement par l’équipe : absent des listes, de l’accueil, de la page Équipe et du launcher." },
+];
 
 export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: readonly string[] }) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(savePatch, {});
@@ -40,6 +46,7 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
   const [steps, setSteps] = useState(patch.steps);
   const [quote, setQuote] = useState(patch.quote);
   const [featured, setFeatured] = useState(patch.featured ? "1" : "0");
+  const [draft, setDraft] = useState(patch.draft ? "1" : "0");
   const [kind, setKind] = useState<PatchKind>(patch.kind);
   const updateStep = (index: number, change: Partial<ProgressStep>) =>
     setSteps((current) => current.map((step, i) => (i === index ? { ...step, ...change } : step)));
@@ -59,6 +66,30 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
         <Label htmlFor="title">Titre</Label>
         <Input id="title" name="title" required maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Visibilité</legend>
+        <input type="hidden" name="draft" value={draft} />
+        <div className="flex flex-wrap gap-2">
+          {VISIBILITY.map((option) => (
+            <label
+              key={option.value}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-input px-4 py-2 text-sm font-semibold transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary has-focus-visible:ring-2 has-focus-visible:ring-ring"
+            >
+              <input
+                type="radio"
+                name="draft-choice"
+                value={option.value}
+                checked={draft === option.value}
+                onChange={() => setDraft(option.value)}
+                className="sr-only"
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">{VISIBILITY.find((option) => option.value === draft)?.hint}</p>
+      </fieldset>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">Rubrique</legend>

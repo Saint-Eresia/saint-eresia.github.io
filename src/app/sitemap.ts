@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
          WHERE c.published = 1 AND n.draft = 0`,
       )
       .all<{ novelSlug: string; slug: string; updatedAt: string }>(),
-    db.prepare("SELECT slug, kind, updatedAt FROM patch").all<{ slug: string; kind: string; updatedAt: string }>(),
+    db.prepare("SELECT slug, kind, updatedAt FROM patch WHERE draft = 0").all<{ slug: string; kind: string; updatedAt: string }>(),
     db.prepare("SELECT slug, updatedAt FROM news WHERE published = 1").all<{ slug: string; updatedAt: string }>(),
   ]);
   return [

@@ -34,6 +34,7 @@ function readPatchForm(formData: FormData) {
   const downloadUrl = String(formData.get("downloadUrl") ?? "").trim();
   const quote = String(formData.get("quote") ?? "").trim();
   const featured = formData.get("featured") === "1" ? 1 : 0;
+  const draft = formData.get("draft") === "1" ? 1 : 0;
   const kind = String(formData.get("kind") ?? "vn");
   if (!isPatchKind(kind)) return { error: "Rubrique invalide." };
   // Identifiants Steam / GOG facultatifs : un nombre entier, ou vide.
@@ -65,7 +66,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, kind, steamAppId, gogId } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, draft, kind, steamAppId, gogId } };
 }
 
 // Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
@@ -86,14 +87,14 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, kind, steamAppId, gogId } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, draft, kind, steamAppId, gogId } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId],
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId],
       },
       logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
     ]);
@@ -105,6 +106,7 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
   const changes = [
     ...diff([
       { label: "Titre", before: before.title, after: title },
+      { label: "Visibilité", before: before.draft ? "Brouillon" : "Publié", after: draft ? "Brouillon" : "Publié" },
       { label: "Rubrique", before: PATCH_KINDS[isPatchKind(before.kind) ? before.kind : "vn"].plural, after: PATCH_KINDS[kind].plural },
       { label: "Statut", before: before.status, after: status },
       { label: "Avancement global", before: `${before.progress} %`, after: `${progress} %` },
@@ -124,8 +126,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     { id, title },
     [
       {
-        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, kind = ?, steamAppId = ?, gogId = ? WHERE id = ?",
-        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId, id],
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, draft = ?, kind = ?, steamAppId = ?, gogId = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, id],
       },
     ],
     changes,

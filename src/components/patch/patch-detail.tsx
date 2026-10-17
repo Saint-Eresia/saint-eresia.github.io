@@ -13,7 +13,7 @@ import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
 import { excerpt } from "@/lib/news";
 import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
-import { formatDate, getPatchBySlug, imageUrl } from "@/lib/patches";
+import { canSeePatch, formatDate, getPatchBySlug, imageUrl, isPublicPatch } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
 import { listPatchTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
@@ -22,7 +22,8 @@ import { getViewer } from "@/lib/viewer";
 // Un patch ouvert depuis la mauvaise rubrique redirige vers la bonne adresse.
 export async function patchMetadata(params: Promise<{ slug: string }>): Promise<Metadata> {
   const patch = await getPatchBySlug((await params).slug);
-  if (!patch) return { title: "Patch introuvable" };
+  if (!patch || !(await canSeePatch(patch))) return { title: "Patch introuvable" };
+  if (!isPublicPatch(patch)) return { title: `${patch.title} (brouillon)`, robots: { index: false } };
   const image = patch.background ?? patch.cover;
   return {
     title: patch.title,
@@ -45,7 +46,8 @@ export function PatchDetailPage({ params, kind }: { params: Promise<{ slug: stri
 
 async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>; kind: PatchKind }) {
   const patch = await getPatchBySlug((await params).slug);
-  if (!patch) notFound();
+  // Patch en brouillon : réservé à l’équipe.
+  if (!patch || !(await canSeePatch(patch))) notFound();
   if (patch.kind !== kind) permanentRedirect(patchHref(patch));
   const section = PATCH_KINDS[kind];
   const members = await listPatchTeam(patch.id);
@@ -65,6 +67,11 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
           >
             <ArrowLeft className="size-4" /> {section.plural}
           </Link>
+          {!isPublicPatch(patch) && (
+            <p role="status" className="mt-4 w-fit rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
+              Brouillon : ce patch n’est visible que par l’équipe.
+            </p>
+          )}
           <div className="mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr]">
             <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-border shadow-[0_24px_60px_var(--shadow)] sm:w-full">
               {patch.cover ? (

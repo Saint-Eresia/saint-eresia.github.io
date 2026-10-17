@@ -79,6 +79,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
               steps: patch.steps,
               quote: patch.quote,
               featured: patch.featured === 1,
+              draft: patch.draft === 1,
               kind: patch.kind,
             }}
           />

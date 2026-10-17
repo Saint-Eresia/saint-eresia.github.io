@@ -36,6 +36,8 @@ const SCHEMA = `
     featured INTEGER NOT NULL DEFAULT 0,
     -- Type : 'vn' (rubrique Patchs VN) ou 'jeu' (rubrique Jeux, jeux vidéo hors visual novels).
     kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu')),
+    -- Brouillon (1) : invisible du public (listes, fiche, accueil, page Équipe, launcher), visible par l’équipe.
+    draft INTEGER NOT NULL DEFAULT 0,
     -- Identifiants du jeu sur Steam et GOG : le launcher s’en sert pour retrouver le jeu installé.
     steamAppId INTEGER,
     gogId INTEGER,
@@ -359,6 +361,7 @@ export async function prepareSchema(client: Client) {
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
+  if (!patchColumns.includes("draft")) await client.execute("ALTER TABLE patch ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   if (!patchColumns.includes("steamAppId")) await client.execute("ALTER TABLE patch ADD COLUMN steamAppId INTEGER");
   if (!patchColumns.includes("gogId")) await client.execute("ALTER TABLE patch ADD COLUMN gogId INTEGER");
   if (!patchColumns.includes("kind")) {

@@ -40,7 +40,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/gestion">
   const query = await searchParams;
   const onglet = one(query.onglet);
   const feed: FeedParams = { membre: one(query.membre), type: one(query.type), page: one(query.page) };
-  const [news, novels, allPatches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels({ drafts: true }), listPatches(), listTeam()]);
+  const [news, novels, allPatches, team] = await Promise.all([listNews({ publishedOnly: false }), listNovels({ drafts: true }), listPatches(undefined, { drafts: true }), listTeam()]);
   const patches = allPatches.filter((patch) => patch.kind === "vn");
   const games = allPatches.filter((patch) => patch.kind === "jeu");
 
@@ -205,7 +205,10 @@ function PatchList({ patches, kind }: { patches: Awaited<ReturnType<typeof listP
               side={
                 <>
                   <div className="flex items-center justify-between text-xs">
-                    <StatusBadge status={patch.status} />
+                    <span className="flex flex-wrap gap-1.5">
+                      {patch.draft ? <StatusBadge status="Brouillon" /> : null}
+                      <StatusBadge status={patch.status} />
+                    </span>
                     <span className="font-semibold text-muted-foreground tabular-nums">{patch.progress} %</span>
                   </div>
                   <ProgressBar value={patch.progress} className="mt-2" />
