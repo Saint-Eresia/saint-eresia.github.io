@@ -36,6 +36,14 @@ function readPatchForm(formData: FormData) {
   const featured = formData.get("featured") === "1" ? 1 : 0;
   const kind = String(formData.get("kind") ?? "vn");
   if (!isPatchKind(kind)) return { error: "Rubrique invalide." };
+  // Identifiants Steam / GOG facultatifs : un nombre entier, ou vide.
+  const storeId = (key: string) => {
+    const raw = String(formData.get(key) ?? "").trim();
+    return raw === "" ? null : /^\d{1,12}$/.test(raw) ? Number(raw) : NaN;
+  };
+  const steamAppId = storeId("steamAppId");
+  const gogId = storeId("gogId");
+  if (Number.isNaN(steamAppId) || Number.isNaN(gogId)) return { error: "Les identifiants Steam et GOG sont des nombres (ou vides)." };
   if (quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
@@ -57,7 +65,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, kind } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, kind, steamAppId, gogId } };
 }
 
 // Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
@@ -78,14 +86,14 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, kind } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, kind, steamAppId, gogId } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind],
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId],
       },
       logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
     ]);
@@ -104,6 +112,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     ...stepChanges(parseSteps(before.progressSteps), steps),
     ...diff([
       { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
+      { label: "Steam App ID", before: before.steamAppId ?? "", after: steamAppId ?? "" },
+      { label: "ID GOG", before: before.gogId ?? "", after: gogId ?? "" },
       { label: "Citation", before: before.quote, after: quote },
       { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: featured ? "Oui" : "Non" },
       { label: "Description", before: before.description, after: description, long: true },
@@ -114,8 +124,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     { id, title },
     [
       {
-        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, kind = ? WHERE id = ?",
-        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, id],
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, kind = ?, steamAppId = ?, gogId = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, kind, steamAppId, gogId, id],
       },
     ],
     changes,

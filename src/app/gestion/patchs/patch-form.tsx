@@ -20,6 +20,8 @@ type PatchFields = {
   status: string;
   progress: number;
   downloadUrl: string;
+  steamAppId: number | null;
+  gogId: number | null;
   steps: ProgressStep[];
   quote: string;
   featured: boolean; // recommandé sur l’accueil
@@ -32,6 +34,8 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
   const [status, setStatus] = useState(patch.status);
   const [progress, setProgress] = useState(patch.progress);
   const [downloadUrl, setDownloadUrl] = useState(patch.downloadUrl);
+  const [steamAppId, setSteamAppId] = useState(patch.steamAppId === null ? "" : String(patch.steamAppId));
+  const [gogId, setGogId] = useState(patch.gogId === null ? "" : String(patch.gogId));
   const [description, setDescription] = useState(patch.description);
   const [steps, setSteps] = useState(patch.steps);
   const [quote, setQuote] = useState(patch.quote);
@@ -187,6 +191,29 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
           onChange={(e) => setDownloadUrl(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">Laissez vide si le patch n’est pas encore disponible.</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="steamAppId">Steam App ID</Label>
+          <Input
+            id="steamAppId"
+            name="steamAppId"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="Ex. 970570"
+            value={steamAppId}
+            onChange={(e) => setSteamAppId(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="gogId">ID GOG</Label>
+          <Input id="gogId" name="gogId" inputMode="numeric" pattern="[0-9]*" placeholder="Ex. 1207658924" value={gogId} onChange={(e) => setGogId(e.target.value)} />
+        </div>
+        <p className="text-xs text-muted-foreground sm:col-span-2">
+          Facultatifs : le launcher s’en sert pour retrouver le jeu installé. L’App ID Steam figure dans l’adresse de la page du
+          jeu sur le Store (store.steampowered.com/app/<strong>970570</strong>/…).
+        </p>
       </div>
 
       <div className="space-y-2">

@@ -30,6 +30,8 @@ export type Patch = {
   quote: string; // citation du carrousel « Recommandé »
   featured: number; // 1 : affiché dans le carrousel de l’accueil
   kind: PatchKind; // 'vn' ou 'jeu', voir patch-kinds.ts
+  steamAppId: number | null; // pour le launcher : détection du jeu installé
+  gogId: number | null;
   createdAt: string;
   updatedAt: string;
 };

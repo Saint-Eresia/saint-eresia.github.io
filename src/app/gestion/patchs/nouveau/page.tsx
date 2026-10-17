@@ -34,7 +34,7 @@ async function NewPatch({ searchParams }: Pick<PageProps<"/gestion/patchs/nouvea
       <div className="max-w-3xl rounded-2xl border border-border bg-card p-6 sm:p-8">
         <PatchForm
           statuses={STATUSES}
-          patch={{ title: "", description: "", status: "En développement", progress: 0, downloadUrl: "", steps: [], quote: "", featured: false, kind }}
+          patch={{ title: "", description: "", status: "En développement", progress: 0, downloadUrl: "", steamAppId: null, gogId: null, steps: [], quote: "", featured: false, kind }}
         />
         <p className="mt-6 text-sm text-muted-foreground">
           Vous pourrez ajouter la couverture et les captures d’écran une fois le {kind === "jeu" ? "jeu" : "patch"} créé.
