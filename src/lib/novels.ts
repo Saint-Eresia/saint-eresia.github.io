@@ -52,8 +52,9 @@ export type VolumeWithChapters = Volume & { chapters: ChapterSummary[] };
 const SUMMARY_COLUMNS =
   "c.id, c.novelId, c.volumeId, c.slug, c.position, c.label, c.title, c.published, c.translators, c.downloadUrl, c.createdAt, c.updatedAt";
 
+// « Chapitre 12 : Titre » (espace insécable avant les deux-points).
 export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
-  chapter.title && chapter.title !== chapter.label ? `${chapter.label} — ${chapter.title}` : chapter.label;
+  chapter.title && chapter.title !== chapter.label ? `${chapter.label} : ${chapter.title}` : chapter.label;
 export const volumeHeading = (volume: Pick<Volume, "number" | "title">) =>
   volume.title ? `Tome ${volume.number} — ${volume.title}` : `Tome ${volume.number}`;
 
