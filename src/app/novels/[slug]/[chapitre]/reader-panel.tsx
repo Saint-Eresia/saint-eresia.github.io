@@ -1,0 +1,264 @@
+"use client";
+
+import { Images, Minus, Plus, RotateCcw, Settings2, X } from "lucide-react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
+
+// Réglages de lecture, propres à chaque lecteur et conservés dans son navigateur (localStorage).
+type Settings = { font: FontKey; size: number; leading: number; tracking: number; align: "left" | "justify" };
+type FontKey = "sans" | "serif" | "system";
+
+const FONTS: Record<FontKey, { label: string; family: string }> = {
+  sans: { label: "Sans-serif", family: "var(--font-urbanist), sans-serif" },
+  serif: { label: "Serif", family: "var(--font-literata), Georgia, serif" },
+  system: { label: "Police du système", family: "system-ui, sans-serif" },
+};
+const DEFAULTS: Settings = { font: "sans", size: 18, leading: 1.8, tracking: 0, align: "left" };
+const LIMITS = { size: [14, 30, 1], leading: [1.2, 2.6, 0.1], tracking: [0, 3, 0.5] } as const;
+const STORAGE_KEY = "lecture:options";
+const OPEN_KEY = "lecture:panneau";
+
+const clamp = (key: keyof typeof LIMITS, value: number) => {
+  const [min, max, step] = LIMITS[key];
+  return Math.min(max, Math.max(min, Math.round(value / step) * step));
+};
+
+// Petit magasin partagé : la valeur en mémoire fait foi, le localStorage n’est qu’une sauvegarde
+// (il peut être indisponible, en navigation privée par exemple).
+let current: Settings | null = null;
+const listeners = new Set<() => void>();
+function load(): Settings {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") as Partial<Settings>;
+    return {
+      font: saved.font && saved.font in FONTS ? saved.font : DEFAULTS.font,
+      size: typeof saved.size === "number" ? clamp("size", saved.size) : DEFAULTS.size,
+      leading: typeof saved.leading === "number" ? clamp("leading", saved.leading) : DEFAULTS.leading,
+      tracking: typeof saved.tracking === "number" ? clamp("tracking", saved.tracking) : DEFAULTS.tracking,
+      align: saved.align === "justify" ? "justify" : "left",
+    };
+  } catch {
+    return DEFAULTS;
+  }
+}
+const snapshot = () => (current ??= load());
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+function save(next: Settings) {
+  current = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {}
+  listeners.forEach((listener) => listener());
+}
+// Panneau rouvert d’un chapitre à l’autre s’il était resté ouvert.
+let panelOpen: boolean | null = null;
+const openSnapshot = () => {
+  if (panelOpen === null) {
+    try {
+      panelOpen = localStorage.getItem(OPEN_KEY) === "1";
+    } catch {
+      panelOpen = false;
+    }
+  }
+  return panelOpen;
+};
+function setPanelOpen(next: boolean) {
+  panelOpen = next;
+  try {
+    localStorage.setItem(OPEN_KEY, next ? "1" : "0");
+  } catch {}
+  listeners.forEach((listener) => listener());
+}
+
+export type ReaderImage = { src: string; alt: string };
+
+// Texte du chapitre mis en forme selon les réglages, avec le panneau « Options » / « Illustrations ».
+export function ReaderPanel({ images, children }: { images: ReaderImage[]; children: ReactNode }) {
+  const settings = useSyncExternalStore(subscribe, snapshot, () => DEFAULTS);
+  const open = useSyncExternalStore(subscribe, openSnapshot, () => false);
+  const [tab, setTab] = useState<"options" | "illustrations">("options");
+  const content = useRef<HTMLDivElement>(null);
+
+  const toggle = setPanelOpen;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPanelOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const set = <K extends keyof Settings>(key: K, value: Settings[K]) => save({ ...settings, [key]: value });
+  const step = (key: keyof typeof LIMITS, direction: 1 | -1) => set(key, clamp(key, settings[key] + direction * LIMITS[key][2]));
+  const goTo = (index: number) => {
+    content.current?.querySelectorAll("img")[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!window.matchMedia("(min-width: 1024px)").matches) toggle(false);
+  };
+
+  const style = {
+    "--reader-font": FONTS[settings.font].family,
+    "--reader-size": `${settings.size}px`,
+    "--reader-leading": settings.leading,
+    "--reader-tracking": `${settings.tracking}px`,
+    "--reader-align": settings.align,
+    "--reader-hyphens": settings.align === "justify" ? "auto" : "manual",
+  } as CSSProperties;
+
+  return (
+    <>
+      <div ref={content} style={style}>
+        {children}
+      </div>
+
+      {!open && (
+        <button
+          type="button"
+          onClick={() => toggle(true)}
+          className="fixed bottom-5 left-5 z-40 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold shadow-[0_12px_40px_var(--shadow)] transition-colors hover:text-primary"
+        >
+          <Settings2 className="size-4" /> Options de lecture
+        </button>
+      )}
+
+      {open && (
+        <aside
+          aria-label="Options de lecture"
+          className="fixed inset-x-3 bottom-3 z-40 flex max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_50px_var(--shadow)] lg:inset-x-auto lg:top-24 lg:bottom-auto lg:left-5 lg:max-h-[calc(100vh-8rem)] lg:w-72"
+        >
+          <div className="flex items-center gap-1 border-b border-border p-2">
+            <TabButton active={tab === "options"} onClick={() => setTab("options")}>
+              <Settings2 className="size-4" /> Options
+            </TabButton>
+            {images.length > 0 && (
+              <TabButton active={tab === "illustrations"} onClick={() => setTab("illustrations")}>
+                <Images className="size-4" /> Illustrations <span className="text-xs text-muted-foreground">{images.length}</span>
+              </TabButton>
+            )}
+            <button
+              type="button"
+              onClick={() => toggle(false)}
+              aria-label="Fermer les options de lecture"
+              className="ml-auto rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          <div className="overflow-y-auto p-4">
+            {tab === "options" || images.length === 0 ? (
+              <div className="space-y-4">
+                <Field label="Police">
+                  <select
+                    value={settings.font}
+                    onChange={(e) => set("font", e.target.value as FontKey)}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                  >
+                    {Object.entries(FONTS).map(([key, font]) => (
+                      <option key={key} value={key}>
+                        {font.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Stepper label="Taille" value={`${settings.size}px`} onStep={(d) => step("size", d)} minus="A−" plus="A+" />
+                <Stepper label="Interligne" value={settings.leading.toFixed(1)} onStep={(d) => step("leading", d)} />
+                <Stepper label="Lettrage" value={`${settings.tracking}px`} onStep={(d) => step("tracking", d)} />
+                <Field label="Alignement">
+                  <select
+                    value={settings.align}
+                    onChange={(e) => set("align", e.target.value as Settings["align"])}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="left">Aligner à gauche</option>
+                    <option value="justify">Justifier</option>
+                  </select>
+                </Field>
+                <button
+                  type="button"
+                  onClick={() => save(DEFAULTS)}
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+                >
+                  <RotateCcw className="size-4" /> Réinitialiser
+                </button>
+              </div>
+            ) : (
+              <ol className="grid grid-cols-2 gap-3">
+                {images.map((image, index) => (
+                  <li key={image.src + index}>
+                    <button
+                      type="button"
+                      onClick={() => goTo(index)}
+                      className="group block w-full overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-primary"
+                    >
+                      <img src={image.src} alt={image.alt} loading="lazy" className="aspect-[3/4] w-full object-cover" />
+                      <span className="block px-2 py-1 text-xs font-semibold text-muted-foreground group-hover:text-primary">
+                        Illustration {index + 1}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </aside>
+      )}
+    </>
+  );
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold transition-colors",
+        active ? "bg-muted text-primary" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="text-sm font-bold">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Stepper({
+  label,
+  value,
+  onStep,
+  minus,
+  plus,
+}: {
+  label: string;
+  value: string;
+  onStep: (direction: 1 | -1) => void;
+  minus?: string;
+  plus?: string;
+}) {
+  const square = "flex size-10 shrink-0 items-center justify-center rounded-lg border border-border text-sm font-bold transition-colors hover:bg-muted";
+  return (
+    <div className="space-y-1.5">
+      <span className="text-sm font-bold">{label}</span>
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={() => onStep(-1)} className={square} aria-label={`${label} : diminuer`}>
+          {minus ?? <Minus className="size-4" />}
+        </button>
+        <output className="flex h-10 flex-1 items-center justify-center rounded-lg bg-muted text-sm font-semibold">{value}</output>
+        <button type="button" onClick={() => onStep(1)} className={square} aria-label={`${label} : augmenter`}>
+          {plus ?? <Plus className="size-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}

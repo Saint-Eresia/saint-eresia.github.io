@@ -191,9 +191,14 @@
   .prose-patch img { max-width: 100%; height: auto; border-radius: var(--radius); }
 
   /* Liseuse des chapitres */
+  /* Réglables par le lecteur (panneau « Options de lecture ») via les variables --reader-*. */
   .prose-reader {
-    font-size: 1.15rem;
-    line-height: 1.85;
+    font-family: var(--reader-font, inherit);
+    font-size: var(--reader-size, 1.15rem);
+    line-height: var(--reader-leading, 1.85);
+    letter-spacing: var(--reader-tracking, normal);
+    text-align: var(--reader-align, start);
+    hyphens: var(--reader-hyphens, manual);
     color: var(--prose-reader);
   }
   .prose-reader > * + * { margin-top: 1.1rem; }

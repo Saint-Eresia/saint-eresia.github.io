@@ -1,11 +1,20 @@
 import { ChevronLeft, ChevronRight, Download, List } from "lucide-react";
 import type { Metadata } from "next";
+import { Literata } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { canSeeNovel, chapterHeading, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
+import { ReaderPanel } from "./reader-panel";
+
+// Police serif proposée dans les options de lecture.
+const literata = Literata({ variable: "--font-literata", subsets: ["latin"] });
+
+// Illustrations du chapitre, dans l’ordre du texte, pour la liste du panneau de lecture.
+const imagesOf = (content: string) =>
+  [...content.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)/g)].map(([, alt, src]) => ({ alt, src }));
 
 type Props = PageProps<"/novels/[slug]/[chapitre]">;
 
@@ -32,7 +41,7 @@ async function Reader({ params }: { params: Props["params"] }) {
   const { novel, volume, chapter, previous, next } = data;
 
   return (
-    <article className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
+    <article className={`mx-auto max-w-3xl px-4 pt-10 sm:px-6 ${literata.variable}`}>
       <header className="text-center">
         <Link href={`/novels/${novel.slug}`} className="text-sm font-semibold text-primary hover:underline">
           {novel.title}
@@ -51,7 +60,9 @@ async function Reader({ params }: { params: Props["params"] }) {
 
       <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-8" />
       <div className="mt-10">
-        <Markdown reader>{chapter.content}</Markdown>
+        <ReaderPanel images={imagesOf(chapter.content)}>
+          <Markdown reader>{chapter.content}</Markdown>
+        </ReaderPanel>
       </div>
       <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-14 border-t border-border pt-8" />
     </article>
