@@ -81,7 +81,7 @@ function ChapterNav({
   className?: string;
 }) {
   return (
-    <nav aria-label="Navigation entre les chapitres" className={`grid grid-cols-[1fr_auto_1fr] items-center gap-3 ${className}`}>
+    <nav aria-label="Navigation entre les chapitres" className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 ${className}`}>
       <div>
         {previous && (
           <Button asChild variant="outline" size="pill" className="max-w-full">
@@ -94,7 +94,7 @@ function ChapterNav({
       </div>
       <Button asChild variant="ghost" size="pill">
         <Link href={`/novels/${novelSlug}`}>
-          <List /> Sommaire
+          <List /> <span className="max-sm:sr-only">Sommaire</span>
         </Link>
       </Button>
       <div className="text-right">
