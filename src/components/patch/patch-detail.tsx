@@ -131,7 +131,22 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
                 Bientôt disponible
               </Button>
             )}
-            <p className="text-center text-xs text-muted-foreground">Le jeu original n’est pas inclus.</p>
+            <p className="text-center text-xs text-muted-foreground">
+              Le jeu original n’est pas inclus.
+              {patch.vndbId && (
+                <>
+                  {" "}
+                  <a
+                    href={`https://vndb.org/${patch.vndbId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold hover:text-primary hover:underline"
+                  >
+                    Fiche VNDB
+                  </a>
+                </>
+              )}
+            </p>
             <Suspense fallback={null}>
               <EditLink id={patch.id} />
             </Suspense>
