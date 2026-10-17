@@ -90,6 +90,35 @@
   color-scheme: light;
 }
 
+/* Fond sépia des options de lecture (attribut posé sur <html> par le lecteur des chapitres),
+   prioritaire sur les thèmes clair et sombre. */
+html[data-reader-theme="sepia"],
+html.dark[data-reader-theme="sepia"] {
+  --background: hsl(40 45% 90%);
+  --foreground: hsl(30 30% 18%);
+  --card: hsl(40 45% 94%);
+  --card-foreground: hsl(30 30% 18%);
+  --popover: hsl(40 45% 94%);
+  --popover-foreground: hsl(30 30% 18%);
+  --primary: hsl(349 65% 40%);
+  --primary-dark: hsl(349 65% 32%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(38 38% 85%);
+  --secondary-foreground: hsl(30 30% 18%);
+  --muted: hsl(38 32% 82%);
+  --muted-foreground: hsl(30 18% 36%);
+  --accent: hsl(30 45% 84%);
+  --accent-foreground: hsl(349 60% 30%);
+  --border: hsl(36 26% 76%);
+  --border-strong: hsl(34 20% 62%);
+  --input: hsl(32 14% 50%);
+  --prose: hsl(30 28% 20%);
+  --prose-reader: hsl(30 32% 16%);
+  --shadow: hsl(30 30% 20% / 0.2);
+  --selection: hsl(349 65% 40% / 0.2);
+  color-scheme: light;
+}
+
 /* Palette sombre reprise de l’ancien site. */
 .dark {
   --background: hsl(224 18% 8%);

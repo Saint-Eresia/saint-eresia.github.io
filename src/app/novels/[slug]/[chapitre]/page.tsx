@@ -64,6 +64,8 @@ async function Reader({ params }: { params: Props["params"] }) {
           images={imagesOf(chapter.content)}
           novelSlug={novel.slug}
           chapter={{ slug: chapter.slug, heading: chapterHeading(chapter) }}
+          previousHref={previous && `/novels/${novel.slug}/${previous.slug}`}
+          nextHref={next && `/novels/${novel.slug}/${next.slug}`}
         >
           <Markdown reader>{chapter.content}</Markdown>
         </ReaderPanel>
