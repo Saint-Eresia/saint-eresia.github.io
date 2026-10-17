@@ -150,7 +150,10 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                             className="group flex items-center gap-4 px-5 py-3 transition-colors hover:bg-muted/50"
                           >
                             <span className="min-w-0 flex-1">
-                              <span className="block font-semibold group-hover:text-primary">{heading}</span>
+                              <span className="block font-semibold group-hover:text-primary">
+                                <span aria-hidden className="mr-1.5 text-primary">•</span>
+                                {heading}
+                              </span>
                               {chapter.translators && (
                                 <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
                               )}
