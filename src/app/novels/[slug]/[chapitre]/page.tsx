@@ -6,7 +6,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
-import { canSeeNovel, chapterHeading, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
+import { canSeeNovel, chapterHeading, coverOf, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
+import { imageUrl } from "@/lib/patches";
+import { socialMetadata } from "@/lib/site-url";
 import { ReaderPanel } from "./reader-panel";
 
 // Police serif proposée dans les options de lecture.
@@ -21,8 +23,18 @@ type Props = PageProps<"/novels/[slug]/[chapitre]">;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, chapitre } = await params;
   const data = await getPublishedChapter(slug, chapitre);
-  if (data && !(await canSeeNovel(data.novel))) return { title: "Chapitre introuvable" };
-  return { title: data ? `${chapterHeading(data.chapter)} · ${data.novel.title}` : "Chapitre introuvable" };
+  if (!data || !(await canSeeNovel(data.novel))) return { title: "Chapitre introuvable" };
+  const title = `${chapterHeading(data.chapter)} · ${data.novel.title}`;
+  const cover = await coverOf(data.novel.id);
+  return {
+    title,
+    ...socialMetadata({
+      title,
+      description: `${data.novel.title}, ${volumeHeading(data.volume)} : ${chapterHeading(data.chapter)}. À lire en ligne en français sur Saint Eresia.`,
+      image: cover && imageUrl(cover),
+      type: "article",
+    }),
+  };
 }
 
 export default function ReaderPage({ params }: Props) {

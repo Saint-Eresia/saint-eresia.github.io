@@ -3,11 +3,15 @@ import { Urbanist } from "next/font/google";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const urbanist = Urbanist({ variable: "--font-urbanist", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  // Base des adresses absolues des aperçus de partage (Open Graph).
+  metadataBase: new URL(siteUrl()),
+  openGraph: { siteName: "Saint Eresia", locale: "fr_FR", type: "website" },
   title: { default: "Saint Eresia — Light novels et patchs VN en français", template: "%s · Saint Eresia" },
   description: "Saint Eresia traduit des light novels, à lire en ligne, et publie des patchs français pour visual novels.",
   // Flux RSS (nouveaux chapitres et actualités), détecté par les lecteurs de flux.

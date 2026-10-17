@@ -1,15 +1,9 @@
 import "server-only";
+import { siteUrl } from "@/lib/site-url";
 
 // Annonce sur Discord (webhook d’un salon) d’un chapitre ou d’une actualité tout juste publiés.
 // Sans DISCORD_WEBHOOK_URL (à créer dans Discord : Paramètres du salon → Intégrations → Webhooks), rien n’est envoyé.
 // Une annonce qui échoue ne bloque jamais l’enregistrement : l’erreur est seulement journalisée.
-
-// Adresse publique du site, pour les liens des annonces (domaine de production sur Vercel).
-export function siteUrl() {
-  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  return "http://localhost:3000";
-}
 
 export async function announce({ title, path, description, image }: { title: string; path: string; description?: string; image?: string | null }) {
   const webhook = process.env.DISCORD_WEBHOOK_URL;

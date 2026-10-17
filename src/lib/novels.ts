@@ -64,7 +64,7 @@ export const volumeHeading = (volume: Pick<Volume, "number" | "title"> & { label
 
 const imageOf = async (novelId: number, kind: "cover" | "background" | "logo") =>
   (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = ?").get<NovelImage>(novelId, kind)) ?? null;
-const coverOf = (novelId: number) => imageOf(novelId, "cover");
+export const coverOf = (novelId: number) => imageOf(novelId, "cover");
 // Image large affichée derrière l’en-tête de la fiche ; à défaut, la couverture floutée.
 const backgroundOf = (novelId: number) => imageOf(novelId, "background");
 // Logo (PNG détouré) affiché à droite dans le carrousel « Recommandé » de l’accueil.

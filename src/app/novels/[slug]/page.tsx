@@ -10,7 +10,9 @@ import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
 import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
+import { excerpt } from "@/lib/news";
 import { formatDate, imageUrl } from "@/lib/patches";
+import { socialMetadata } from "@/lib/site-url";
 import { listNovelTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 import { ResumeButton } from "./resume-button";
@@ -18,7 +20,19 @@ import { ResumeButton } from "./resume-button";
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
   const novel = await getNovelBySlug((await params).slug);
   if (!novel || !(await canSeeNovel(novel))) return { title: "Light novel introuvable" };
-  return isPublicNovel(novel) ? { title: novel.title } : { title: `${novel.title} (brouillon)`, robots: { index: false } };
+  if (!isPublicNovel(novel)) return { title: `${novel.title} (brouillon)`, robots: { index: false } };
+  // Aperçu de partage : citation (ou début de la présentation), arrière-plan en grand, sinon couverture.
+  const image = novel.background ?? novel.cover;
+  return {
+    title: novel.title,
+    ...socialMetadata({
+      title: novel.title,
+      description: novel.quote || excerpt(novel.synopsis, 200),
+      image: image && imageUrl(image),
+      large: !!novel.background,
+      type: "book",
+    }),
+  };
 }
 
 export default function NovelPage({ params }: PageProps<"/novels/[slug]">) {

@@ -11,8 +11,10 @@ import { HeroBackdrop } from "@/components/hero-backdrop";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
+import { excerpt } from "@/lib/news";
 import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
 import { formatDate, getPatchBySlug, imageUrl } from "@/lib/patches";
+import { socialMetadata } from "@/lib/site-url";
 import { listPatchTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 
@@ -20,7 +22,17 @@ import { getViewer } from "@/lib/viewer";
 // Un patch ouvert depuis la mauvaise rubrique redirige vers la bonne adresse.
 export async function patchMetadata(params: Promise<{ slug: string }>): Promise<Metadata> {
   const patch = await getPatchBySlug((await params).slug);
-  return { title: patch?.title ?? "Patch introuvable" };
+  if (!patch) return { title: "Patch introuvable" };
+  const image = patch.background ?? patch.cover;
+  return {
+    title: patch.title,
+    ...socialMetadata({
+      title: patch.title,
+      description: patch.quote || excerpt(patch.description, 200),
+      image: image && imageUrl(image),
+      large: !!patch.background,
+    }),
+  };
 }
 
 export function PatchDetailPage({ params, kind }: { params: Promise<{ slug: string }>; kind: PatchKind }) {
