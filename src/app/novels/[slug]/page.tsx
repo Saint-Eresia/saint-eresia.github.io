@@ -139,7 +139,12 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               <div className="space-y-5">
                 {tableOfContents(novel.volumes).map((group) => (
                   <div key={group.key} className="overflow-hidden rounded-2xl border border-border bg-card">
-                    {group.heading && <h3 className="border-b border-border bg-secondary px-5 py-3 font-bold">{group.heading}</h3>}
+                    {group.heading && (
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-secondary px-5 py-3">
+                        <h3 className="font-bold">{group.heading}</h3>
+                        {group.translators && <p className="text-xs text-muted-foreground">Traduction : {group.translators}</p>}
+                      </div>
+                    )}
                     {group.note && (
                       <div className="border-b border-border bg-secondary/50 px-5 py-3 text-sm">
                         <Markdown>{group.note}</Markdown>
@@ -157,7 +162,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                                 <span aria-hidden className="mr-1.5 text-primary">•</span>
                                 {heading}
                               </span>
-                              {chapter.translators && (
+                              {chapter.translators && !group.translators && (
                                 <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
                               )}
                             </span>
@@ -208,10 +213,22 @@ function HeroQuote({ quote, note }: { quote: string; note: string }) {
   );
 }
 
+// Traducteurs communs à tous les chapitres d’un tome (au moins deux), pour ne pas les répéter à chaque ligne.
+function sharedTranslators(chapters: ChapterSummary[]) {
+  const [first] = chapters;
+  return chapters.length > 1 && first.translators && chapters.every((c) => c.translators === first.translators) ? first.translators : undefined;
+}
+
 // Un tome lu d’un bloc (un seul chapitre « Tome N ») n’a pas besoin d’en-tête :
 // ces tomes consécutifs sont regroupés dans une même liste.
 function tableOfContents(volumes: VolumeWithChapters[]) {
-  const groups: { key: string; heading: string | null; note?: string; rows: { chapter: ChapterSummary; heading: string }[] }[] = [];
+  const groups: {
+    key: string;
+    heading: string | null;
+    note?: string;
+    translators?: string; // commun à tous les chapitres du tome : affiché une fois dans l’en-tête
+    rows: { chapter: ChapterSummary; heading: string }[];
+  }[] = [];
   for (const volume of volumes) {
     const [only] = volume.chapters;
     const whole = volume.chapters.length === 1 && only.label === `Tome ${volume.number}`;
@@ -220,6 +237,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
         key: `v${volume.id}`,
         heading: volumeHeading(volume),
         note: volume.note,
+        translators: sharedTranslators(volume.chapters),
         rows: volume.chapters.map((chapter) => ({ chapter, heading: chapterHeading(chapter) })),
       });
       continue;
