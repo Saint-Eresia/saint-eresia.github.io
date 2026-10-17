@@ -61,7 +61,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               Brouillon : ce novel n’est visible que par l’équipe.
             </p>
           )}
-          <div className="mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr]">
+          <div
+            className={`mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr] ${novel.quote ? "lg:grid-cols-[15rem_1fr_minmax(0,24rem)]" : ""}`}
+          >
             <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-border shadow-[0_24px_60px_var(--shadow)] sm:w-full">
               {novel.cover ? (
                 <img
@@ -82,6 +84,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               </h1>
               {novel.author && <p className="mt-3 text-muted-foreground">par {novel.author}</p>}
             </div>
+            {novel.quote && <HeroQuote quote={novel.quote} />}
           </div>
         </div>
       </header>
@@ -172,6 +175,22 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
         </div>
       </div>
     </article>
+  );
+}
+
+// Citation (ex. accroche de la couverture du light novel original) en bas à droite de l’en-tête,
+// en serif comme sur le livre, fondue dans l’arrière-plan par un halo sombre aux bords estompés.
+function HeroQuote({ quote }: { quote: string }) {
+  return (
+    <figure className="relative isolate pb-2 sm:col-span-2 lg:col-span-1">
+      <div
+        aria-hidden
+        className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[50%] bg-background/55 blur-2xl"
+      />
+      <blockquote className="font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 [text-shadow:0_1px_12px_var(--background)] lg:text-right lg:text-xl">
+        {quote}
+      </blockquote>
+    </figure>
   );
 }
 
