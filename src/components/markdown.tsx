@@ -11,11 +11,15 @@ export function Markdown({ children, reader = false }: { children: string; reade
       <ReactMarkdown
         remarkPlugins={reader ? [remarkGfm, remarkBreaks] : [remarkGfm]}
         components={{
-          a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {children}
-            </a>
-          ),
+          // Liens internes (« /novels/… ») dans le même onglet, liens externes dans un nouvel onglet.
+          a: ({ href, children }) =>
+            href?.startsWith("/") && !href.startsWith("//") ? (
+              <a href={href}>{children}</a>
+            ) : (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
           img: ({ src, alt }) => <img src={typeof src === "string" ? src : undefined} alt={alt ?? ""} loading="lazy" />,
         }}
       >
