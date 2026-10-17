@@ -181,53 +181,66 @@ export async function deleteNovelImage(novelId: number, kind: "background" | "lo
 
 // ——— Tomes ———
 
-function readVolume(number: number, title: string) {
+export type VolumeInput = { number: number; label: string; title: string; note: string };
+
+function readVolume(input: VolumeInput) {
+  const { number } = input;
   if (!Number.isInteger(number) || number < 0 || number > 999) return { error: "Le numéro de tome doit être un entier positif." };
-  return { title: title.trim().slice(0, 180) };
+  if (input.note.trim().length > 2000) return { error: "La précision du tome est trop longue (2000 caractères au plus)." };
+  return { volume: { number, label: input.label.trim().slice(0, 60), title: input.title.trim().slice(0, 180), note: input.note.trim() } };
 }
 
-const volumeLabel = (novel: Pick<Novel, "title">, volume: Pick<Volume, "number" | "title">) => `${novel.title} — ${volumeHeading(volume)}`;
+const volumeLabel = (novel: Pick<Novel, "title">, volume: Pick<Volume, "number" | "title" | "label">) => `${novel.title} — ${volumeHeading(volume)}`;
 
-export async function addVolume(novelId: number, number: number, title: string): Promise<ActionResult> {
+export async function addVolume(novelId: number, input: VolumeInput): Promise<ActionResult> {
   const actor = await teamActor();
   if ("error" in actor) return actor;
-  const parsed = readVolume(number, title);
-  if (parsed.error) return parsed;
+  const parsed = readVolume(input);
+  if (!parsed.volume) return { error: parsed.error };
+  const { number, label, title, note } = parsed.volume;
   const novel = await findNovel(novelId);
   if (!novel) return { error: "Novel introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ?").get(novelId, number)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
   await db.batch([
-    { sql: "INSERT INTO volume (novelId, number, title) VALUES (?, ?, ?)", args: [novelId, number, parsed.title ?? ""] },
-    logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, { number, title: parsed.title ?? "" }), action: "create" }),
+    { sql: "INSERT INTO volume (novelId, number, label, title, note) VALUES (?, ?, ?, ?, ?)", args: [novelId, number, label, title, note] },
+    logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, parsed.volume), action: "create" }),
     touch(novelId),
   ]);
   refresh();
   return { savedAt: Date.now() };
 }
 
-export async function updateVolume(volumeId: number, number: number, title: string): Promise<ActionResult> {
+export async function updateVolume(volumeId: number, input: VolumeInput): Promise<ActionResult> {
   const actor = await teamActor();
   if ("error" in actor) return actor;
-  const parsed = readVolume(number, title);
-  if (parsed.error) return parsed;
+  const parsed = readVolume(input);
+  if (!parsed.volume) return { error: parsed.error };
+  const { number, label, title, note } = parsed.volume;
   const volume = await findVolume(volumeId);
   if (!volume) return { error: "Tome introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ? AND id != ?").get(volume.novelId, number, volumeId)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
   const novel = (await findNovel(volume.novelId))!;
-  await commit(actor, volume.novelId, [{ sql: "UPDATE volume SET number = ?, title = ? WHERE id = ?", args: [number, parsed.title ?? "", volumeId] }], {
-    type: "volume",
-    id: volumeId,
-    label: volumeLabel(novel, { number, title: parsed.title ?? "" }),
-    action: "update",
-    changes: diff([
-      { label: "Numéro", before: volume.number, after: number },
-      { label: "Titre", before: volume.title, after: parsed.title ?? "" },
-    ]),
-  });
+  await commit(
+    actor,
+    volume.novelId,
+    [{ sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ? WHERE id = ?", args: [number, label, title, note, volumeId] }],
+    {
+      type: "volume",
+      id: volumeId,
+      label: volumeLabel(novel, parsed.volume),
+      action: "update",
+      changes: diff([
+        { label: "Numéro", before: volume.number, after: number },
+        { label: "Intitulé", before: volume.label, after: label },
+        { label: "Titre", before: volume.title, after: title },
+        { label: "Précision", before: volume.note, after: note, long: true },
+      ]),
+    },
+  );
   return { savedAt: Date.now() };
 }
 
@@ -291,7 +304,7 @@ export async function moveChapters(novelId: number, chapterIds: number[], volume
         changes: [
           {
             field: "Tome",
-            before: volumeHeading(volumes.get(Number(chapter.volumeId)) ?? { number: 0, title: "" }),
+            before: volumeHeading(volumes.get(Number(chapter.volumeId)) ?? { number: 0, title: "", label: "" }),
             after: volumeHeading(target),
           },
         ],

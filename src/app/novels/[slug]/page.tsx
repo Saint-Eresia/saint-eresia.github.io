@@ -137,6 +137,11 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                 {tableOfContents(novel.volumes).map((group) => (
                   <div key={group.key} className="overflow-hidden rounded-2xl border border-border bg-card">
                     {group.heading && <h3 className="border-b border-border bg-secondary px-5 py-3 font-bold">{group.heading}</h3>}
+                    {group.note && (
+                      <div className="border-b border-border bg-secondary/50 px-5 py-3 text-sm">
+                        <Markdown>{group.note}</Markdown>
+                      </div>
+                    )}
                     <ol className="divide-y divide-border">
                       {group.rows.map(({ chapter, heading }) => (
                         <li key={chapter.id}>
@@ -170,7 +175,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
 // Un tome lu d’un bloc (un seul chapitre « Tome N ») n’a pas besoin d’en-tête :
 // ces tomes consécutifs sont regroupés dans une même liste.
 function tableOfContents(volumes: VolumeWithChapters[]) {
-  const groups: { key: string; heading: string | null; rows: { chapter: ChapterSummary; heading: string }[] }[] = [];
+  const groups: { key: string; heading: string | null; note?: string; rows: { chapter: ChapterSummary; heading: string }[] }[] = [];
   for (const volume of volumes) {
     const [only] = volume.chapters;
     const whole = volume.chapters.length === 1 && only.label === `Tome ${volume.number}`;
@@ -178,6 +183,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
       groups.push({
         key: `v${volume.id}`,
         heading: volumeHeading(volume),
+        note: volume.note,
         rows: volume.chapters.map((chapter) => ({ chapter, heading: chapterHeading(chapter) })),
       });
       continue;

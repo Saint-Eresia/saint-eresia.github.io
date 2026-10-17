@@ -145,7 +145,9 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
           volumes={novel.volumes.map((volume) => ({
             id: volume.id,
             number: volume.number,
+            label: volume.label,
             title: volume.title,
+            note: volume.note,
             chapters: volume.chapters.map((c) => ({ id: c.id, heading: chapterHeading(c), published: c.published === 1 })),
           }))}
         />

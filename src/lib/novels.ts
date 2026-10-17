@@ -30,7 +30,8 @@ export type Novel = {
   createdAt: string;
   updatedAt: string;
 };
-export type Volume = { id: number; novelId: number; number: number; title: string };
+// label : intitulé remplaçant « Tome N » (ex. « Arc VI ») ; note : précision en Markdown affichée sous l’en-tête.
+export type Volume = { id: number; novelId: number; number: number; title: string; label: string; note: string };
 export type Chapter = {
   id: number;
   novelId: number;
@@ -55,8 +56,9 @@ const SUMMARY_COLUMNS =
 // « Chapitre 12 : Titre » (espace insécable avant les deux-points).
 export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
   chapter.title && chapter.title !== chapter.label ? `${chapter.label} : ${chapter.title}` : chapter.label;
-export const volumeHeading = (volume: Pick<Volume, "number" | "title">) =>
-  volume.title ? `Tome ${volume.number} — ${volume.title}` : `Tome ${volume.number}`;
+export const volumeName = (volume: Pick<Volume, "number"> & { label?: string }) => volume.label || `Tome ${volume.number}`;
+export const volumeHeading = (volume: Pick<Volume, "number" | "title"> & { label?: string }) =>
+  volume.title ? `${volumeName(volume)} — ${volume.title}` : volumeName(volume);
 
 const imageOf = async (novelId: number, kind: "cover" | "background" | "logo") =>
   (await db.prepare("SELECT * FROM novel_image WHERE novelId = ? AND kind = ?").get<NovelImage>(novelId, kind)) ?? null;

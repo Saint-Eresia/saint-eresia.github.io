@@ -84,6 +84,10 @@ const SCHEMA = `
     novelId INTEGER NOT NULL REFERENCES novel(id) ON DELETE CASCADE,
     number INTEGER NOT NULL,
     title TEXT NOT NULL DEFAULT '',
+    -- Intitulé affiché à la place de « Tome N » (ex. « Arc VI ») ; vide : « Tome N ».
+    label TEXT NOT NULL DEFAULT '',
+    -- Précision affichée sous l’en-tête du tome dans le sommaire (Markdown), ex. crédits d’une traduction reprise.
+    note TEXT NOT NULL DEFAULT '',
     UNIQUE (novelId, number)
   );
   CREATE TABLE IF NOT EXISTS chapter (
@@ -333,6 +337,9 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("quote")) await client.execute("ALTER TABLE novel ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
+  const volumeColumns = ((await client.execute("PRAGMA table_info(volume)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!volumeColumns.includes("label")) await client.execute("ALTER TABLE volume ADD COLUMN label TEXT NOT NULL DEFAULT ''");
+  if (!volumeColumns.includes("note")) await client.execute("ALTER TABLE volume ADD COLUMN note TEXT NOT NULL DEFAULT ''");
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");

@@ -7,13 +7,16 @@ import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addVolume, deleteVolume, moveChapters, updateVolume, type ActionResult } from "./actions";
+import { addVolume, deleteVolume, moveChapters, updateVolume, type ActionResult, type VolumeInput } from "./actions";
 
 export type ManagedVolume = {
   id: number;
   number: number;
+  label: string;
   title: string;
+  note: string;
   chapters: { id: number; heading: string; published: boolean }[];
 };
 
@@ -23,7 +26,7 @@ function report(result: ActionResult, success: string) {
   return !result.error;
 }
 
-// Tomes du novel : numéro et titre modifiables, liste des chapitres avec leur statut.
+// Tomes du novel : numéro, intitulé, titre et précision modifiables, liste des chapitres avec leur statut.
 // Les chapitres cochés peuvent être déplacés vers un autre tome (barre « Déplacer vers »).
 export function VolumeManager({ novelId, volumes }: { novelId: number; volumes: ManagedVolume[] }) {
   const nextNumber = Math.max(0, ...volumes.map((v) => v.number)) + 1;
@@ -38,7 +41,12 @@ export function VolumeManager({ novelId, volumes }: { novelId: number; volumes: 
     <div className="space-y-5">
       {volumes.length === 0 && <p className="text-muted-foreground">Aucun tome. Ajoutez-en un pour créer des chapitres.</p>}
       {volumes.map((volume) => (
-        <VolumeCard key={`${volume.id}-${volume.number}-${volume.title}`} volume={volume} selected={chosen} onToggle={toggle} />
+        <VolumeCard
+          key={`${volume.id}-${volume.number}-${volume.label}-${volume.title}-${volume.note}`}
+          volume={volume}
+          selected={chosen}
+          onToggle={toggle}
+        />
       ))}
       {chosen.length > 0 && (
         <MoveBar novelId={novelId} volumes={volumes} chapterIds={chosen} onDone={() => setSelected([])} />
@@ -82,7 +90,7 @@ function MoveBar({
           <option value="">Choisir un tome…</option>
           {volumes.map((volume) => (
             <option key={volume.id} value={volume.id}>
-              Tome {volume.number}
+              {volume.label || `Tome ${volume.number}`}
               {volume.title && ` : ${volume.title}`}
             </option>
           ))}
@@ -111,37 +119,49 @@ function MoveBar({
   );
 }
 
-function VolumeFields({
-  number,
-  title,
-  onNumber,
-  onTitle,
-}: {
-  number: string;
-  title: string;
-  onNumber: (value: string) => void;
-  onTitle: (value: string) => void;
-}) {
+// Champs d’un tome, saisis en texte : le numéro est converti à l’envoi.
+type VolumeDraft = { number: string; label: string; title: string; note: string };
+const draftOf = (volume: Pick<ManagedVolume, "number" | "label" | "title" | "note">): VolumeDraft => ({
+  number: String(volume.number),
+  label: volume.label,
+  title: volume.title,
+  note: volume.note,
+});
+const inputOf = (draft: VolumeDraft): VolumeInput => ({ ...draft, number: Number(draft.number) });
+
+function VolumeFields({ draft, onChange }: { draft: VolumeDraft; onChange: (draft: VolumeDraft) => void }) {
+  const set = (key: keyof VolumeDraft) => (e: { target: { value: string } }) => onChange({ ...draft, [key]: e.target.value });
   return (
     <>
       <label className="flex items-center gap-2 text-sm font-semibold">
         Tome
-        <Input
-          type="number"
-          min={0}
-          value={number}
-          onChange={(e) => onNumber(e.target.value)}
-          className="w-20"
-          aria-label="Numéro du tome"
-        />
+        <Input type="number" min={0} value={draft.number} onChange={set("number")} className="w-20" aria-label="Numéro du tome" />
       </label>
       <Input
-        value={title}
+        value={draft.label}
+        maxLength={60}
+        placeholder={`Intitulé (Tome ${draft.number || "N"})`}
+        title="Remplace « Tome N » dans le sommaire, ex. « Arc VI ». Facultatif."
+        onChange={set("label")}
+        className="w-44"
+        aria-label="Intitulé du tome"
+      />
+      <Input
+        value={draft.title}
         maxLength={180}
         placeholder="Titre du tome (facultatif)"
-        onChange={(e) => onTitle(e.target.value)}
+        onChange={set("title")}
         className="min-w-48 flex-1"
         aria-label="Titre du tome"
+      />
+      <Textarea
+        value={draft.note}
+        maxLength={2000}
+        rows={2}
+        placeholder="Précision affichée sous le tome dans le sommaire (facultatif, Markdown), ex. crédits d’une traduction reprise"
+        onChange={set("note")}
+        className="min-h-0 basis-full"
+        aria-label="Précision du tome"
       />
     </>
   );
@@ -158,10 +178,10 @@ function VolumeCard({
 }) {
   const ids = volume.chapters.map((chapter) => chapter.id);
   const allChecked = ids.length > 0 && ids.every((id) => selected.includes(id));
-  const [number, setNumber] = useState(String(volume.number));
-  const [title, setTitle] = useState(volume.title);
+  const [draft, setDraft] = useState(() => draftOf(volume));
   const [pending, startTransition] = useTransition();
-  const dirty = number !== String(volume.number) || title !== volume.title;
+  const saved = draftOf(volume);
+  const dirty = (Object.keys(saved) as (keyof VolumeDraft)[]).some((key) => draft[key] !== saved[key]);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border">
@@ -170,11 +190,11 @@ function VolumeCard({
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
-            report(await updateVolume(volume.id, Number(number), title), "Tome enregistré.");
+            report(await updateVolume(volume.id, inputOf(draft)), "Tome enregistré.");
           });
         }}
       >
-        <VolumeFields number={number} title={title} onNumber={setNumber} onTitle={setTitle} />
+        <VolumeFields draft={draft} onChange={setDraft} />
         <Button type="submit" size="sm" className="rounded-full" disabled={!dirty || pending}>
           Enregistrer
         </Button>
@@ -244,8 +264,7 @@ function VolumeCard({
 }
 
 function AddVolume({ novelId, defaultNumber }: { novelId: number; defaultNumber: number }) {
-  const [number, setNumber] = useState(String(defaultNumber));
-  const [title, setTitle] = useState("");
+  const [draft, setDraft] = useState<VolumeDraft>({ number: String(defaultNumber), label: "", title: "", note: "" });
   const [pending, startTransition] = useTransition();
   return (
     <form
@@ -253,11 +272,11 @@ function AddVolume({ novelId, defaultNumber }: { novelId: number; defaultNumber:
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
-          report(await addVolume(novelId, Number(number), title), "Tome ajouté.");
+          report(await addVolume(novelId, inputOf(draft)), "Tome ajouté.");
         });
       }}
     >
-      <VolumeFields number={number} title={title} onNumber={setNumber} onTitle={setTitle} />
+      <VolumeFields draft={draft} onChange={setDraft} />
       <Button type="submit" size="sm" variant="outline" className="rounded-full" disabled={pending}>
         <Plus /> Ajouter le tome
       </Button>
