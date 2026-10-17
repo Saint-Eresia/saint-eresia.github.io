@@ -4,6 +4,7 @@ import { Images, Minus, Plus, RotateCcw, Settings2, X } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { readProgress, RESUME_HASH, writeProgress } from "@/lib/reading-progress";
 import { cn } from "@/lib/utils";
+import { ImageLightbox } from "./image-lightbox";
 
 // Réglages de lecture, propres à chaque lecteur et conservés dans son navigateur (localStorage).
 type Settings = { font: FontKey; size: number; leading: number; tracking: number; align: "left" | "justify" };
@@ -92,6 +93,7 @@ export function ReaderPanel({
   const settings = useSyncExternalStore(subscribe, snapshot, () => DEFAULTS);
   const open = useSyncExternalStore(subscribe, openSnapshot, () => false);
   const [tab, setTab] = useState<"options" | "illustrations">("options");
+  const [zoomed, setZoomed] = useState<number | null>(null);
   const content = useRef<HTMLDivElement>(null);
 
   const toggle = setPanelOpen;
@@ -157,9 +159,20 @@ export function ReaderPanel({
 
   return (
     <>
-      <div ref={content} style={style}>
+      {/* Clic sur une illustration : affichage en plein écran. */}
+      <div
+        ref={content}
+        style={style}
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if (target.tagName !== "IMG") return;
+          const index = Array.from(content.current?.querySelectorAll("img") ?? []).indexOf(target as HTMLImageElement);
+          if (index >= 0) setZoomed(index);
+        }}
+      >
         {children}
       </div>
+      <ImageLightbox images={images} index={zoomed} onChange={setZoomed} />
 
       {!open && (
         <button

@@ -206,6 +206,7 @@
   .prose-reader h3 { margin-top: 2.2rem; font-size: 1.2rem; }
   .prose-reader p:has(> img:only-child) { margin-block: 2rem; }
   .prose-reader img { display: block; margin-inline: auto; max-height: 85vh; width: auto; box-shadow: 0 18px 40px var(--shadow); }
+  .prose-reader img { cursor: zoom-in; }
   /* Séparation de scène */
   .prose-reader hr { margin-block: 2.5rem; border: 0; text-align: center; }
   .prose-reader hr::after { content: "* * *"; color: var(--primary); letter-spacing: 0.6em; }
