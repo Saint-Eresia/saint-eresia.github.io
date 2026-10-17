@@ -2,6 +2,7 @@
 
 import { Images, Minus, Plus, RotateCcw, Settings2, X } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { readProgress, RESUME_HASH, writeProgress } from "@/lib/reading-progress";
 import { cn } from "@/lib/utils";
 
 // Réglages de lecture, propres à chaque lecteur et conservés dans son navigateur (localStorage).
@@ -76,13 +77,61 @@ function setPanelOpen(next: boolean) {
 export type ReaderImage = { src: string; alt: string };
 
 // Texte du chapitre mis en forme selon les réglages, avec le panneau « Options » / « Illustrations ».
-export function ReaderPanel({ images, children }: { images: ReaderImage[]; children: ReactNode }) {
+// Mémorise aussi le chapitre et le bloc de texte atteint (« Reprendre la lecture » sur la fiche du novel).
+export function ReaderPanel({
+  images,
+  novelSlug,
+  chapter,
+  children,
+}: {
+  images: ReaderImage[];
+  novelSlug: string;
+  chapter: { slug: string; heading: string };
+  children: ReactNode;
+}) {
   const settings = useSyncExternalStore(subscribe, snapshot, () => DEFAULTS);
   const open = useSyncExternalStore(subscribe, openSnapshot, () => false);
   const [tab, setTab] = useState<"options" | "illustrations">("options");
   const content = useRef<HTMLDivElement>(null);
 
   const toggle = setPanelOpen;
+
+  // Reprise : retour au bloc mémorisé si l’on arrive par « Reprendre la lecture », puis suivi du défilement.
+  useEffect(() => {
+    const blocks = () => Array.from(content.current?.querySelector(".prose-reader")?.children ?? []);
+    let frame = 0;
+    let started = false;
+    // Bloc le plus avancé atteint pendant la visite : remonter en haut de page (menu, sommaire) ne l’efface pas.
+    let furthest = 0;
+    const record = () => {
+      frame = 0;
+      // Premier bloc dont le bas dépasse l’en-tête du site (environ 5 rem).
+      furthest = Math.max(furthest, blocks().findIndex((block) => block.getBoundingClientRect().bottom > 80));
+      writeProgress(novelSlug, { slug: chapter.slug, heading: chapter.heading, block: furthest, at: Date.now() });
+    };
+    const onScroll = () => {
+      if (started && !frame) frame = requestAnimationFrame(record);
+    };
+    // Le suivi ne démarre qu’après le retour au passage mémorisé, pour ne pas l’écraser.
+    const start = requestAnimationFrame(() => {
+      if (window.location.hash === RESUME_HASH) {
+        const saved = readProgress(novelSlug);
+        if (saved?.slug === chapter.slug) {
+          furthest = saved.block;
+          blocks()[saved.block]?.scrollIntoView({ block: "start" });
+        }
+        history.replaceState(history.state, "", window.location.pathname + window.location.search);
+      }
+      started = true;
+      record();
+    });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(start);
+      cancelAnimationFrame(frame);
+    };
+  }, [novelSlug, chapter.slug, chapter.heading]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPanelOpen(false);

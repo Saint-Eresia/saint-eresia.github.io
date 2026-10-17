@@ -60,7 +60,11 @@ async function Reader({ params }: { params: Props["params"] }) {
 
       <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-8" />
       <div className="mt-10">
-        <ReaderPanel images={imagesOf(chapter.content)}>
+        <ReaderPanel
+          images={imagesOf(chapter.content)}
+          novelSlug={novel.slug}
+          chapter={{ slug: chapter.slug, heading: chapterHeading(chapter) }}
+        >
           <Markdown reader>{chapter.content}</Markdown>
         </ReaderPanel>
       </div>

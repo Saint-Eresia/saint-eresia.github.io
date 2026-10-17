@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, ChevronRight, Pencil } from "lucide-react";
+import { ArrowLeft, ChevronRight, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +13,7 @@ import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeadi
 import { formatDate, imageUrl } from "@/lib/patches";
 import { listNovelTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
+import { ResumeButton } from "./resume-button";
 
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
   const novel = await getNovelBySlug((await params).slug);
@@ -93,11 +94,11 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
         <aside className={layout.aside}>
           <div className={`space-y-5 rounded-2xl border border-border bg-card p-6 ${layout.sticky}`}>
             {first ? (
-              <Button asChild size="pill" className="w-full">
-                <Link href={`/novels/${novel.slug}/${first.slug}`}>
-                  <BookOpen /> Commencer la lecture
-                </Link>
-              </Button>
+              <ResumeButton
+                novelSlug={novel.slug}
+                firstSlug={first.slug}
+                chapters={novel.volumes.flatMap((volume) => volume.chapters.map((chapter) => chapter.slug))}
+              />
             ) : (
               <Button size="pill" className="w-full" disabled>
                 Bientôt disponible
