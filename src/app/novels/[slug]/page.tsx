@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Pencil } from "lucide-react";
+import { ArrowLeft, ChevronRight, Download, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -143,7 +143,19 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                     {group.heading && (
                       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-secondary px-5 py-3">
                         <h3 className="font-bold">{group.heading}</h3>
-                        {group.translators && <p className="text-xs text-muted-foreground">Traduction : {group.translators}</p>}
+                        <div className="flex items-center gap-4">
+                          {group.translators && <p className="text-xs text-muted-foreground">Traduction : {group.translators}</p>}
+                          {group.volumeNumber !== undefined && (
+                            // Lien simple (pas de préchargement) : l’EPUB est généré à la première demande.
+                            <a
+                              href={`/novels/${novel.slug}/epub/${group.volumeNumber}`}
+                              title={`Télécharger ${group.heading} en EPUB, pour liseuse`}
+                              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold transition-colors hover:border-primary hover:text-primary"
+                            >
+                              <Download className="size-3.5" /> EPUB
+                            </a>
+                          )}
+                        </div>
                       </div>
                     )}
                     {group.note && (
@@ -228,6 +240,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
     heading: string | null;
     note?: string;
     translators?: string; // commun à tous les chapitres du tome : affiché une fois dans l’en-tête
+    volumeNumber?: number; // tome téléchargeable en EPUB
     rows: { chapter: ChapterSummary; heading: string }[];
   }[] = [];
   for (const volume of volumes) {
@@ -239,6 +252,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
         heading: volumeHeading(volume),
         note: volume.note,
         translators: sharedTranslators(volume.chapters),
+        volumeNumber: volume.number,
         rows: volume.chapters.map((chapter) => ({ chapter, heading: chapterHeading(chapter) })),
       });
       continue;
