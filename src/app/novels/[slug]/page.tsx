@@ -193,7 +193,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                                 <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
                               )}
                             </span>
-                            <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(chapter.updatedAt)}</span>
+                            <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(chapter.publishedAt ?? chapter.createdAt)}</span>
                             <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary" />
                           </Link>
                         </li>
