@@ -58,6 +58,7 @@ async function EditChapter({ params, searchParams }: Pick<Props, "params" | "sea
             position: chapter.position,
             published: chapter.published === 1,
             translators: chapter.translators,
+            credits: chapter.credits,
             downloadUrl: chapter.downloadUrl,
             content: chapter.content,
           }}

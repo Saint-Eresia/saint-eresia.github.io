@@ -4,6 +4,7 @@ import { Literata } from "next/font/google";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CreditLines } from "@/components/credit-lines";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { canSeeNovel, chapterHeading, coverOf, getNovelBySlug, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
@@ -67,7 +68,11 @@ async function Reader({ params }: { params: Props["params"] }) {
           {volumeHeading(volume)}
         </p>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">{chapterHeading(chapter)}</h1>
-        {chapter.translators && <p className="mt-3 text-sm text-muted-foreground">Traduction : {chapter.translators}</p>}
+        {chapter.credits ? (
+          <CreditLines text={chapter.credits} className="mt-3 space-y-0.5 text-sm text-muted-foreground" />
+        ) : (
+          chapter.translators && <p className="mt-3 text-sm text-muted-foreground">Traduction : {chapter.translators}</p>
+        )}
         {chapter.downloadUrl && (
           <Button asChild variant="outline" size="pill" className="mt-5">
             <a href={chapter.downloadUrl} target="_blank" rel="noopener noreferrer">

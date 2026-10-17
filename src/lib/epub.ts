@@ -22,14 +22,14 @@ export type EpubInput = {
   novel: Pick<Novel, "title" | "originalTitle" | "author" | "artist" | "slug">;
   cover: Pick<NovelImage, "file"> | null;
   volume: Pick<Volume, "id" | "number" | "label" | "title" | "note">;
-  chapters: Pick<Chapter, "id" | "slug" | "label" | "title" | "content" | "translators" | "updatedAt">[];
+  chapters: Pick<Chapter, "id" | "slug" | "label" | "title" | "content" | "translators" | "credits" | "updatedAt">[];
   siteUrl: string;
 };
 
 // Empreinte du contenu : un tome modifié (chapitre, titre, couverture…) donne un nouvel EPUB.
 export function epubKey({ novel, cover, volume, chapters }: EpubInput) {
   const hash = createHash("sha256");
-  hash.update(JSON.stringify([EPUB_VERSION, novel, cover?.file ?? "", volume, chapters.map((c) => [c.id, c.updatedAt, c.label, c.title, c.translators])]));
+  hash.update(JSON.stringify([EPUB_VERSION, novel, cover?.file ?? "", volume, chapters.map((c) => [c.id, c.updatedAt, c.label, c.title, c.translators, c.credits])]));
   return hash.digest("hex").slice(0, 24);
 }
 
@@ -142,7 +142,16 @@ export async function buildEpub(input: EpubInput): Promise<Buffer> {
 
   const chapterFiles = chapters.map((chapter, index) => {
     const title = chapterHeading(chapter);
-    const credit = chapter.translators && !shared ? `<p class="credit">Traduction : ${escape(chapter.translators)}</p>` : "";
+    // Crédits détaillés (liens réduits à leur texte), sinon les traducteurs s’ils changent d’un chapitre à l’autre.
+    const detailed = chapter.credits
+      .split("\n")
+      .map((line) => line.trim().replace(/\[([^\]]+)\]\([^)]*\)/g, "$1"))
+      .filter(Boolean);
+    const credit = detailed.length
+      ? `<p class="credit">${detailed.map(escape).join("<br/>")}</p>`
+      : chapter.translators && !shared
+        ? `<p class="credit">Traduction : ${escape(chapter.translators)}</p>`
+        : "";
     return {
       file: `chap-${String(index + 1).padStart(3, "0")}.xhtml`,
       title,

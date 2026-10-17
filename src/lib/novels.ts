@@ -44,6 +44,7 @@ export type Chapter = {
   content: string;
   published: number;
   translators: string;
+  credits: string; // crédits détaillés, sous le titre du chapitre seulement
   downloadUrl: string;
   publishedAt: string | null; // première publication
   createdAt: string;
@@ -53,7 +54,7 @@ export type ChapterSummary = Omit<Chapter, "content">;
 export type VolumeWithChapters = Volume & { chapters: ChapterSummary[] };
 
 const SUMMARY_COLUMNS =
-  "c.id, c.novelId, c.volumeId, c.slug, c.position, c.label, c.title, c.published, c.translators, c.downloadUrl, c.createdAt, c.updatedAt";
+  "c.id, c.novelId, c.volumeId, c.slug, c.position, c.label, c.title, c.published, c.translators, c.credits, c.downloadUrl, c.publishedAt, c.createdAt, c.updatedAt";
 
 // « Chapitre 12 : Titre » (espace insécable avant les deux-points).
 export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>

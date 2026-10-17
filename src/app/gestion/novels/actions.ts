@@ -339,6 +339,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   const position = Number(formData.get("position"));
   const published = formData.get("published") === "1" ? 1 : 0;
   const translators = text(formData, "translators");
+  const credits = String(formData.get("credits") ?? "").trim();
   const downloadUrl = text(formData, "downloadUrl");
   const content = String(formData.get("content") ?? "").trim();
 
@@ -346,6 +347,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   if (title.length > 180) return { error: "Le titre est trop long (180 caractères maximum)." };
   if (!Number.isInteger(position) || position < 0) return { error: "L’ordre doit être un entier positif." };
   if (translators.length > 200) return { error: "Le champ traduction est trop long." };
+  if (credits.length > 1000) return { error: "Les crédits détaillés sont trop longs (1000 caractères maximum)." };
   if (downloadUrl && !isHttpUrl(downloadUrl)) return { error: "Le lien de téléchargement doit commencer par http:// ou https://." };
   if (content.length > 2_000_000) return { error: "Le texte est trop long." };
   if (published && !content) return { error: "Un chapitre publié ne peut pas être vide." };
@@ -359,9 +361,9 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
       volume.novelId,
       [
         {
-          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl, publishedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN datetime('now') END)`,
-          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, downloadUrl, published],
+          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, credits, downloadUrl, publishedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN datetime('now') END)`,
+          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, credits, downloadUrl, published],
         },
       ],
       // last_insert_rowid() reste celui du chapitre : la mise à jour de date intercalée n’est pas une insertion.
@@ -382,9 +384,9 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
     [
       {
         sql: `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
-                downloadUrl = ?, publishedAt = CASE WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
+                credits = ?, downloadUrl = ?, publishedAt = CASE WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
                 updatedAt = datetime('now') WHERE id = ?`,
-        args: [volume.id, position, label, title, content, published, translators, downloadUrl, published, id],
+        args: [volume.id, position, label, title, content, published, translators, credits, downloadUrl, published, id],
       },
     ],
     {
@@ -399,6 +401,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
         { label: "Ordre", before: before.position, after: position },
         { label: "Statut", before: before.published ? "Publié" : "Brouillon", after: published ? "Publié" : "Brouillon" },
         { label: "Traduction", before: before.translators, after: translators },
+        { label: "Crédits détaillés", before: before.credits, after: credits },
         { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
         { label: "Texte", before: before.content, after: content, long: true },
       ]),

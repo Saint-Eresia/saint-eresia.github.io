@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { saveChapter, type ActionResult } from "../novels/actions";
@@ -17,6 +18,7 @@ type ChapterFields = {
   position: number;
   published: boolean;
   translators: string;
+  credits: string;
   downloadUrl: string;
   content: string;
 };
@@ -37,6 +39,7 @@ export function ChapterForm({
   const [position, setPosition] = useState(String(chapter.position));
   const [published, setPublished] = useState(chapter.published ? "1" : "0");
   const [translators, setTranslators] = useState(chapter.translators);
+  const [credits, setCredits] = useState(chapter.credits);
   const [downloadUrl, setDownloadUrl] = useState(chapter.downloadUrl);
   const [content, setContent] = useState(chapter.content);
 
@@ -112,6 +115,23 @@ export function ChapterForm({
             value={translators}
             onChange={(e) => setTranslators(e.target.value)}
           />
+          <p className="text-xs text-muted-foreground">Affiché sous le titre du chapitre et, s’il change d’un chapitre à l’autre, dans le sommaire.</p>
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="credits">Crédits détaillés (facultatif)</Label>
+          <Textarea
+            id="credits"
+            name="credits"
+            rows={2}
+            maxLength={1000}
+            placeholder={"Ex. Traduction française : X (de l’anglais), relecture Y — [Équipe](https://…)\nVersion anglaise : Z"}
+            value={credits}
+            onChange={(e) => setCredits(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Affichés sous le titre du chapitre seulement (pas dans le sommaire), à la place du champ Traduction. Une ligne par
+            crédit ; liens au format [texte](https://…).
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="downloadUrl">Lien de téléchargement (facultatif)</Label>

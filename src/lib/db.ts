@@ -106,6 +106,8 @@ const SCHEMA = `
     content TEXT NOT NULL DEFAULT '',
     published INTEGER NOT NULL DEFAULT 0,
     translators TEXT NOT NULL DEFAULT '',
+    -- Crédits détaillés, affichés sous le titre du chapitre seulement (pas dans le sommaire) ; liens Markdown permis.
+    credits TEXT NOT NULL DEFAULT '',
     downloadUrl TEXT NOT NULL DEFAULT '',
     -- Date de la première publication (flux RSS) ; vide pour un brouillon jamais publié.
     publishedAt TEXT,
@@ -346,6 +348,7 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("quoteNote")) await client.execute("ALTER TABLE novel ADD COLUMN quoteNote TEXT NOT NULL DEFAULT ''");
   const chapterColumns = ((await client.execute("PRAGMA table_info(chapter)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!chapterColumns.includes("credits")) await client.execute("ALTER TABLE chapter ADD COLUMN credits TEXT NOT NULL DEFAULT ''");
   if (!chapterColumns.includes("publishedAt")) {
     await client.execute("ALTER TABLE chapter ADD COLUMN publishedAt TEXT");
     await client.execute("UPDATE chapter SET publishedAt = createdAt WHERE published = 1");

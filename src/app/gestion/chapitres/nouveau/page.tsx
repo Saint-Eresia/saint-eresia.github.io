@@ -39,6 +39,7 @@ async function NewChapter({ searchParams }: Pick<Props, "searchParams">) {
             position: nextPosition,
             published: false,
             translators: "",
+            credits: "",
             downloadUrl: "",
             content: "",
           }}
