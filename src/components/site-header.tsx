@@ -9,7 +9,7 @@ import { NavLinks } from "./nav-links";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/88 backdrop-blur-md">
+    <header data-site-chrome className="sticky top-0 z-40 border-b border-border bg-background/88 backdrop-blur-md">
       <div className="mx-auto flex h-[70px] max-w-6xl items-center gap-3 px-4 sm:gap-7 sm:px-6">
         <Link href="/" className="shrink-0 text-xl font-extrabold tracking-tight whitespace-nowrap sm:text-2xl">
           Saint Eresia

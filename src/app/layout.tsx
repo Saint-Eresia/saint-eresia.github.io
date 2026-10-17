@@ -40,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main id="contenu" className="flex-1">
           {children}
         </main>
-        <footer className="mt-20 border-t border-border">
+        <footer data-site-chrome className="mt-20 border-t border-border">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <span className="font-semibold text-foreground">Saint Eresia</span>

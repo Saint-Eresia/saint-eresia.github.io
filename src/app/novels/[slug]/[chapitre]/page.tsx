@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
-import { canSeeNovel, chapterHeading, coverOf, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
+import { canSeeNovel, chapterHeading, coverOf, getNovelBySlug, getPublishedChapter, volumeHeading, type ChapterSummary } from "@/lib/novels";
 import { imageUrl } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
 import { ReaderPanel } from "./reader-panel";
@@ -51,14 +51,21 @@ async function Reader({ params }: { params: Props["params"] }) {
   // Chapitre d’un novel en brouillon : réservé à l’équipe.
   if (!data || !(await canSeeNovel(data.novel))) notFound();
   const { novel, volume, chapter, previous, next } = data;
+  // Sommaire du mode lecture : tous les chapitres publiés du novel, par tome.
+  const toc = ((await getNovelBySlug(slug))?.volumes ?? []).map((v) => ({
+    heading: volumeHeading(v),
+    chapters: v.chapters.map((c) => ({ slug: c.slug, heading: chapterHeading(c) })),
+  }));
 
   return (
-    <article className={`mx-auto max-w-3xl px-4 pt-10 sm:px-6 ${literata.variable}`}>
+    <article className={`reader-article mx-auto max-w-3xl px-4 pt-10 sm:px-6 ${literata.variable}`}>
       <header className="text-center">
-        <Link href={`/novels/${novel.slug}`} className="text-sm font-semibold text-primary hover:underline">
+        <Link href={`/novels/${novel.slug}`} data-reader-chrome className="text-sm font-semibold text-primary hover:underline">
           {novel.title}
         </Link>
-        <p className="mt-1 text-sm text-muted-foreground">{volumeHeading(volume)}</p>
+        <p data-reader-chrome className="mt-1 text-sm text-muted-foreground">
+          {volumeHeading(volume)}
+        </p>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">{chapterHeading(chapter)}</h1>
         {chapter.translators && <p className="mt-3 text-sm text-muted-foreground">Traduction : {chapter.translators}</p>}
         {chapter.downloadUrl && (
@@ -70,7 +77,9 @@ async function Reader({ params }: { params: Props["params"] }) {
         )}
       </header>
 
-      <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-8" />
+      <div data-reader-chrome>
+        <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-8" />
+      </div>
       <div className="mt-10">
         <ReaderPanel
           images={imagesOf(chapter.content)}
@@ -78,6 +87,7 @@ async function Reader({ params }: { params: Props["params"] }) {
           chapter={{ slug: chapter.slug, heading: chapterHeading(chapter) }}
           previousHref={previous && `/novels/${novel.slug}/${previous.slug}`}
           nextHref={next && `/novels/${novel.slug}/${next.slug}`}
+          toc={toc}
         >
           <Markdown reader>{chapter.content}</Markdown>
         </ReaderPanel>

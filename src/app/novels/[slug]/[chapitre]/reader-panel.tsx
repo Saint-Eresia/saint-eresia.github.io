@@ -1,6 +1,7 @@
 "use client";
 
-import { Images, Minus, Plus, RotateCcw, Settings2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, List, Maximize2, Minus, Plus, RotateCcw, Settings2, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { readProgress, RESUME_HASH, writeProgress } from "@/lib/reading-progress";
@@ -47,7 +48,7 @@ function load(): Settings {
   }
 }
 const snapshot = () => (current ??= load());
-const subscribe = (listener: () => void) => {
+export const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
@@ -78,7 +79,30 @@ function setPanelOpen(next: boolean) {
   listeners.forEach((listener) => listener());
 }
 
+// Mode lecture : sommaire en colonne, flèches sur les côtés, en-tête et pied du site masqués. Conservé d’un chapitre à l’autre.
+const FOCUS_KEY = "lecture:mode";
+let focusMode: boolean | null = null;
+export const focusSnapshot = () => {
+  if (focusMode === null) {
+    try {
+      focusMode = localStorage.getItem(FOCUS_KEY) === "1";
+    } catch {
+      focusMode = false;
+    }
+  }
+  return focusMode;
+};
+function setFocusMode(next: boolean) {
+  focusMode = next;
+  try {
+    localStorage.setItem(FOCUS_KEY, next ? "1" : "0");
+  } catch {}
+  listeners.forEach((listener) => listener());
+}
+
 export type ReaderImage = { src: string; alt: string };
+// Sommaire du mode lecture : chapitres publiés, regroupés par tome.
+export type ReaderToc = { heading: string; chapters: { slug: string; heading: string }[] }[];
 
 // Texte du chapitre mis en forme selon les réglages, avec le panneau « Options » / « Illustrations ».
 // Mémorise aussi le chapitre et le bloc de texte atteint (« Reprendre la lecture » sur la fiche du novel).
@@ -88,6 +112,7 @@ export function ReaderPanel({
   chapter,
   previousHref,
   nextHref,
+  toc,
   children,
 }: {
   images: ReaderImage[];
@@ -95,10 +120,15 @@ export function ReaderPanel({
   chapter: { slug: string; heading: string };
   previousHref: string | null;
   nextHref: string | null;
+  toc: ReaderToc;
   children: ReactNode;
 }) {
   const settings = useSyncExternalStore(subscribe, snapshot, () => DEFAULTS);
   const open = useSyncExternalStore(subscribe, openSnapshot, () => false);
+  const focus = useSyncExternalStore(subscribe, focusSnapshot, () => false);
+  // Sommaire du mode lecture sur petit écran (toujours affiché sur grand écran).
+  const [tocOpen, setTocOpen] = useState(false);
+  const tocList = useRef<HTMLElement>(null);
   const [tab, setTab] = useState<"options" | "illustrations">("options");
   const [zoomed, setZoomed] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
@@ -126,6 +156,11 @@ export function ReaderPanel({
       delete root.dataset.readerTheme;
     };
   }, [settings.theme]);
+
+  // Mode lecture : chapitre courant ramené au milieu du sommaire (l’attribut sur <html> est posé par FocusSync).
+  useEffect(() => {
+    if (focus) tocList.current?.querySelector("[aria-current=page]")?.scrollIntoView({ block: "center" });
+  }, [focus, chapter.slug]);
 
   // Barre de progression : part du texte du chapitre déjà parcourue.
   useEffect(() => {
@@ -190,11 +225,16 @@ export function ReaderPanel({
     };
   }, [novelSlug, chapter.slug, chapter.heading]);
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPanelOpen(false);
+    if (!open && !focus) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (open) setPanelOpen(false);
+      else if (tocOpen) setTocOpen(false);
+      else setFocusMode(false);
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, focus, tocOpen]);
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) => save({ ...settings, [key]: value });
   const step = (key: keyof typeof LIMITS, direction: 1 | -1) => set(key, clamp(key, settings[key] + direction * LIMITS[key][2]));
@@ -232,20 +272,120 @@ export function ReaderPanel({
         <div className="h-full origin-left bg-primary transition-transform duration-150" style={{ transform: `scaleX(${progress})` }} />
       </div>
 
-      {!open && (
-        <button
-          type="button"
-          onClick={() => toggle(true)}
-          className="fixed bottom-5 left-5 z-40 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold shadow-[0_12px_40px_var(--shadow)] transition-colors hover:text-primary"
-        >
-          <Settings2 className="size-4" /> Options de lecture
-        </button>
+      {!open && !focus && (
+        <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggle(true)}
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold shadow-[0_12px_40px_var(--shadow)] transition-colors hover:text-primary"
+          >
+            <Settings2 className="size-4" /> Options de lecture
+          </button>
+          <button
+            type="button"
+            onClick={() => setFocusMode(true)}
+            title="Mode lecture : sommaire en colonne, sans l’en-tête du site"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold shadow-[0_12px_40px_var(--shadow)] transition-colors hover:text-primary"
+          >
+            <Maximize2 className="size-4" /> <span className="max-sm:sr-only">Mode lecture</span>
+          </button>
+        </div>
+      )}
+
+      {focus && (
+        <>
+          <nav
+            ref={tocList}
+            aria-label="Chapitres"
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] overflow-y-auto border-r border-border bg-card transition-transform lg:z-30 lg:translate-x-0",
+              tocOpen ? "translate-x-0" : "-translate-x-full",
+            )}
+          >
+            {toc.map((group) => (
+              <div key={group.heading}>
+                {toc.length > 1 && (
+                  <p className="sticky top-0 z-10 border-b border-border bg-secondary px-4 py-2 text-xs font-bold text-muted-foreground">{group.heading}</p>
+                )}
+                <ol>
+                  {group.chapters.map((item) => (
+                    <li key={item.slug}>
+                      <Link
+                        href={`/novels/${novelSlug}/${item.slug}`}
+                        aria-current={item.slug === chapter.slug ? "page" : undefined}
+                        onClick={() => setTocOpen(false)}
+                        className="block border-b border-border px-4 py-3 text-sm transition-colors hover:bg-muted/60 aria-[current=page]:font-semibold aria-[current=page]:text-primary"
+                      >
+                        {item.heading}
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </nav>
+          {tocOpen && <div aria-hidden className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setTocOpen(false)} />}
+
+          <div className="fixed inset-x-0 top-0 z-30 flex items-center justify-between bg-background/85 px-3 py-2 backdrop-blur-sm lg:left-80">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setTocOpen(true)}
+                aria-label="Afficher les chapitres"
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+              >
+                <List className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => toggle(!open)}
+                aria-label="Options de lecture"
+                aria-pressed={open}
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-pressed:text-primary"
+              >
+                <Settings2 className="size-5" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFocusMode(false)}
+              aria-label="Quitter le mode lecture"
+              title="Quitter le mode lecture"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+
+          {previousHref && (
+            <Link
+              href={previousHref}
+              aria-label="Chapitre précédent"
+              className="fixed top-1/2 left-3 z-20 hidden -translate-y-1/2 rounded-full p-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:block lg:left-[21rem]"
+            >
+              <ChevronLeft className="size-7" />
+            </Link>
+          )}
+          {nextHref && (
+            <Link
+              href={nextHref}
+              aria-label="Chapitre suivant"
+              className="fixed top-1/2 right-3 z-20 hidden -translate-y-1/2 rounded-full p-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:block"
+            >
+              <ChevronRight className="size-7" />
+            </Link>
+          )}
+        </>
       )}
 
       {open && (
         <aside
           aria-label="Options de lecture"
-          className="fixed inset-x-3 bottom-3 z-40 flex max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_50px_var(--shadow)] lg:inset-x-auto lg:top-24 lg:bottom-auto lg:left-5 lg:max-h-[calc(100vh-8rem)] lg:w-72"
+          className={cn(
+            "fixed inset-x-3 bottom-3 z-40 flex max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_18px_50px_var(--shadow)] lg:inset-x-auto lg:bottom-auto lg:max-h-[calc(100vh-8rem)] lg:w-72",
+            // En mode lecture, le panneau s’ouvre sous la roue dentée, à droite du sommaire.
+            focus ? "lg:top-14 lg:left-[21rem]" : "lg:top-24 lg:left-5",
+          )}
         >
           <div className="flex items-center gap-1 border-b border-border p-2">
             <TabButton active={tab === "options"} onClick={() => setTab("options")}>

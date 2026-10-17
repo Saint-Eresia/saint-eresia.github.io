@@ -119,6 +119,24 @@ html.dark[data-reader-theme="sepia"] {
   color-scheme: light;
 }
 
+/* Mode lecture des chapitres (attribut posé sur <html> par le lecteur) : sans en-tête ni pied du site, ni les
+   liens de navigation du chapitre (remplacés par le sommaire en colonne et les flèches) ; texte plus large. */
+html[data-reader-mode="focus"] [data-site-chrome],
+html[data-reader-mode="focus"] [data-reader-chrome] {
+  display: none !important;
+}
+html[data-reader-mode="focus"] .reader-article {
+  max-width: 60rem;
+  padding-top: 4.5rem;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  html[data-reader-mode="focus"] .reader-article { padding-inline: 5rem; }
+}
+@media (min-width: 1024px) {
+  html[data-reader-mode="focus"] main { padding-left: 20rem; }
+}
+
 /* Palette sombre reprise de l’ancien site. */
 .dark {
   --background: hsl(224 18% 8%);
@@ -237,7 +255,7 @@ html.dark[data-reader-theme="sepia"] {
   .prose-reader img { display: block; margin-inline: auto; max-height: 85vh; width: auto; box-shadow: 0 18px 40px var(--shadow); }
   .prose-reader img { cursor: zoom-in; }
   /* Séparation de scène */
-  .prose-reader hr { margin-block: 2.5rem; border: 0; text-align: center; }
+  .prose-reader hr { margin-block: 2.5rem; height: auto; overflow: visible; border: 0; text-align: center; }
   .prose-reader hr::after { content: "* * *"; color: var(--primary); letter-spacing: 0.6em; }
   /* Dans un chapitre, une citation est un message affiché à l’écran : encadrée, sans couleur d’alerte. */
   .prose-reader blockquote { border-color: var(--border-strong); background: var(--secondary); color: var(--foreground); }
