@@ -10,6 +10,8 @@ const urbanist = Urbanist({ variable: "--font-urbanist", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: { default: "Saint Eresia — Light novels et patchs VN en français", template: "%s · Saint Eresia" },
   description: "Saint Eresia traduit des light novels, à lire en ligne, et publie des patchs français pour visual novels.",
+  // Flux RSS (nouveaux chapitres et actualités), détecté par les lecteurs de flux.
+  alternates: { types: { "application/rss+xml": [{ url: "/feed.xml", title: "Saint Eresia — nouveautés" }] } },
 };
 
 // Thème appliqué avant le premier affichage (pas de flash) : choix mémorisé sous la clé "theme" par le bouton
@@ -44,6 +46,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/plus" className="hover:text-foreground hover:underline">
                 Outils
               </Link>
+              <a href="/feed.xml" className="hover:text-foreground hover:underline">
+                Flux RSS
+              </a>
             </p>
             <p>Les œuvres originales appartiennent à leurs ayants droit. Nous encourageons leur achat.</p>
           </div>

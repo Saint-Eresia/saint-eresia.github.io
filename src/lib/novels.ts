@@ -45,6 +45,7 @@ export type Chapter = {
   published: number;
   translators: string;
   downloadUrl: string;
+  publishedAt: string | null; // première publication
   createdAt: string;
   updatedAt: string;
 };

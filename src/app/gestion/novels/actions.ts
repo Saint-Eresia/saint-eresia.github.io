@@ -3,14 +3,16 @@
 import type { InStatement } from "@libsql/client";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { isHttpUrl, teamActor, type ActionResult } from "@/lib/action-guard";
 import { diff, logEntry, type Actor, type Change, type EntityType } from "@/lib/activity";
 import { db } from "@/lib/db";
+import { announce } from "@/lib/discord";
 import { chapterHeading, NOVEL_STATUSES, uniqueChapterSlug, volumeHeading, type Chapter, type Novel, type Volume } from "@/lib/novels";
 import { slugify } from "@/lib/patches";
 import { isRoleKey, NOVEL_ROLE_KEYS, type RoleKey } from "@/lib/roles";
 import { setProjectTeam, type TeamEntry } from "@/lib/team";
-import { IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
+import { fileUrl, IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
 
@@ -357,14 +359,15 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
       volume.novelId,
       [
         {
-          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, downloadUrl],
+          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, downloadUrl, publishedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN datetime('now') END)`,
+          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, downloadUrl, published],
         },
       ],
       // last_insert_rowid() reste celui du chapitre : la mise à jour de date intercalée n’est pas une insertion.
       { type: "chapter", id: "last", label: chapterLabel(novel, { label, title }), action: "create" },
     );
+    if (published) announceChapter(novel, { slug, label, title });
     redirect(`/gestion/chapitres/${created.lastInsertRowid}?cree=1`);
   }
 
@@ -379,8 +382,9 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
     [
       {
         sql: `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
-                downloadUrl = ?, updatedAt = datetime('now') WHERE id = ?`,
-        args: [volume.id, position, label, title, content, published, translators, downloadUrl, id],
+                downloadUrl = ?, publishedAt = CASE WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
+                updatedAt = datetime('now') WHERE id = ?`,
+        args: [volume.id, position, label, title, content, published, translators, downloadUrl, published, id],
       },
     ],
     {
@@ -400,7 +404,23 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
       ]),
     },
   );
+  // Annonce à la première publication seulement (pas à chaque correction d’un chapitre déjà publié).
+  if (published && !before.published && !before.publishedAt) announceChapter(novel, { slug: before.slug, label, title });
   return { savedAt: Date.now() };
+}
+
+// Annonce Discord d’un nouveau chapitre, après la réponse (sans la retarder). Pas d’annonce pour un brouillon de novel.
+function announceChapter(novel: Novel, chapter: Pick<Chapter, "slug" | "label" | "title">) {
+  if (novel.draft) return;
+  after(async () => {
+    const cover = await db.prepare("SELECT file FROM novel_image WHERE novelId = ? AND kind = 'cover'").get<{ file: string }>(novel.id);
+    await announce({
+      title: `${novel.title} — ${chapterHeading(chapter)}`,
+      path: `/novels/${novel.slug}/${chapter.slug}`,
+      description: "Nouveau chapitre disponible à la lecture.",
+      image: cover ? fileUrl(cover.file) : null,
+    });
+  });
 }
 
 export async function deleteChapter(chapterId: number): Promise<ActionResult> {

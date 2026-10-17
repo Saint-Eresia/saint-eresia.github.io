@@ -2,9 +2,11 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { teamActor, type ActionResult } from "@/lib/action-guard";
 import { diff, logEntry } from "@/lib/activity";
 import { db } from "@/lib/db";
+import { announce } from "@/lib/discord";
 import { uniqueNewsSlug, type News } from "@/lib/news";
 
 export type { ActionResult };
@@ -24,14 +26,16 @@ export async function saveNews(_prev: ActionResult, formData: FormData): Promise
 
   const id = Number(formData.get("id")) || null;
   if (id === null) {
+    const slug = await uniqueNewsSlug(title);
     const [created] = await db.batch([
       {
         sql: `INSERT INTO news (slug, title, content, author, published, publishedAt)
               VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN datetime('now') END)`,
-        args: [await uniqueNewsSlug(title), title, content, actor.name, published, published],
+        args: [slug, title, content, actor.name, published, published],
       },
       logEntry(actor, { type: "news", id: "last", label: title, action: "create" }),
     ]);
+    if (published) announceNews({ slug, title, content });
     redirect(`/gestion/actualites/${created.lastInsertRowid}?cree=1`);
   }
 
@@ -59,7 +63,20 @@ export async function saveNews(_prev: ActionResult, formData: FormData): Promise
     }),
   ]);
   refresh();
+  // Annonce à la première publication seulement.
+  if (published && !before.publishedAt) announceNews({ slug: before.slug, title, content });
   return { savedAt: Date.now() };
+}
+
+// Annonce Discord d’une actualité, après la réponse : titre, lien et début du texte.
+function announceNews(news: Pick<News, "slug" | "title" | "content">) {
+  const excerpt = news.content
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[*_#>`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  after(() => announce({ title: news.title, path: `/actualites/${news.slug}`, description: excerpt.length > 300 ? `${excerpt.slice(0, 300)}…` : excerpt }));
 }
 
 export async function deleteNews(id: number): Promise<ActionResult> {

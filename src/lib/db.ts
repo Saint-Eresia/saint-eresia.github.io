@@ -104,6 +104,8 @@ const SCHEMA = `
     published INTEGER NOT NULL DEFAULT 0,
     translators TEXT NOT NULL DEFAULT '',
     downloadUrl TEXT NOT NULL DEFAULT '',
+    -- Date de la première publication (flux RSS) ; vide pour un brouillon jamais publié.
+    publishedAt TEXT,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (novelId, slug)
@@ -340,6 +342,11 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("quoteNote")) await client.execute("ALTER TABLE novel ADD COLUMN quoteNote TEXT NOT NULL DEFAULT ''");
+  const chapterColumns = ((await client.execute("PRAGMA table_info(chapter)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!chapterColumns.includes("publishedAt")) {
+    await client.execute("ALTER TABLE chapter ADD COLUMN publishedAt TEXT");
+    await client.execute("UPDATE chapter SET publishedAt = createdAt WHERE published = 1");
+  }
   const volumeColumns = ((await client.execute("PRAGMA table_info(volume)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!volumeColumns.includes("label")) await client.execute("ALTER TABLE volume ADD COLUMN label TEXT NOT NULL DEFAULT ''");
   if (!volumeColumns.includes("note")) await client.execute("ALTER TABLE volume ADD COLUMN note TEXT NOT NULL DEFAULT ''");
