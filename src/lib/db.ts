@@ -41,6 +41,8 @@ const SCHEMA = `
     -- Identifiants du jeu sur Steam et GOG : le launcher s’en sert pour retrouver le jeu installé.
     steamAppId INTEGER,
     gogId INTEGER,
+    -- Identifiant VNDB (« v12345 ») ; vide si inconnu.
+    vndbId TEXT NOT NULL DEFAULT '',
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -364,6 +366,7 @@ export async function prepareSchema(client: Client) {
   if (!patchColumns.includes("draft")) await client.execute("ALTER TABLE patch ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   if (!patchColumns.includes("steamAppId")) await client.execute("ALTER TABLE patch ADD COLUMN steamAppId INTEGER");
   if (!patchColumns.includes("gogId")) await client.execute("ALTER TABLE patch ADD COLUMN gogId INTEGER");
+  if (!patchColumns.includes("vndbId")) await client.execute("ALTER TABLE patch ADD COLUMN vndbId TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("kind")) {
     await client.execute("ALTER TABLE patch ADD COLUMN kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu'))");
   }

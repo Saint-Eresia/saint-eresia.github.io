@@ -34,6 +34,7 @@ export type Patch = {
   draft: number; // 1 : brouillon, invisible du public (voir isPublicPatch)
   steamAppId: number | null; // pour le launcher : détection du jeu installé
   gogId: number | null;
+  vndbId: string; // « v12345 », ou vide
   createdAt: string;
   updatedAt: string;
 };

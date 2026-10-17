@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     pageUrl: `${origin}/${patch.kind === "jeu" ? "jeux" : "patchs"}/${patch.slug}`,
     steamAppId: patch.steamAppId ?? undefined,
     gogId: patch.gogId ?? undefined,
+    vndbId: patch.vndbId || undefined,
     updatedAt: patch.updatedAt,
   }));
   return Response.json(body, { headers: { "Cache-Control": "public, max-age=300" } });

@@ -76,6 +76,7 @@ async function EditPatch({ params, searchParams }: Pick<PageProps<"/gestion/patc
               downloadUrl: patch.downloadUrl,
               steamAppId: patch.steamAppId,
               gogId: patch.gogId,
+              vndbId: patch.vndbId ?? "",
               steps: patch.steps,
               quote: patch.quote,
               featured: patch.featured === 1,

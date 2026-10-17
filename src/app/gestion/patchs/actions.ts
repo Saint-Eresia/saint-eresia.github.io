@@ -45,6 +45,11 @@ function readPatchForm(formData: FormData) {
   const steamAppId = storeId("steamAppId");
   const gogId = storeId("gogId");
   if (Number.isNaN(steamAppId) || Number.isNaN(gogId)) return { error: "Les identifiants Steam et GOG sont des nombres (ou vides)." };
+  // VNDB : « v12345 », « 12345 » ou l’adresse de la fiche (vndb.org/v12345), enregistré sous la forme « v12345 ».
+  const vndbRaw = String(formData.get("vndbId") ?? "").trim();
+  const vndbMatch = vndbRaw.match(/^(?:(?:https?:\/\/)?(?:www\.)?vndb\.org\/)?v?(\d{1,7})\/?$/i);
+  if (vndbRaw && !vndbMatch) return { error: "L’identifiant VNDB doit avoir la forme v12345 (ou l’adresse de la fiche VNDB)." };
+  const vndbId = vndbMatch ? `v${Number(vndbMatch[1])}` : "";
   if (quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
@@ -66,7 +71,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, draft, kind, steamAppId, gogId } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, draft, kind, steamAppId, gogId, vndbId } };
 }
 
 // Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
@@ -87,14 +92,14 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, draft, kind, steamAppId, gogId } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId } = parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId],
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId],
       },
       logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
     ]);
@@ -116,6 +121,7 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
       { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
       { label: "Steam App ID", before: before.steamAppId ?? "", after: steamAppId ?? "" },
       { label: "ID GOG", before: before.gogId ?? "", after: gogId ?? "" },
+      { label: "ID VNDB", before: before.vndbId ?? "", after: vndbId },
       { label: "Citation", before: before.quote, after: quote },
       { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: featured ? "Oui" : "Non" },
       { label: "Description", before: before.description, after: description, long: true },
@@ -126,8 +132,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     { id, title },
     [
       {
-        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, draft = ?, kind = ?, steamAppId = ?, gogId = ? WHERE id = ?",
-        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, id],
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, draft = ?, kind = ?, steamAppId = ?, gogId = ?, vndbId = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, id],
       },
     ],
     changes,
