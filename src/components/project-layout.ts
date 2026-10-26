@@ -5,6 +5,8 @@ export function projectLayout(withMembers: boolean) {
   if (!withMembers) {
     return {
       hero: "mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6",
+      // Même largeur que hero, sans marges verticales (en-tête à bandeau des novels).
+      container: "mx-auto max-w-6xl px-4 sm:px-6",
       body: "mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem]",
       aside: "lg:col-start-2 lg:row-start-1",
       sticky: "lg:sticky lg:top-24",
@@ -14,6 +16,7 @@ export function projectLayout(withMembers: boolean) {
   }
   return {
     hero: "mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6 2xl:max-w-[88rem]",
+    container: "mx-auto max-w-6xl px-4 sm:px-6 2xl:max-w-[88rem]",
     body:
       "mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr] 2xl:max-w-[88rem] 2xl:grid-cols-[minmax(0,1fr)_20rem_16rem]",
     // En 2xl, les deux colonnes de droite couvrent toute la hauteur : leurs cartes peuvent rester collées en haut.

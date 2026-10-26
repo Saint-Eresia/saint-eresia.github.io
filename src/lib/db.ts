@@ -71,6 +71,9 @@ const SCHEMA = `
     quote TEXT NOT NULL DEFAULT '',
     -- Commentaire de la citation, affiché au survol sur la fiche (ex. sa provenance).
     quoteNote TEXT NOT NULL DEFAULT '',
+    -- Badge du format à côté de la couverture (ex. « WN », « LN ») et période de sortie (ex. « Depuis 2012 »).
+    format TEXT NOT NULL DEFAULT '',
+    released TEXT NOT NULL DEFAULT '',
     featured INTEGER NOT NULL DEFAULT 0,
     -- Brouillon (1) : invisible du public (listes, fiche, chapitres, accueil, page Équipe), visible par l’équipe.
     draft INTEGER NOT NULL DEFAULT 0,
@@ -356,6 +359,8 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("featured")) await client.execute("ALTER TABLE novel ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("draft")) await client.execute("ALTER TABLE novel ADD COLUMN draft INTEGER NOT NULL DEFAULT 0");
   if (!novelColumns.includes("quoteNote")) await client.execute("ALTER TABLE novel ADD COLUMN quoteNote TEXT NOT NULL DEFAULT ''");
+  if (!novelColumns.includes("format")) await client.execute("ALTER TABLE novel ADD COLUMN format TEXT NOT NULL DEFAULT ''");
+  if (!novelColumns.includes("released")) await client.execute("ALTER TABLE novel ADD COLUMN released TEXT NOT NULL DEFAULT ''");
   const chapterColumns = ((await client.execute("PRAGMA table_info(chapter)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!chapterColumns.includes("credits")) await client.execute("ALTER TABLE chapter ADD COLUMN credits TEXT NOT NULL DEFAULT ''");
   if (!chapterColumns.includes("phase")) await client.execute("ALTER TABLE chapter ADD COLUMN phase TEXT NOT NULL DEFAULT ''");

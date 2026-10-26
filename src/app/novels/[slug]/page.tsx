@@ -4,7 +4,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CoverPlaceholder, StatusBadge } from "@/components/content-meta";
-import { HeroBackdrop } from "@/components/hero-backdrop";
 import { Markdown } from "@/components/markdown";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
@@ -60,27 +59,38 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
 
   return (
     <article>
-      <header className="relative isolate overflow-hidden border-b border-border">
-        <HeroBackdrop
-          background={novel.background && imageUrl(novel.background)}
-          cover={novel.cover && imageUrl(novel.cover)}
-        />
-        <div className={layout.hero}>
-          <Link
-            href="/novels"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" /> Novels
-          </Link>
-          {!isPublicNovel(novel) && (
-            <p role="status" className="mt-4 w-fit rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
-              Brouillon : ce novel n’est visible que par l’équipe.
-            </p>
+      {/* En-tête : bandeau (arrière-plan net, sinon couverture floutée), couverture à cheval sur son bord bas,
+          statut et format à côté d’elle dans le bandeau, titre en dessous, citation en haut à droite. */}
+      <header className="border-b border-border pb-8">
+        <div className="relative isolate h-44 overflow-hidden sm:h-64 lg:h-80">
+          {novel.background ? (
+            <img src={imageUrl(novel.background)} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
+          ) : (
+            <>
+              {novel.cover && (
+                <img
+                  src={imageUrl(novel.cover)}
+                  alt=""
+                  className="absolute inset-0 -z-20 h-full w-full scale-110 object-cover opacity-40 blur-3xl saturate-150"
+                />
+              )}
+              <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-background/30 to-background/70" />
+            </>
           )}
-          <div
-            className={`mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:items-end md:grid-cols-[15rem_1fr] ${novel.quote ? "lg:grid-cols-[15rem_1fr_minmax(0,24rem)]" : ""}`}
-          >
-            <div className="aspect-[3/4] w-40 overflow-hidden rounded-2xl border border-border shadow-[0_24px_60px_var(--shadow)] sm:w-full">
+          <div className={`relative h-full ${layout.container}`}>
+            <Link
+              href="/novels"
+              className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-background/75 px-3 py-1.5 text-sm font-semibold text-muted-foreground backdrop-blur-sm transition-colors hover:text-foreground sm:left-6"
+            >
+              <ArrowLeft className="size-4" /> Novels
+            </Link>
+            {novel.quote && <HeroQuote quote={novel.quote} note={novel.quoteNote} />}
+          </div>
+        </div>
+
+        <div className={layout.container}>
+          <div className="flex gap-4 sm:gap-8">
+            <div className="relative z-10 -mt-24 aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-[0_24px_60px_var(--shadow)] sm:-mt-40 sm:w-44 lg:-mt-48 lg:w-52">
               {novel.cover ? (
                 <img
                   src={imageUrl(novel.cover)}
@@ -93,15 +103,43 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                 <CoverPlaceholder title={novel.title} />
               )}
             </div>
-            <div className="min-w-0 pb-2">
-              <StatusBadge status={novel.status} />
-              <h1 className="mt-3 text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
+            <div className="min-w-0 flex-1">
+              {/* Remontés dans le bandeau ; la période de sortie chevauche son bord, à droite. */}
+              <div className="-mt-14 flex items-end justify-between gap-4 sm:-mt-16">
+                <div className="flex flex-col items-start gap-1.5">
+                  <span className="rounded-full bg-background/90 backdrop-blur-sm">
+                    <StatusBadge status={novel.status} />
+                  </span>
+                  {novel.format && (
+                    <span className="rounded-md border border-foreground/50 bg-background/85 px-3 py-0.5 text-sm font-bold tracking-wide backdrop-blur-sm">
+                      {novel.format}
+                    </span>
+                  )}
+                </div>
+                {novel.released && (
+                  <p className="hidden translate-y-1/2 items-center divide-x divide-border rounded-xl border border-border bg-card text-sm shadow-[0_12px_40px_var(--shadow)] sm:flex">
+                    <span className="px-4 py-2 font-semibold text-muted-foreground">Sorti</span>
+                    <span className="px-4 py-2 font-bold">{novel.released}</span>
+                  </p>
+                )}
+              </div>
+              <h1 className="mt-5 text-2xl leading-tight font-extrabold tracking-tight text-balance sm:text-3xl lg:text-4xl">
                 {novel.title}
               </h1>
-              {novel.author && <p className="mt-3 text-muted-foreground">par {novel.author}</p>}
+              {novel.author && <p className="mt-2 text-muted-foreground">par {novel.author}</p>}
+              {novel.released && <p className="mt-1 text-sm text-muted-foreground sm:hidden">Sorti : {novel.released}</p>}
+              {!isPublicNovel(novel) && (
+                <p role="status" className="mt-4 w-fit rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
+                  Brouillon : ce novel n’est visible que par l’équipe.
+                </p>
+              )}
             </div>
-            {novel.quote && <HeroQuote quote={novel.quote} note={novel.quoteNote} />}
           </div>
+          {novel.quote && (
+            <blockquote className="mt-6 font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 sm:hidden">
+              {novel.quote}
+            </blockquote>
+          )}
         </div>
       </header>
 
@@ -252,28 +290,25 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
   );
 }
 
-// Citation (ex. accroche de la couverture du light novel original) en bas à droite de l’en-tête,
-// en serif comme sur le livre, fondue dans l’arrière-plan par un halo sombre aux bords estompés.
+// Citation (ex. accroche de la couverture du light novel original) en bas à droite du bandeau,
+// en serif comme sur le livre, dans un encart sombre qui reste lisible sur n’importe quelle image.
 // Son commentaire éventuel (ex. sa provenance) s’affiche dans une bulle au survol ou au focus.
+// Sur mobile, le bandeau est trop bas : la citation est reprise sous le titre.
 function HeroQuote({ quote, note }: { quote: string; note: string }) {
   return (
     <figure
       tabIndex={note ? 0 : undefined}
       aria-describedby={note ? "citation-commentaire" : undefined}
-      className={`group relative isolate pb-2 outline-none sm:col-span-2 lg:col-span-1 ${note ? "cursor-help" : ""}`}
+      className={`group absolute right-4 bottom-6 hidden max-w-sm rounded-lg bg-black/70 px-5 py-4 text-white outline-none backdrop-blur-sm sm:right-6 sm:block ${note ? "cursor-help" : ""}`}
     >
-      <div
-        aria-hidden
-        className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[50%] bg-background/55 blur-2xl"
-      />
-      <blockquote className="font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 [text-shadow:0_1px_12px_var(--background)] lg:text-right lg:text-xl">
+      <blockquote className="text-right font-[Georgia,'Times_New_Roman',serif] text-base leading-snug text-pretty lg:text-lg">
         {quote}
       </blockquote>
       {note && (
         <figcaption
           id="citation-commentaire"
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-0 z-10 mb-3 w-max max-w-72 translate-y-1 rounded-lg border border-border bg-popover px-3 py-2 text-sm text-popover-foreground opacity-0 shadow-[0_12px_40px_var(--shadow)] transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 lg:right-0 lg:left-auto"
+          className="pointer-events-none absolute bottom-full right-0 z-10 mb-3 w-max max-w-72 translate-y-1 rounded-lg border border-border bg-popover px-3 py-2 text-sm text-popover-foreground opacity-0 shadow-[0_12px_40px_var(--shadow)] transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
         >
           {note}
         </figcaption>

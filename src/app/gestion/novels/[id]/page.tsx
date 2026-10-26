@@ -67,6 +67,8 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
               synopsis: novel.synopsis,
               quote: novel.quote,
               quoteNote: novel.quoteNote,
+              format: novel.format,
+              released: novel.released,
               featured: novel.featured ? "1" : "0",
               draft: novel.draft ? "1" : "0",
             }}

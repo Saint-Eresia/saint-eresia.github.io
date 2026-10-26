@@ -19,6 +19,8 @@ type NovelFields = {
   synopsis: string;
   quote: string;
   quoteNote: string;
+  format: string; // badge à côté de la couverture (ex. « WN »)
+  released: string; // période de sortie (ex. « Depuis 2012 »)
   featured: string; // "1" : recommandé sur l’accueil
   draft: string; // "1" : brouillon, invisible du public
 };
@@ -105,6 +107,30 @@ export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: r
         <div className="space-y-2">
           <Label htmlFor="artist">Illustrateur</Label>
           <Input id="artist" name="artist" maxLength={120} value={fields.artist} onChange={(e) => set("artist")(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="format">Format (facultatif)</Label>
+          <Input
+            id="format"
+            name="format"
+            maxLength={20}
+            placeholder="WN, LN…"
+            value={fields.format}
+            onChange={(e) => set("format")(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">Badge affiché à côté de la couverture, sous le statut.</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="released">Sortie (facultatif)</Label>
+          <Input
+            id="released"
+            name="released"
+            maxLength={40}
+            placeholder="Depuis 2012, 2004 – 2011…"
+            value={fields.released}
+            onChange={(e) => set("released")(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">Affichée sous l’arrière-plan, à droite : « Sorti | … ».</p>
         </div>
       </div>
 

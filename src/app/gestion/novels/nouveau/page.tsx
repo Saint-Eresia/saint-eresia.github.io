@@ -15,7 +15,7 @@ export default function NewNovelPage() {
         <div className={`mt-8 max-w-3xl ${panel}`}>
           <NovelForm
             statuses={NOVEL_STATUSES}
-            novel={{ title: "", originalTitle: "", author: "", artist: "", status: "En cours", synopsis: "", quote: "", quoteNote: "", featured: "0", draft: "1" }}
+            novel={{ title: "", originalTitle: "", author: "", artist: "", status: "En cours", synopsis: "", quote: "", quoteNote: "", format: "", released: "", featured: "0", draft: "1" }}
           />
           <p className="mt-6 text-sm text-muted-foreground">
             Vous pourrez ajouter la couverture, les tomes et les chapitres une fois le novel créé.
