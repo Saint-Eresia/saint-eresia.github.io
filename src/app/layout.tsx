@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
+import localFont from "next/font/local";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
+// Florence Sans Black (la police du launcher) : seulement le titre « Saint Eresia » de l'en-tête ; elle rend mal
+// sur les petits textes, le reste du site est en Urbanist.
+const florence = localFont({
+  variable: "--font-florence",
+  display: "swap",
+  src: [{ path: "./fonts/florencesans-black.ttf", weight: "600 900", style: "normal" }],
+});
 const urbanist = Urbanist({ variable: "--font-urbanist", subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -25,7 +33,7 @@ const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("theme");var d=
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // La classe .dark est posée par le script avant l’hydratation : React ne doit pas signaler l’écart.
-    <html lang="fr" className={urbanist.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="fr" className={`${florence.variable} ${urbanist.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

@@ -341,8 +341,10 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   const translators = text(formData, "translators");
   const credits = String(formData.get("credits") ?? "").trim();
   const downloadUrl = text(formData, "downloadUrl");
+  const releaseDate = text(formData, "releaseDate");
   const content = String(formData.get("content") ?? "").trim();
 
+  if (releaseDate && (!/^\d{4}-\d{2}-\d{2}$/.test(releaseDate) || Number.isNaN(Date.parse(releaseDate)))) return { error: "La date de sortie n’est pas valide." };
   if (!label || label.length > 80) return { error: "Le libellé est requis (ex. « Chapitre 3 », 80 caractères maximum)." };
   if (title.length > 180) return { error: "Le titre est trop long (180 caractères maximum)." };
   if (!Number.isInteger(position) || position < 0) return { error: "L’ordre doit être un entier positif." };
@@ -362,8 +364,8 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
       [
         {
           sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, credits, downloadUrl, publishedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN datetime('now') END)`,
-          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, credits, downloadUrl, published],
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? <> '' THEN ? || ' 12:00:00' WHEN ? = 1 THEN datetime('now') END)`,
+          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, credits, downloadUrl, releaseDate, releaseDate, published],
         },
       ],
       // last_insert_rowid() reste celui du chapitre : la mise à jour de date intercalée n’est pas une insertion.
@@ -384,9 +386,12 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
     [
       {
         sql: `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
-                credits = ?, downloadUrl = ?, publishedAt = CASE WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
+                credits = ?, downloadUrl = ?,
+                -- Date de sortie choisie (l'heure d'origine est gardée si le jour ne change pas), sinon automatique.
+                publishedAt = CASE WHEN ? <> '' THEN (CASE WHEN substr(publishedAt, 1, 10) = ? THEN publishedAt ELSE ? || ' 12:00:00' END)
+                                   WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
                 updatedAt = datetime('now') WHERE id = ?`,
-        args: [volume.id, position, label, title, content, published, translators, credits, downloadUrl, published, id],
+        args: [volume.id, position, label, title, content, published, translators, credits, downloadUrl, releaseDate, releaseDate, releaseDate, published, id],
       },
     ],
     {
@@ -403,6 +408,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
         { label: "Traduction", before: before.translators, after: translators },
         { label: "Crédits détaillés", before: before.credits, after: credits },
         { label: "Lien de téléchargement", before: before.downloadUrl, after: downloadUrl },
+        { label: "Date de sortie", before: before.publishedAt?.slice(0, 10) ?? "", after: releaseDate || (before.publishedAt?.slice(0, 10) ?? "") },
         { label: "Texte", before: before.content, after: content, long: true },
       ]),
     },

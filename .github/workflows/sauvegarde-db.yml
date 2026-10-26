@@ -1,0 +1,58 @@
+# Sauvegarde de la base en ligne sur la branche « sauvegarde-db » : toutes les heures, un commit seulement si
+# quelque chose a changé (et à la demande, onglet Actions → « Sauvegarde de la base » → Run workflow).
+# Secrets du dépôt à créer : TURSO_DATABASE_URL et TURSO_AUTH_TOKEN (un jeton en lecture seule suffit).
+name: Sauvegarde de la base
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sauvegarde-db
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Seul le client libSQL est nécessaire, pas les dépendances du site.
+      - name: Client libSQL
+        run: |
+          mkdir -p "$RUNNER_TEMP/outil"
+          cp scripts/sauvegarde-db.mjs "$RUNNER_TEMP/outil/"
+          cd "$RUNNER_TEMP/outil" && npm init -y > /dev/null && npm install --silent @libsql/client@0.18.0
+
+      - name: Branche de sauvegarde
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin sauvegarde-db > /dev/null; then
+            git fetch --depth 1 origin sauvegarde-db:refs/remotes/origin/sauvegarde-db
+            git worktree add -B sauvegarde-db sauvegarde origin/sauvegarde-db
+          else
+            git worktree add --detach sauvegarde
+            git -C sauvegarde switch --orphan sauvegarde-db
+          fi
+
+      - name: Export de la base
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: node "$RUNNER_TEMP/outil/sauvegarde-db.mjs" sauvegarde/base
+
+      - name: Commit si changement
+        working-directory: sauvegarde
+        run: |
+          git add -A base
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git commit -q -m "Sauvegarde de la base ($(date -u '+%Y-%m-%d %H:%M') UTC)"
+          git push origin sauvegarde-db

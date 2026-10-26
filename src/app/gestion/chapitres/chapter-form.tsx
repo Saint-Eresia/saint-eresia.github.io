@@ -20,6 +20,8 @@ type ChapterFields = {
   translators: string;
   credits: string;
   downloadUrl: string;
+  // AAAA-MM-JJ, vide : date de la première publication, fixée automatiquement.
+  releaseDate?: string;
   content: string;
 };
 
@@ -41,6 +43,7 @@ export function ChapterForm({
   const [translators, setTranslators] = useState(chapter.translators);
   const [credits, setCredits] = useState(chapter.credits);
   const [downloadUrl, setDownloadUrl] = useState(chapter.downloadUrl);
+  const [releaseDate, setReleaseDate] = useState(chapter.releaseDate ?? "");
   const [content, setContent] = useState(chapter.content);
 
   useEffect(() => {
@@ -143,6 +146,13 @@ export function ChapterForm({
             value={downloadUrl}
             onChange={(e) => setDownloadUrl(e.target.value)}
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="releaseDate">Date de sortie</Label>
+          <Input id="releaseDate" name="releaseDate" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
+          <p className="text-xs text-muted-foreground">
+            Affichée dans le sommaire et le flux RSS. Vide : date de la première publication, fixée automatiquement.
+          </p>
         </div>
       </div>
 

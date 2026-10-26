@@ -32,7 +32,10 @@ function requireEnv(name: string) {
 }
 
 async function copyRows(source: ReturnType<typeof createClient>) {
+  const present = new Set((await source.execute("SELECT name FROM sqlite_master WHERE type = 'table'")).rows.map((row) => String(row.name)));
   for (const table of TABLES) {
+    // Une base locale plus ancienne que le schéma n’a pas toutes les tables.
+    if (!present.has(table)) continue;
     const rs = await source.execute(`SELECT * FROM ${table}`);
     if (rs.rows.length === 0) continue;
     const columns = rs.columns;

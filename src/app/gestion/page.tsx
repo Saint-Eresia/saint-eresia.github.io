@@ -1,4 +1,4 @@
-import { ChevronRight, Newspaper, Plus } from "lucide-react";
+import { ChevronRight, DatabaseBackup, Newspaper, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -26,8 +26,19 @@ export default function ManagePage({ searchParams }: PageProps<"/gestion">) {
   return (
     <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-muted" />}>
       <TeamGate>
-        <p className="text-xs font-extrabold tracking-[0.14em] text-primary uppercase">Espace équipe</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Gestion du contenu</h1>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-extrabold tracking-[0.14em] text-primary uppercase">Espace équipe</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Gestion du contenu</h1>
+          </div>
+          {/* Lien simple (pas de préchargement) : chaque clic produit une nouvelle sauvegarde. */}
+          <Button asChild variant="outline" size="pill">
+            <a href="/gestion/sauvegarde" title="Télécharge une archive de toute la base (sans les comptes de connexion)">
+              <DatabaseBackup className="size-4" aria-hidden />
+              Sauvegarder la base
+            </a>
+          </Button>
+        </div>
         <Dashboard searchParams={searchParams} />
       </TeamGate>
     </Suspense>

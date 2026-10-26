@@ -60,6 +60,7 @@ async function EditChapter({ params, searchParams }: Pick<Props, "params" | "sea
             translators: chapter.translators,
             credits: chapter.credits,
             downloadUrl: chapter.downloadUrl,
+            releaseDate: chapter.publishedAt?.slice(0, 10) ?? "",
             content: chapter.content,
           }}
         />
