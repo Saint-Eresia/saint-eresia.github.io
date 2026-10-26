@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { canSeeNovel, getVolumeIllustrations, isPublicNovel, volumeHeading } from "@/lib/novels";
+import { getViewer } from "@/lib/viewer";
 import { IllustrationGallery } from "./illustration-gallery";
 
 type Props = PageProps<"/novels/[slug]/illustrations/[tome]">;
@@ -36,6 +37,8 @@ async function Illustrations({ params }: { params: Props["params"] }) {
   const data = await load(params);
   if (!data || data.images.length === 0) notFound();
   const { novel, volume, images } = data;
+  // L’équipe peut retirer une illustration de son chapitre depuis cette page.
+  const canEdit = !!(await getViewer())?.isTeam;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -49,7 +52,7 @@ async function Illustrations({ params }: { params: Props["params"] }) {
       <p className="mt-2 text-muted-foreground">
         {volumeHeading(volume)} · {images.length} illustration{images.length > 1 ? "s" : ""}
       </p>
-      <IllustrationGallery novelSlug={novel.slug} images={images} />
+      <IllustrationGallery novelId={canEdit ? novel.id : undefined} novelSlug={novel.slug} images={images} />
     </div>
   );
 }

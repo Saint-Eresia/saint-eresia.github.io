@@ -185,6 +185,47 @@ export async function deleteNovelImage(novelId: number, kind: "background" | "lo
   return { savedAt: Date.now() };
 }
 
+// Retire une illustration du texte d’un chapitre (avec sa ligne de crédit « *Rôle : Nom* » éventuelle),
+// depuis la page des illustrations d’un tome. Le fichier est supprimé s’il ne sert plus dans aucun chapitre.
+export async function deleteIllustration(novelId: number, chapterSlug: string, src: string): Promise<ActionResult> {
+  const actor = await teamActor();
+  if ("error" in actor) return actor;
+  const novel = await findNovel(novelId);
+  if (!novel) return { error: "Novel introuvable." };
+  const chapter = await db.prepare("SELECT * FROM chapter WHERE novelId = ? AND slug = ?").get<Chapter>(novelId, chapterSlug);
+  if (!chapter) return { error: "Chapitre introuvable." };
+
+  const escaped = src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const image = new RegExp(`\\s*!\\[[^\\]]*\\]\\(${escaped}\\)(?:[ \\t]*\\r?\\n[ \\t]*(?:\\r?\\n[ \\t]*)?\\*[^*\\n]+ : [^*\\n]+\\*)?\\s*`);
+  if (!image.test(chapter.content)) return { error: "Cette illustration n’est plus dans le chapitre. Rechargez la page." };
+  const content = chapter.content.replace(image, "\n\n").trim();
+
+  await commit(
+    actor,
+    novelId,
+    [{ sql: "UPDATE chapter SET content = ?, updatedAt = datetime('now') WHERE id = ?", args: [content, chapter.id] }],
+    {
+      type: "chapter",
+      id: chapter.id,
+      label: chapterLabel(novel, chapter),
+      action: "update",
+      changes: diff([{ label: "Texte", before: chapter.content, after: content, long: true }]),
+    },
+  );
+
+  // Fichier (et entrée de la galerie du novel) supprimés seulement s’il n’apparaît plus dans aucun chapitre.
+  const stillUsed = await db.prepare("SELECT 1 FROM chapter WHERE novelId = ? AND instr(content, ?) > 0").get(novelId, `(${src})`);
+  if (!stillUsed) {
+    const file = src.replace(/^\/uploads\//, "");
+    const found = await db.prepare("SELECT 1 FROM novel_image WHERE novelId = ? AND kind = 'illustration' AND file = ?").get(novelId, file);
+    if (found) {
+      await db.prepare("DELETE FROM novel_image WHERE novelId = ? AND kind = 'illustration' AND file = ?").run(novelId, file);
+      await removeFile(file);
+    }
+  }
+  return { savedAt: Date.now() };
+}
+
 // ——— Tomes ———
 
 export type VolumeInput = { number: number; label: string; title: string; note: string; image: string; imageCredit: string };

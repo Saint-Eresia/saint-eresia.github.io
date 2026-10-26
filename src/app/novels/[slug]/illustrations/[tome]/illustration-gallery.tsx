@@ -2,11 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
+import { deleteIllustration } from "@/app/gestion/novels/actions";
+import { ConfirmDelete } from "@/components/confirm-delete";
 import type { VolumeIllustration } from "@/lib/novels";
 import { ImageLightbox } from "../../[chapitre]/image-lightbox";
 
 // Grille des illustrations : un clic ouvre la visionneuse (← / → pour parcourir), le lien mène au chapitre.
-export function IllustrationGallery({ novelSlug, images }: { novelSlug: string; images: VolumeIllustration[] }) {
+// Avec novelId (équipe), chaque illustration peut être retirée de son chapitre.
+export function IllustrationGallery({
+  novelId,
+  novelSlug,
+  images,
+}: {
+  novelId?: number;
+  novelSlug: string;
+  images: VolumeIllustration[];
+}) {
   const [zoomed, setZoomed] = useState<number | null>(null);
   return (
     <>
@@ -26,6 +38,21 @@ export function IllustrationGallery({ novelSlug, images }: { novelSlug: string; 
                 {image.chapter.heading}
               </Link>
               {image.credit && <p className="text-muted-foreground">{image.credit}</p>}
+              {novelId !== undefined && (
+                <div className="pt-1.5">
+                  <ConfirmDelete
+                    size="sm"
+                    label="Supprimer"
+                    title="Supprimer cette illustration ?"
+                    description={`Elle sera retirée du texte de « ${image.chapter.heading} », avec sa ligne de crédit. Le fichier est supprimé s’il ne sert dans aucun autre chapitre.`}
+                    action={async () => {
+                      const result = await deleteIllustration(novelId, image.chapter.slug, image.src);
+                      if (!result.error) toast.success("Illustration supprimée.");
+                      return result;
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </li>
         ))}
