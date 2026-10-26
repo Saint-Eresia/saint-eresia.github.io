@@ -105,9 +105,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
             </div>
             <div className="min-w-0 flex-1">
               {/* Remontés dans le bandeau ; la période de sortie chevauche son bord, à droite. */}
-              <div className="-mt-14 flex items-end justify-between gap-4 sm:-mt-16">
+              <div className="-mt-16 flex h-16 items-end justify-between gap-4 pb-2">
                 <div className="flex flex-col items-start gap-1.5">
-                  <span className="rounded-full bg-background/90 backdrop-blur-sm">
+                  <span className="inline-flex rounded-full bg-background/90 backdrop-blur-sm">
                     <StatusBadge status={novel.status} />
                   </span>
                   {novel.format && (
@@ -117,13 +117,13 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                   )}
                 </div>
                 {novel.released && (
-                  <p className="hidden translate-y-1/2 items-center divide-x divide-border rounded-xl border border-border bg-card text-sm shadow-[0_12px_40px_var(--shadow)] sm:flex">
+                  <p className="hidden translate-y-[calc(50%+0.5rem)] items-center divide-x divide-border rounded-xl border border-border bg-card text-sm shadow-[0_12px_40px_var(--shadow)] sm:flex">
                     <span className="px-4 py-2 font-semibold text-muted-foreground">Sorti</span>
                     <span className="px-4 py-2 font-bold">{novel.released}</span>
                   </p>
                 )}
               </div>
-              <h1 className="mt-5 text-2xl leading-tight font-extrabold tracking-tight text-balance sm:text-3xl lg:text-4xl">
+              <h1 className="mt-4 text-2xl leading-tight font-extrabold tracking-tight text-balance sm:text-3xl lg:text-4xl">
                 {novel.title}
               </h1>
               {novel.author && <p className="mt-2 text-muted-foreground">par {novel.author}</p>}
@@ -137,7 +137,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
           </div>
           {novel.quote && (
             <blockquote className="mt-6 font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 sm:hidden">
-              {novel.quote}
+              « {novel.quote} »
             </blockquote>
           )}
         </div>
@@ -299,10 +299,10 @@ function HeroQuote({ quote, note }: { quote: string; note: string }) {
     <figure
       tabIndex={note ? 0 : undefined}
       aria-describedby={note ? "citation-commentaire" : undefined}
-      className={`group absolute right-4 bottom-6 hidden max-w-sm rounded-lg bg-black/70 px-5 py-4 text-white outline-none backdrop-blur-sm sm:right-6 sm:block ${note ? "cursor-help" : ""}`}
+      className={`group absolute right-4 bottom-12 hidden max-w-sm rounded-lg bg-black/70 px-5 py-4 text-white outline-none backdrop-blur-sm sm:right-6 sm:block ${note ? "cursor-help" : ""}`}
     >
       <blockquote className="text-right font-[Georgia,'Times_New_Roman',serif] text-base leading-snug text-pretty lg:text-lg">
-        {quote}
+        « {quote} »
       </blockquote>
       {note && (
         <figcaption
