@@ -97,6 +97,9 @@ const SCHEMA = `
     label TEXT NOT NULL DEFAULT '',
     -- Précision affichée sous l’en-tête du tome dans le sommaire (Markdown), ex. crédits d’une traduction reprise.
     note TEXT NOT NULL DEFAULT '',
+    -- Image en tête du tome dans le sommaire (URL ou fichier envoyé) et son crédit (Markdown), ex. « Illustration : X ».
+    image TEXT NOT NULL DEFAULT '',
+    imageCredit TEXT NOT NULL DEFAULT '',
     UNIQUE (novelId, number)
   );
   CREATE TABLE IF NOT EXISTS chapter (
@@ -113,6 +116,8 @@ const SCHEMA = `
     -- Crédits détaillés, affichés sous le titre du chapitre seulement (pas dans le sommaire) ; liens Markdown permis.
     credits TEXT NOT NULL DEFAULT '',
     downloadUrl TEXT NOT NULL DEFAULT '',
+    -- Partie du tome (ex. « Phase 3 ») : les chapitres consécutifs de même phase sont regroupés dans le sommaire.
+    phase TEXT NOT NULL DEFAULT '',
     -- Date de la première publication (flux RSS) ; vide pour un brouillon jamais publié.
     publishedAt TEXT,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
@@ -353,6 +358,7 @@ export async function prepareSchema(client: Client) {
   if (!novelColumns.includes("quoteNote")) await client.execute("ALTER TABLE novel ADD COLUMN quoteNote TEXT NOT NULL DEFAULT ''");
   const chapterColumns = ((await client.execute("PRAGMA table_info(chapter)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!chapterColumns.includes("credits")) await client.execute("ALTER TABLE chapter ADD COLUMN credits TEXT NOT NULL DEFAULT ''");
+  if (!chapterColumns.includes("phase")) await client.execute("ALTER TABLE chapter ADD COLUMN phase TEXT NOT NULL DEFAULT ''");
   if (!chapterColumns.includes("publishedAt")) {
     await client.execute("ALTER TABLE chapter ADD COLUMN publishedAt TEXT");
     await client.execute("UPDATE chapter SET publishedAt = createdAt WHERE published = 1");
@@ -360,6 +366,8 @@ export async function prepareSchema(client: Client) {
   const volumeColumns = ((await client.execute("PRAGMA table_info(volume)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!volumeColumns.includes("label")) await client.execute("ALTER TABLE volume ADD COLUMN label TEXT NOT NULL DEFAULT ''");
   if (!volumeColumns.includes("note")) await client.execute("ALTER TABLE volume ADD COLUMN note TEXT NOT NULL DEFAULT ''");
+  if (!volumeColumns.includes("image")) await client.execute("ALTER TABLE volume ADD COLUMN image TEXT NOT NULL DEFAULT ''");
+  if (!volumeColumns.includes("imageCredit")) await client.execute("ALTER TABLE volume ADD COLUMN imageCredit TEXT NOT NULL DEFAULT ''");
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");

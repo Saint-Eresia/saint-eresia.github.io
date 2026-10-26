@@ -31,8 +31,18 @@ export type Novel = {
   createdAt: string;
   updatedAt: string;
 };
-// label : intitulé remplaçant « Tome N » (ex. « Arc VI ») ; note : précision en Markdown affichée sous l’en-tête.
-export type Volume = { id: number; novelId: number; number: number; title: string; label: string; note: string };
+// label : intitulé remplaçant « Tome N » (ex. « Arc VI ») ; note : précision en Markdown affichée sous l’en-tête ;
+// image : image en tête du tome dans le sommaire (URL ou fichier envoyé), imageCredit : son crédit (Markdown).
+export type Volume = {
+  id: number;
+  novelId: number;
+  number: number;
+  title: string;
+  label: string;
+  note: string;
+  image: string;
+  imageCredit: string;
+};
 export type Chapter = {
   id: number;
   novelId: number;
@@ -46,15 +56,16 @@ export type Chapter = {
   translators: string;
   credits: string; // crédits détaillés, sous le titre du chapitre seulement
   downloadUrl: string;
+  phase: string; // partie du tome (ex. « Phase 3 »), sous-titre du sommaire
   publishedAt: string | null; // première publication
   createdAt: string;
   updatedAt: string;
 };
 export type ChapterSummary = Omit<Chapter, "content">;
-export type VolumeWithChapters = Volume & { chapters: ChapterSummary[] };
+export type VolumeWithChapters = Volume & { chapters: ChapterSummary[]; illustrationCount: number };
 
 const SUMMARY_COLUMNS =
-  "c.id, c.novelId, c.volumeId, c.slug, c.position, c.label, c.title, c.published, c.translators, c.credits, c.downloadUrl, c.publishedAt, c.createdAt, c.updatedAt";
+  "c.id, c.novelId, c.volumeId, c.slug, c.position, c.label, c.title, c.published, c.translators, c.credits, c.downloadUrl, c.phase, c.publishedAt, c.createdAt, c.updatedAt";
 
 // « Chapitre 12 : Titre » (espace insécable avant les deux-points).
 export const chapterHeading = (chapter: Pick<Chapter, "label" | "title">) =>
@@ -106,7 +117,18 @@ async function volumesOf(novelId: number, publishedOnly: boolean): Promise<Volum
        WHERE c.novelId = ? ${publishedOnly ? "AND c.published = 1" : ""} ORDER BY v.number, c.position, c.id`,
     )
     .all<ChapterSummary>(novelId);
-  const withChapters = volumes.map((volume) => ({ ...volume, chapters: chapters.filter((c) => c.volumeId === volume.id) }));
+  // Nombre d’images Markdown (« ![ ») dans les chapitres publiés de chaque tome, pour le lien vers ses illustrations.
+  const counts = await db
+    .prepare(
+      `SELECT volumeId, SUM((length(content) - length(replace(content, '![', ''))) / 2) AS n
+       FROM chapter WHERE novelId = ? AND published = 1 GROUP BY volumeId`,
+    )
+    .all<{ volumeId: number; n: number }>(novelId);
+  const withChapters = volumes.map((volume) => ({
+    ...volume,
+    chapters: chapters.filter((c) => c.volumeId === volume.id),
+    illustrationCount: Number(counts.find((row) => row.volumeId === volume.id)?.n ?? 0),
+  }));
   // Côté public, un tome sans chapitre publié n’apparaît pas.
   return publishedOnly ? withChapters.filter((volume) => volume.chapters.length > 0) : withChapters;
 }
@@ -192,7 +214,40 @@ export async function getVolumeWithNovel(volumeId: number) {
   const { next } = (await db
     .prepare("SELECT COALESCE(MAX(position), 0) + 1 AS next FROM chapter WHERE volumeId = ?")
     .get<{ next: number }>(volume.id))!;
-  return { volume, novel, volumes, nextPosition: next };
+  // Un nouveau chapitre reprend la phase du dernier chapitre du tome.
+  const last = await db.prepare("SELECT phase FROM chapter WHERE volumeId = ? ORDER BY position DESC, id DESC LIMIT 1").get<{ phase: string }>(volume.id);
+  return { volume, novel, volumes, nextPosition: next, phase: last?.phase ?? "" };
+}
+
+// Phases déjà employées dans le novel, proposées à la saisie d’un chapitre.
+export async function phasesOf(novelId: number) {
+  const rows = await db.prepare("SELECT DISTINCT phase FROM chapter WHERE novelId = ? AND phase <> '' ORDER BY phase").all<{ phase: string }>(novelId);
+  return rows.map((row) => row.phase);
+}
+
+export type VolumeIllustration = { src: string; alt: string; credit: string; chapter: { slug: string; heading: string } };
+
+// Illustrations d’un tome, dans l’ordre de lecture : images Markdown des chapitres publiés,
+// avec la ligne de crédit qui les suit éventuellement (« *Colorisation : X* »).
+export async function getVolumeIllustrations(novelSlug: string, volumeNumber: number) {
+  await connection();
+  const novel = await db.prepare("SELECT * FROM novel WHERE slug = ?").get<Novel>(novelSlug);
+  if (!novel) return null;
+  const volume = await db.prepare("SELECT * FROM volume WHERE novelId = ? AND number = ?").get<Volume>(novel.id, volumeNumber);
+  if (!volume) return null;
+  const chapters = await db
+    .prepare("SELECT slug, label, title, content FROM chapter WHERE volumeId = ? AND published = 1 ORDER BY position, id")
+    .all<Pick<Chapter, "slug" | "label" | "title" | "content">>(volume.id);
+  const images: VolumeIllustration[] = chapters.flatMap((chapter) =>
+    // Crédit : ligne en italique de la forme « Rôle : Nom » (une dédicace en italique n’en est pas un).
+    [...chapter.content.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)(?:[ \t]*\r?\n[ \t]*(?:\r?\n[ \t]*)?\*([^*\n]+ : [^*\n]+)\*)?/g)].map(([, alt, src, credit]) => ({
+      src,
+      alt,
+      credit: credit?.trim() ?? "",
+      chapter: { slug: chapter.slug, heading: chapterHeading(chapter) },
+    })),
+  );
+  return { novel, volume, images };
 }
 
 // « Tome 1 » dans le tome 1 → tome-1 ; « Chapitre 3 » dans le tome 2 → tome-2-chapitre-3.

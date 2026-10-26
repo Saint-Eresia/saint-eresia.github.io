@@ -187,13 +187,27 @@ export async function deleteNovelImage(novelId: number, kind: "background" | "lo
 
 // ——— Tomes ———
 
-export type VolumeInput = { number: number; label: string; title: string; note: string };
+export type VolumeInput = { number: number; label: string; title: string; note: string; image: string; imageCredit: string };
 
 function readVolume(input: VolumeInput) {
   const { number } = input;
   if (!Number.isInteger(number) || number < 0 || number > 999) return { error: "Le numéro de tome doit être un entier positif." };
   if (input.note.trim().length > 2000) return { error: "La précision du tome est trop longue (2000 caractères au plus)." };
-  return { volume: { number, label: input.label.trim().slice(0, 60), title: input.title.trim().slice(0, 180), note: input.note.trim() } };
+  const image = input.image.trim();
+  // URL complète, ou chemin d’un fichier envoyé (/uploads/…) ramené à son nom comme les autres images.
+  const file = image.replace(/^\/uploads\//, "");
+  if (image && !isHttpUrl(image) && (file === image || file.includes("/"))) return { error: "L’image du tome doit être une adresse http(s) ou une image envoyée." };
+  if (input.imageCredit.trim().length > 300) return { error: "Le crédit de l’image est trop long (300 caractères au plus)." };
+  return {
+    volume: {
+      number,
+      label: input.label.trim().slice(0, 60),
+      title: input.title.trim().slice(0, 180),
+      note: input.note.trim(),
+      image: file,
+      imageCredit: input.imageCredit.trim(),
+    },
+  };
 }
 
 const volumeLabel = (novel: Pick<Novel, "title">, volume: Pick<Volume, "number" | "title" | "label">) => `${novel.title} — ${volumeHeading(volume)}`;
@@ -203,14 +217,17 @@ export async function addVolume(novelId: number, input: VolumeInput): Promise<Ac
   if ("error" in actor) return actor;
   const parsed = readVolume(input);
   if (!parsed.volume) return { error: parsed.error };
-  const { number, label, title, note } = parsed.volume;
+  const { number, label, title, note, image, imageCredit } = parsed.volume;
   const novel = await findNovel(novelId);
   if (!novel) return { error: "Novel introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ?").get(novelId, number)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
   await db.batch([
-    { sql: "INSERT INTO volume (novelId, number, label, title, note) VALUES (?, ?, ?, ?, ?)", args: [novelId, number, label, title, note] },
+    {
+      sql: "INSERT INTO volume (novelId, number, label, title, note, image, imageCredit) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      args: [novelId, number, label, title, note, image, imageCredit],
+    },
     logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, parsed.volume), action: "create" }),
     touch(novelId),
   ]);
@@ -223,7 +240,7 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
   if ("error" in actor) return actor;
   const parsed = readVolume(input);
   if (!parsed.volume) return { error: parsed.error };
-  const { number, label, title, note } = parsed.volume;
+  const { number, label, title, note, image, imageCredit } = parsed.volume;
   const volume = await findVolume(volumeId);
   if (!volume) return { error: "Tome introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ? AND id != ?").get(volume.novelId, number, volumeId)) {
@@ -233,7 +250,12 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
   await commit(
     actor,
     volume.novelId,
-    [{ sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ? WHERE id = ?", args: [number, label, title, note, volumeId] }],
+    [
+      {
+        sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ?, image = ?, imageCredit = ? WHERE id = ?",
+        args: [number, label, title, note, image, imageCredit, volumeId],
+      },
+    ],
     {
       type: "volume",
       id: volumeId,
@@ -244,6 +266,8 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
         { label: "Intitulé", before: volume.label, after: label },
         { label: "Titre", before: volume.title, after: title },
         { label: "Précision", before: volume.note, after: note, long: true },
+        { label: "Image", before: volume.image, after: image },
+        { label: "Crédit de l’image", before: volume.imageCredit, after: imageCredit },
       ]),
     },
   );
@@ -341,6 +365,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   const translators = text(formData, "translators");
   const credits = String(formData.get("credits") ?? "").trim();
   const downloadUrl = text(formData, "downloadUrl");
+  const phase = text(formData, "phase");
   const releaseDate = text(formData, "releaseDate");
   const content = String(formData.get("content") ?? "").trim();
 
@@ -349,6 +374,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
   if (title.length > 180) return { error: "Le titre est trop long (180 caractères maximum)." };
   if (!Number.isInteger(position) || position < 0) return { error: "L’ordre doit être un entier positif." };
   if (translators.length > 200) return { error: "Le champ traduction est trop long." };
+  if (phase.length > 80) return { error: "Le nom de la phase est trop long (80 caractères maximum)." };
   if (credits.length > 1000) return { error: "Les crédits détaillés sont trop longs (1000 caractères maximum)." };
   if (downloadUrl && !isHttpUrl(downloadUrl)) return { error: "Le lien de téléchargement doit commencer par http:// ou https://." };
   if (content.length > 2_000_000) return { error: "Le texte est trop long." };
@@ -363,9 +389,9 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
       volume.novelId,
       [
         {
-          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, credits, downloadUrl, publishedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? <> '' THEN ? || ' 12:00:00' WHEN ? = 1 THEN datetime('now') END)`,
-          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, credits, downloadUrl, releaseDate, releaseDate, published],
+          sql: `INSERT INTO chapter (novelId, volumeId, slug, position, label, title, content, published, translators, credits, downloadUrl, phase, publishedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? <> '' THEN ? || ' 12:00:00' WHEN ? = 1 THEN datetime('now') END)`,
+          args: [volume.novelId, volume.id, slug, position, label, title, content, published, translators, credits, downloadUrl, phase, releaseDate, releaseDate, published],
         },
       ],
       // last_insert_rowid() reste celui du chapitre : la mise à jour de date intercalée n’est pas une insertion.
@@ -386,12 +412,12 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
     [
       {
         sql: `UPDATE chapter SET volumeId = ?, position = ?, label = ?, title = ?, content = ?, published = ?, translators = ?,
-                credits = ?, downloadUrl = ?,
+                credits = ?, downloadUrl = ?, phase = ?,
                 -- Date de sortie choisie (l'heure d'origine est gardée si le jour ne change pas), sinon automatique.
                 publishedAt = CASE WHEN ? <> '' THEN (CASE WHEN substr(publishedAt, 1, 10) = ? THEN publishedAt ELSE ? || ' 12:00:00' END)
                                    WHEN ? = 1 THEN COALESCE(publishedAt, datetime('now')) ELSE publishedAt END,
                 updatedAt = datetime('now') WHERE id = ?`,
-        args: [volume.id, position, label, title, content, published, translators, credits, downloadUrl, releaseDate, releaseDate, releaseDate, published, id],
+        args: [volume.id, position, label, title, content, published, translators, credits, downloadUrl, phase, releaseDate, releaseDate, releaseDate, published, id],
       },
     ],
     {
@@ -404,6 +430,7 @@ export async function saveChapter(_prev: ActionResult, formData: FormData): Prom
         { label: "Titre", before: before.title, after: title },
         { label: "Tome", before: beforeVolume ? volumeHeading(beforeVolume) : "", after: volumeHeading(volume) },
         { label: "Ordre", before: before.position, after: position },
+        { label: "Phase", before: before.phase, after: phase },
         { label: "Statut", before: before.published ? "Publié" : "Brouillon", after: published ? "Publié" : "Brouillon" },
         { label: "Traduction", before: before.translators, after: translators },
         { label: "Crédits détaillés", before: before.credits, after: credits },

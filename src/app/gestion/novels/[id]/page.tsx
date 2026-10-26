@@ -16,6 +16,7 @@ import { saveNovelTeam } from "../actions";
 import { DeleteNovelImageButton } from "../delete-background-button";
 import { DeleteNovelButton } from "../delete-novel-button";
 import { NovelForm } from "../novel-form";
+import { fileUrl } from "@/lib/file-url";
 import { VolumeManager } from "../volume-manager";
 
 export const metadata: Metadata = { title: "Modifier un novel" };
@@ -149,6 +150,8 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
             label: volume.label,
             title: volume.title,
             note: volume.note,
+            image: volume.image && fileUrl(volume.image),
+            imageCredit: volume.imageCredit,
             chapters: volume.chapters.map((c) => ({ id: c.id, heading: chapterHeading(c), published: c.published === 1 })),
           }))}
         />

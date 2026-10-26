@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ManageHeader, panel } from "@/components/manage-header";
 import { TeamGate } from "@/components/team-gate";
-import { getVolumeWithNovel, volumeHeading } from "@/lib/novels";
+import { getVolumeWithNovel, phasesOf, volumeHeading } from "@/lib/novels";
 import { ChapterForm } from "../chapter-form";
 
 export const metadata: Metadata = { title: "Nouveau chapitre" };
@@ -23,7 +23,8 @@ export default function NewChapterPage({ searchParams }: Props) {
 async function NewChapter({ searchParams }: Pick<Props, "searchParams">) {
   const data = await getVolumeWithNovel(Number((await searchParams).tome));
   if (!data) notFound();
-  const { volume, novel, volumes, nextPosition } = data;
+  const { volume, novel, volumes, nextPosition, phase } = data;
+  const phases = await phasesOf(novel.id);
 
   return (
     <>
@@ -32,6 +33,7 @@ async function NewChapter({ searchParams }: Pick<Props, "searchParams">) {
         <ChapterForm
           novelId={novel.id}
           volumes={volumes.map((v) => ({ id: v.id, heading: volumeHeading(v) }))}
+          phases={phases}
           chapter={{
             volumeId: volume.id,
             label: "",
@@ -41,6 +43,7 @@ async function NewChapter({ searchParams }: Pick<Props, "searchParams">) {
             translators: "",
             credits: "",
             downloadUrl: "",
+            phase,
             content: "",
           }}
         />

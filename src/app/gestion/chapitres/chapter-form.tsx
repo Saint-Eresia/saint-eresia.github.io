@@ -20,6 +20,7 @@ type ChapterFields = {
   translators: string;
   credits: string;
   downloadUrl: string;
+  phase: string;
   // AAAA-MM-JJ, vide : date de la première publication, fixée automatiquement.
   releaseDate?: string;
   content: string;
@@ -29,10 +30,12 @@ export function ChapterForm({
   chapter,
   novelId,
   volumes,
+  phases,
 }: {
   chapter: ChapterFields;
   novelId: number;
   volumes: { id: number; heading: string }[];
+  phases: string[]; // phases déjà employées dans le novel, proposées à la saisie
 }) {
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(saveChapter, {});
   const [volumeId, setVolumeId] = useState(String(chapter.volumeId));
@@ -40,6 +43,7 @@ export function ChapterForm({
   const [title, setTitle] = useState(chapter.title);
   const [position, setPosition] = useState(String(chapter.position));
   const [published, setPublished] = useState(chapter.published ? "1" : "0");
+  const [phase, setPhase] = useState(chapter.phase);
   const [translators, setTranslators] = useState(chapter.translators);
   const [credits, setCredits] = useState(chapter.credits);
   const [downloadUrl, setDownloadUrl] = useState(chapter.downloadUrl);
@@ -107,6 +111,24 @@ export function ChapterForm({
         <div className="space-y-2">
           <Label htmlFor="title">Titre (facultatif)</Label>
           <Input id="title" name="title" maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phase">Phase (facultatif)</Label>
+          <Input
+            id="phase"
+            name="phase"
+            maxLength={80}
+            list="phases"
+            placeholder="Phase 1, Partie 2…"
+            value={phase}
+            onChange={(e) => setPhase(e.target.value)}
+          />
+          <datalist id="phases">
+            {phases.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
+          <p className="text-xs text-muted-foreground">Les chapitres consécutifs de même phase sont regroupés sous ce sous-titre dans le sommaire.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="translators">Traduction</Label>

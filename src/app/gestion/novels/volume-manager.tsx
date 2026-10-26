@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronRight, FolderInput, Plus, X } from "lucide-react";
+import { ChevronRight, FolderInput, ImageUp, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { uploadImages } from "@/components/dropzone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,8 @@ export type ManagedVolume = {
   label: string;
   title: string;
   note: string;
+  image: string; // adresse affichable de l’image du tome, vide sans image
+  imageCredit: string;
   chapters: { id: number; heading: string; published: boolean }[];
 };
 
@@ -42,7 +45,8 @@ export function VolumeManager({ novelId, volumes }: { novelId: number; volumes: 
       {volumes.length === 0 && <p className="text-muted-foreground">Aucun tome. Ajoutez-en un pour créer des chapitres.</p>}
       {volumes.map((volume) => (
         <VolumeCard
-          key={`${volume.id}-${volume.number}-${volume.label}-${volume.title}-${volume.note}`}
+          key={`${volume.id}-${volume.number}-${volume.label}-${volume.title}-${volume.note}-${volume.image}-${volume.imageCredit}`}
+          novelId={novelId}
           volume={volume}
           selected={chosen}
           onToggle={toggle}
@@ -120,17 +124,20 @@ function MoveBar({
 }
 
 // Champs d’un tome, saisis en texte : le numéro est converti à l’envoi.
-type VolumeDraft = { number: string; label: string; title: string; note: string };
-const draftOf = (volume: Pick<ManagedVolume, "number" | "label" | "title" | "note">): VolumeDraft => ({
+type VolumeDraft = { number: string; label: string; title: string; note: string; image: string; imageCredit: string };
+const draftOf = (volume: Pick<ManagedVolume, "number" | "label" | "title" | "note" | "image" | "imageCredit">): VolumeDraft => ({
   number: String(volume.number),
   label: volume.label,
   title: volume.title,
   note: volume.note,
+  image: volume.image,
+  imageCredit: volume.imageCredit,
 });
 const inputOf = (draft: VolumeDraft): VolumeInput => ({ ...draft, number: Number(draft.number) });
 
-function VolumeFields({ draft, onChange }: { draft: VolumeDraft; onChange: (draft: VolumeDraft) => void }) {
+function VolumeFields({ novelId, draft, onChange }: { novelId: number; draft: VolumeDraft; onChange: (draft: VolumeDraft) => void }) {
   const set = (key: keyof VolumeDraft) => (e: { target: { value: string } }) => onChange({ ...draft, [key]: e.target.value });
+  const [uploading, setUploading] = useState(false);
   return (
     <>
       <label className="flex items-center gap-2 text-sm font-semibold">
@@ -163,15 +170,54 @@ function VolumeFields({ draft, onChange }: { draft: VolumeDraft; onChange: (draf
         className="min-h-0 basis-full"
         aria-label="Précision du tome"
       />
+      {/* Image en tête du tome dans le sommaire (bannière ou couverture d’arc) : adresse collée ou fichier envoyé. */}
+      <div className="flex basis-full flex-wrap items-center gap-3">
+        {draft.image && <img src={draft.image} alt="" className="h-12 w-auto rounded border border-border" />}
+        <Input
+          value={draft.image}
+          placeholder="Image du tome : adresse https://… (facultatif)"
+          onChange={set("image")}
+          className="min-w-56 flex-1"
+          aria-label="Image du tome"
+        />
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary">
+          <ImageUp className="size-4" /> {uploading ? "Envoi…" : "Envoyer"}
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            disabled={uploading}
+            onChange={async (e) => {
+              const files = [...(e.target.files ?? [])];
+              e.target.value = "";
+              if (!files.length) return;
+              setUploading(true);
+              const [uploaded] = await uploadImages(`/api/novels/${novelId}/images`, "illustration", files);
+              setUploading(false);
+              if (uploaded) onChange({ ...draft, image: uploaded.url });
+            }}
+          />
+        </label>
+        <Input
+          value={draft.imageCredit}
+          maxLength={300}
+          placeholder="Crédit de l’image (facultatif, Markdown)"
+          onChange={set("imageCredit")}
+          className="min-w-56 flex-1"
+          aria-label="Crédit de l’image du tome"
+        />
+      </div>
     </>
   );
 }
 
 function VolumeCard({
+  novelId,
   volume,
   selected,
   onToggle,
 }: {
+  novelId: number;
   volume: ManagedVolume;
   selected: number[];
   onToggle: (ids: number[], on: boolean) => void;
@@ -194,7 +240,7 @@ function VolumeCard({
           });
         }}
       >
-        <VolumeFields draft={draft} onChange={setDraft} />
+        <VolumeFields novelId={novelId} draft={draft} onChange={setDraft} />
         <Button type="submit" size="sm" className="rounded-full" disabled={!dirty || pending}>
           Enregistrer
         </Button>
@@ -264,7 +310,7 @@ function VolumeCard({
 }
 
 function AddVolume({ novelId, defaultNumber }: { novelId: number; defaultNumber: number }) {
-  const [draft, setDraft] = useState<VolumeDraft>({ number: String(defaultNumber), label: "", title: "", note: "" });
+  const [draft, setDraft] = useState<VolumeDraft>({ number: String(defaultNumber), label: "", title: "", note: "", image: "", imageCredit: "" });
   const [pending, startTransition] = useTransition();
   return (
     <form
@@ -276,7 +322,7 @@ function AddVolume({ novelId, defaultNumber }: { novelId: number; defaultNumber:
         });
       }}
     >
-      <VolumeFields draft={draft} onChange={setDraft} />
+      <VolumeFields novelId={novelId} draft={draft} onChange={setDraft} />
       <Button type="submit" size="sm" variant="outline" className="rounded-full" disabled={pending}>
         <Plus /> Ajouter le tome
       </Button>

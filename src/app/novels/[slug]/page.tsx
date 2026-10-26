@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Download, Pencil } from "lucide-react";
+import { ArrowLeft, ChevronRight, Download, Images, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,6 +10,7 @@ import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
 import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
+import { fileUrl } from "@/lib/file-url";
 import { excerpt } from "@/lib/news";
 import { formatDate, imageUrl } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
@@ -157,8 +158,17 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                     {group.heading && (
                       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-secondary px-5 py-3">
                         <h3 className="font-bold">{group.heading}</h3>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                           {group.translators && <p className="text-xs text-muted-foreground">Traduction : {group.translators}</p>}
+                          {group.volumeNumber !== undefined && group.illustrationCount > 0 && (
+                            <Link
+                              href={`/novels/${novel.slug}/illustrations/${group.volumeNumber}`}
+                              title={`Voir les ${group.illustrationCount} illustrations de ${group.heading}`}
+                              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold transition-colors hover:border-primary hover:text-primary"
+                            >
+                              <Images className="size-3.5" /> Illustrations
+                            </Link>
+                          )}
                           {group.volumeNumber !== undefined && (
                             // Lien simple (pas de préchargement) : l’EPUB est généré à la première demande.
                             <a
@@ -172,33 +182,65 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                         </div>
                       </div>
                     )}
+                    {group.image && (
+                      <figure className="border-b border-border bg-muted/40">
+                        {/* Bannière ou couverture : affichée entière, centrée, quelle que soit sa proportion. */}
+                        <img src={group.image} alt={`Illustration de ${group.heading}`} className="mx-auto block max-h-[30rem] w-auto max-w-full" />
+                        {group.imageCredit && (
+                          <figcaption className="px-5 py-2 text-xs text-muted-foreground">
+                            <Markdown>{group.imageCredit}</Markdown>
+                          </figcaption>
+                        )}
+                      </figure>
+                    )}
                     {group.note && (
                       <div className="border-b border-border bg-secondary/50 px-5 py-3 text-sm">
                         <Markdown>{group.note}</Markdown>
                       </div>
                     )}
-                    <ol className="divide-y divide-border">
-                      {group.rows.map(({ chapter, heading }) => (
-                        <li key={chapter.id}>
-                          <Link
-                            href={`/novels/${novel.slug}/${chapter.slug}`}
-                            className="group flex items-center gap-4 px-5 py-3 transition-colors hover:bg-muted/50"
-                          >
-                            <span className="min-w-0 flex-1">
-                              <span className="block font-semibold group-hover:text-primary">
-                                <span aria-hidden className="mr-1.5 text-primary">•</span>
-                                {heading}
-                              </span>
-                              {chapter.translators && !group.translators && (
-                                <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
-                              )}
-                            </span>
-                            <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(chapter.publishedAt ?? chapter.createdAt)}</span>
-                            <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary" />
-                          </Link>
-                        </li>
-                      ))}
-                    </ol>
+                    {group.sections.map((section, index) => (
+                      <section key={index} className={index > 0 ? "border-t border-border" : undefined}>
+                        {section.phase && (
+                          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 pt-4 pb-1">
+                            <h4 className="text-sm font-bold tracking-wide text-primary uppercase">{section.phase}</h4>
+                            {section.credit && (
+                              <p className="text-xs text-muted-foreground">
+                                Traduction :{" "}
+                                {section.credit.href ? (
+                                  <a href={section.credit.href} className="underline underline-offset-2 hover:text-primary">
+                                    {section.credit.name}
+                                  </a>
+                                ) : (
+                                  section.credit.name
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        <ol className="divide-y divide-border">
+                          {section.rows.map(({ chapter, heading }) => (
+                            <li key={chapter.id}>
+                              <Link
+                                href={`/novels/${novel.slug}/${chapter.slug}`}
+                                className="group flex items-center gap-4 px-5 py-3 transition-colors hover:bg-muted/50"
+                              >
+                                <span className="min-w-0 flex-1">
+                                  <span className="block font-semibold group-hover:text-primary">
+                                    <span aria-hidden className="mr-1.5 text-primary">•</span>
+                                    {heading}
+                                  </span>
+                                  {chapter.translators && !group.translators && !section.credit && (
+                                    <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
+                                  )}
+                                </span>
+                                <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(chapter.publishedAt ?? chapter.createdAt)}</span>
+                                <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary" />
+                              </Link>
+                            </li>
+                          ))}
+                        </ol>
+                      </section>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -246,6 +288,34 @@ function sharedTranslators(chapters: ChapterSummary[]) {
   return chapters.length > 1 && first.translators && chapters.every((c) => c.translators === first.translators) ? first.translators : undefined;
 }
 
+// Équipe créditée pour toute une phase : traducteurs communs, ou équipe extérieure dont le lien
+// figure dans les crédits détaillés de chaque chapitre (« — [Équipe](https://…) »), renvoyée vers son site.
+function phaseCredit(chapters: ChapterSummary[]): { name: string; href?: string } | undefined {
+  const shared = sharedTranslators(chapters);
+  if (shared) return { name: shared };
+  const teams = chapters.map((chapter) => /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/.exec(chapter.credits));
+  const [first] = teams;
+  if (chapters.length < 2 || !first || teams.some((team) => team?.[1] !== first[1])) return undefined;
+  return { name: first[1], href: new URL(first[2]).origin };
+}
+
+type Row = { chapter: ChapterSummary; heading: string };
+type Section = { phase: string; credit?: { name: string; href?: string }; rows: Row[] };
+
+// Chapitres consécutifs d’une même phase regroupés sous un sous-titre ; sans phase, une seule section.
+function sectionsOf(chapters: ChapterSummary[]): Section[] {
+  const sections: (Section & { chapters: ChapterSummary[] })[] = [];
+  for (const chapter of chapters) {
+    const last = sections.at(-1);
+    const row = { chapter, heading: chapterHeading(chapter) };
+    if (last && last.phase === chapter.phase) {
+      last.rows.push(row);
+      last.chapters.push(chapter);
+    } else sections.push({ phase: chapter.phase, rows: [row], chapters: [chapter] });
+  }
+  return sections.map(({ chapters, ...section }) => ({ ...section, credit: section.phase ? phaseCredit(chapters) : undefined }));
+}
+
 // Un tome lu d’un bloc (un seul chapitre « Tome N ») n’a pas besoin d’en-tête :
 // ces tomes consécutifs sont regroupés dans une même liste.
 function tableOfContents(volumes: VolumeWithChapters[]) {
@@ -253,9 +323,12 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
     key: string;
     heading: string | null;
     note?: string;
+    image?: string; // image en tête du tome
+    imageCredit?: string;
     translators?: string; // commun à tous les chapitres du tome : affiché une fois dans l’en-tête
     volumeNumber?: number; // tome téléchargeable en EPUB
-    rows: { chapter: ChapterSummary; heading: string }[];
+    illustrationCount: number; // lien vers la page des illustrations du tome
+    sections: Section[];
   }[] = [];
   for (const volume of volumes) {
     const [only] = volume.chapters;
@@ -265,16 +338,19 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
         key: `v${volume.id}`,
         heading: volumeHeading(volume),
         note: volume.note,
+        image: volume.image && fileUrl(volume.image),
+        imageCredit: volume.imageCredit,
         translators: sharedTranslators(volume.chapters),
         volumeNumber: volume.number,
-        rows: volume.chapters.map((chapter) => ({ chapter, heading: chapterHeading(chapter) })),
+        illustrationCount: volume.illustrationCount,
+        sections: sectionsOf(volume.chapters),
       });
       continue;
     }
     const row = { chapter: only, heading: only.title ? `${volumeHeading(volume)} — ${only.title}` : volumeHeading(volume) };
     const last = groups.at(-1);
-    if (last && last.heading === null) last.rows.push(row);
-    else groups.push({ key: `t${volume.id}`, heading: null, rows: [row] });
+    if (last && last.heading === null) last.sections[0].rows.push(row);
+    else groups.push({ key: `t${volume.id}`, heading: null, illustrationCount: 0, sections: [{ phase: "", rows: [row] }] });
   }
   return groups;
 }

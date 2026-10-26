@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { ManageHeader, panel } from "@/components/manage-header";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
-import { chapterHeading, getChapterById, volumeHeading } from "@/lib/novels";
+import { chapterHeading, getChapterById, phasesOf, volumeHeading } from "@/lib/novels";
 import { DeleteChapterButton } from "../../novels/delete-novel-button";
 import { ChapterForm } from "../chapter-form";
 
@@ -28,6 +28,7 @@ async function EditChapter({ params, searchParams }: Pick<Props, "params" | "sea
   const data = await getChapterById(Number((await params).id));
   if (!data) notFound();
   const { chapter, novel, volumes } = data;
+  const phases = await phasesOf(novel.id);
   const created = (await searchParams).cree === "1";
 
   return (
@@ -50,6 +51,7 @@ async function EditChapter({ params, searchParams }: Pick<Props, "params" | "sea
         <ChapterForm
           novelId={novel.id}
           volumes={volumes.map((v) => ({ id: v.id, heading: volumeHeading(v) }))}
+          phases={phases}
           chapter={{
             id: chapter.id,
             volumeId: chapter.volumeId,
@@ -60,6 +62,7 @@ async function EditChapter({ params, searchParams }: Pick<Props, "params" | "sea
             translators: chapter.translators,
             credits: chapter.credits,
             downloadUrl: chapter.downloadUrl,
+            phase: chapter.phase,
             releaseDate: chapter.publishedAt?.slice(0, 10) ?? "",
             content: chapter.content,
           }}
