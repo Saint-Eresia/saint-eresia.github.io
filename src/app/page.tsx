@@ -8,7 +8,7 @@ import { PatchTile } from "@/components/home/patch-tile";
 import { EmptyState } from "@/components/page-intro";
 import { Button } from "@/components/ui/button";
 import { excerpt, listNews, newsDate } from "@/lib/news";
-import { listFeaturedNovels, listNovels } from "@/lib/novels";
+import { latestReleases, listFeaturedNovels, listNovels } from "@/lib/novels";
 import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
 import { formatDate, imageUrl, listFeaturedPatches, listPatches } from "@/lib/patches";
 import { getViewer } from "@/lib/viewer";
@@ -213,8 +213,12 @@ function PatchTiles({ patches }: { patches: Awaited<ReturnType<typeof listPatche
 }
 
 async function CompactNovels() {
-  const novels = await listNovels();
-  if (novels.length === 0) return <EmptyState>Aucun light novel pour le moment.</EmptyState>;
+  const [all, releases] = await Promise.all([listNovels(), latestReleases()]);
+  if (all.length === 0) return <EmptyState>Aucun light novel pour le moment.</EmptyState>;
+  // Du plus récemment sorti au plus ancien ; un novel sans chapitre publié passe après.
+  const novels = all
+    .map((novel) => ({ ...novel, latest: releases.get(Number(novel.id)) ?? null }))
+    .sort((a, b) => (b.latest?.date ?? "").localeCompare(a.latest?.date ?? ""));
   return (
     <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
       {novels.slice(0, 5).map((novel) => (
@@ -232,8 +236,10 @@ async function CompactNovels() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-bold group-hover:text-primary">{novel.title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {novel.publishedCount} chapitre{novel.publishedCount > 1 ? "s" : ""} · mis à jour le {formatDate(novel.updatedAt)}
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {novel.latest
+                  ? `${novel.latest.label} · ${formatDate(novel.latest.date)}`
+                  : `${novel.publishedCount} chapitre${novel.publishedCount > 1 ? "s" : ""}`}
               </p>
             </div>
             <StatusBadge status={novel.status} className="hidden sm:inline-flex" />

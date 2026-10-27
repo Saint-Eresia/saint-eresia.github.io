@@ -10,8 +10,17 @@ import { Button } from "@/components/ui/button";
 // ouvre la page de téléchargement du patch.
 const GLLIA_TIMEOUT_MS = 1500;
 
-export function GlliaButton({ slug, downloadUrl }: { slug: string; downloadUrl: string }) {
+// Chaque clic (Gllia ou lien direct) est signalé au site pour le compteur de téléchargements de la fiche ;
+// sendBeacon part même si la page est quittée aussitôt.
+function countDownload(id: number) {
+  try {
+    navigator.sendBeacon(`/api/patches/${id}/telechargement`);
+  } catch {}
+}
+
+export function GlliaButton({ id, slug, downloadUrl }: { id: number; slug: string; downloadUrl: string }) {
   function openGllia(event: React.MouseEvent<HTMLAnchorElement>) {
+    countDownload(id);
     // Gllia n’existe que sous Windows ; Ctrl/Maj+clic garde le comportement d’un lien.
     if (!/Windows/.test(navigator.userAgent) || event.ctrlKey || event.shiftKey || event.metaKey) return;
     event.preventDefault();
@@ -33,7 +42,7 @@ export function GlliaButton({ slug, downloadUrl }: { slug: string; downloadUrl: 
 
   return (
     <Button asChild size="pill" className="w-full">
-      <a href={downloadUrl} onClick={openGllia}>
+      <a href={downloadUrl} onClick={openGllia} onAuxClick={(event) => event.button === 1 && countDownload(id)}>
         <Download /> Télécharger via
         {/* Logo noir sur le rose clair du thème sombre, blanc sur le rose foncé du thème clair. */}
         <img src="/gllia/logo-sombre.png" alt="Gllia" width={389} height={160} className="h-5 w-auto dark:hidden" />

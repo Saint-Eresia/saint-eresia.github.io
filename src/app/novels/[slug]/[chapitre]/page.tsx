@@ -11,6 +11,7 @@ import { canSeeNovel, chapterHeading, coverOf, getNovelBySlug, getPublishedChapt
 import { imageUrl } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
 import { ReaderPanel } from "./reader-panel";
+import { TypoReport } from "./typo-report";
 
 // Police serif proposée dans les options de lecture.
 const literata = Literata({ variable: "--font-literata", subsets: ["latin"] });
@@ -97,7 +98,10 @@ async function Reader({ params }: { params: Props["params"] }) {
           <Markdown reader>{chapter.content}</Markdown>
         </ReaderPanel>
       </div>
-      <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-14 border-t border-border pt-8" />
+      <div className="mt-12">
+        <TypoReport novelSlug={novel.slug} chapterSlug={chapter.slug} />
+      </div>
+      <ChapterNav novelSlug={novel.slug} previous={previous} next={next} className="mt-6 border-t border-border pt-8" />
     </article>
   );
 }

@@ -12,10 +12,12 @@ import { HeroBackdrop } from "@/components/hero-backdrop";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
 import { Button } from "@/components/ui/button";
+import { lastProgressOf } from "@/lib/activity";
 import { excerpt } from "@/lib/news";
 import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
 import { canSeePatch, formatDate, getPatchBySlug, imageUrl, isPublicPatch } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
+import { gogStoreUrl, steamStoreUrl } from "@/lib/stores";
 import { listPatchTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
 
@@ -107,6 +109,9 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
                 <CountUp value={patch.progress} suffix=" %" duration={1.2} className="text-2xl font-extrabold tabular-nums" />
               </div>
               <ProgressBar value={patch.progress} className="mt-2 h-2" />
+              <Suspense fallback={null}>
+                <LastProgress patchId={patch.id} />
+              </Suspense>
               {patch.steps.length > 0 && (
                 <dl className="mt-5 space-y-3.5 border-t border-border pt-4">
                   {patch.steps.map((step) => (
@@ -122,28 +127,27 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
               )}
             </div>
             {patch.downloadUrl ? (
-              <GlliaButton slug={patch.slug} downloadUrl={patch.downloadUrl} />
+              <div className="space-y-2">
+                <GlliaButton id={patch.id} slug={patch.slug} downloadUrl={patch.downloadUrl} />
+                {patch.downloads > 0 && (
+                  <p className="text-center text-xs text-muted-foreground">
+                    Ce patch a déjà été téléchargé{" "}
+                    <span className="font-semibold text-foreground tabular-nums">{Number(patch.downloads).toLocaleString("fr-FR")}</span>{" "}
+                    fois.
+                  </p>
+                )}
+              </div>
             ) : (
               <Button size="pill" className="w-full" disabled>
                 Bientôt disponible
               </Button>
             )}
-            <p className="text-center text-xs text-muted-foreground">
-              Le jeu original n’est pas inclus.
-              {patch.vndbId && (
-                <>
-                  {" "}
-                  <a
-                    href={`https://vndb.org/${patch.vndbId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:text-primary hover:underline"
-                  >
-                    Fiche VNDB
-                  </a>
-                </>
-              )}
-            </p>
+            <div className="space-y-1.5 text-center text-xs text-muted-foreground">
+              <p>Le jeu original n’est pas inclus.</p>
+              <Suspense fallback={null}>
+                <GameLinks steamAppId={patch.steamAppId} gogId={patch.gogId} vndbId={patch.vndbId} />
+              </Suspense>
+            </div>
             <Suspense fallback={null}>
               <EditLink id={patch.id} />
             </Suspense>
@@ -179,6 +183,40 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
         </div>
       </div>
     </article>
+  );
+}
+
+// Le jeu original : liens d’achat (Steam, GOG) et fiche VNDB, quand leurs identifiants sont connus.
+async function GameLinks({ steamAppId, gogId, vndbId }: { steamAppId: number | null; gogId: number | null; vndbId: string }) {
+  const links = [
+    steamAppId ? { href: steamStoreUrl(steamAppId), label: "Acheter sur Steam" } : null,
+    gogId ? { href: await gogStoreUrl(gogId), label: "Acheter sur GOG" } : null,
+    vndbId ? { href: `https://vndb.org/${vndbId}`, label: "Fiche VNDB" } : null,
+  ].filter((link) => link !== null);
+  if (links.length === 0) return null;
+  return (
+    <p className="flex flex-wrap justify-center gap-x-3 gap-y-1">
+      {links.map((link) => (
+        <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary hover:underline">
+          {link.label}
+        </a>
+      ))}
+    </p>
+  );
+}
+
+// « Dernière progression : 12 octobre 2026 (85 % → 90 %) », d’après le journal de la gestion.
+async function LastProgress({ patchId }: { patchId: number }) {
+  const last = await lastProgressOf(patchId);
+  if (!last) return null;
+  return (
+    <p className="mt-2 text-xs text-muted-foreground">
+      Dernière progression : {formatDate(last.at)}{" "}
+      <span className="whitespace-nowrap tabular-nums">
+        ({last.step && `${last.step} : `}
+        {last.before} → {last.after})
+      </span>
+    </p>
   );
 }
 

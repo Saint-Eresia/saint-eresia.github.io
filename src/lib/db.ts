@@ -43,6 +43,8 @@ const SCHEMA = `
     gogId INTEGER,
     -- Identifiant VNDB (« v12345 ») ; vide si inconnu.
     vndbId TEXT NOT NULL DEFAULT '',
+    -- Téléchargements depuis la fiche (un par visiteur et par jour, voir patch_download).
+    downloads INTEGER NOT NULL DEFAULT 0,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -206,6 +208,30 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS activity_log_at ON activity_log (at DESC, id DESC);
   CREATE INDEX IF NOT EXISTS activity_log_actor ON activity_log (actorId, at DESC);
   CREATE INDEX IF NOT EXISTS activity_log_type ON activity_log (entityType, at DESC);
+
+  -- Statistiques de visite (src/lib/stats.ts). Aucune donnée personnelle : un visiteur est un identifiant
+  -- aléatoire tiré par son navigateur, un téléchargement est compté sous une empreinte hachée (IP + navigateur + jour).
+  -- site_visit et patch_download ne gardent que le jour en cours : ils servent à ne compter chacun qu’une fois.
+  CREATE TABLE IF NOT EXISTS site_visitor (
+    id TEXT PRIMARY KEY,
+    firstSeen TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS site_visit (
+    day TEXT NOT NULL,
+    visitorId TEXT NOT NULL,
+    PRIMARY KEY (day, visitorId)
+  );
+  CREATE TABLE IF NOT EXISTS patch_download (
+    day TEXT NOT NULL,
+    patchId INTEGER NOT NULL REFERENCES patch(id) ON DELETE CASCADE,
+    visitor TEXT NOT NULL,
+    PRIMARY KEY (day, patchId, visitor)
+  );
+  -- Compteurs : « visiteurs » (total) et « visiteurs:AAAA-MM-JJ » (par jour, heure de Paris).
+  CREATE TABLE IF NOT EXISTS site_stat (
+    key TEXT PRIMARY KEY,
+    value INTEGER NOT NULL DEFAULT 0
+  );
 `;
 
 // Slug d’un nom de membre (ancre stable de la page Équipe) : « len. » → len, « Meruem_FGC » → meruem-fgc.
@@ -388,6 +414,7 @@ export async function prepareSchema(client: Client) {
   if (!patchColumns.includes("steamAppId")) await client.execute("ALTER TABLE patch ADD COLUMN steamAppId INTEGER");
   if (!patchColumns.includes("gogId")) await client.execute("ALTER TABLE patch ADD COLUMN gogId INTEGER");
   if (!patchColumns.includes("vndbId")) await client.execute("ALTER TABLE patch ADD COLUMN vndbId TEXT NOT NULL DEFAULT ''");
+  if (!patchColumns.includes("downloads")) await client.execute("ALTER TABLE patch ADD COLUMN downloads INTEGER NOT NULL DEFAULT 0");
   if (!patchColumns.includes("kind")) {
     await client.execute("ALTER TABLE patch ADD COLUMN kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu'))");
   }

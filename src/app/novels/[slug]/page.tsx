@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Download, Images, Pencil } from "lucide-react";
+import { ArrowLeft, ChevronRight, Download, Images, Pencil, Rss } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,9 +13,10 @@ import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeadi
 import { fileUrl } from "@/lib/file-url";
 import { excerpt } from "@/lib/news";
 import { formatDate, imageUrl } from "@/lib/patches";
-import { socialMetadata } from "@/lib/site-url";
+import { SITE_FEED, socialMetadata } from "@/lib/site-url";
 import { listNovelTeam } from "@/lib/team";
 import { getViewer } from "@/lib/viewer";
+import { ChapterTitle, ReadMarks } from "./read-marks";
 import { ResumeButton } from "./resume-button";
 
 export async function generateMetadata({ params }: PageProps<"/novels/[slug]">): Promise<Metadata> {
@@ -33,8 +34,12 @@ export async function generateMetadata({ params }: PageProps<"/novels/[slug]">):
       large: !!novel.background,
       type: "book",
     }),
+    // Flux du novel en plus de celui du site (les métadonnées remplacent celles du layout, sans les fusionner).
+    alternates: { types: { "application/rss+xml": [SITE_FEED, { url: novelFeed(novel.slug), title: `${novel.title} — nouveaux chapitres` }] } },
   };
 }
+
+const novelFeed = (slug: string) => `/novels/${slug}/feed.xml`;
 
 export default function NovelPage({ params }: PageProps<"/novels/[slug]">) {
   return (
@@ -48,7 +53,8 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
   const novel = await getNovelBySlug((await params).slug);
   if (!novel || !(await canSeeNovel(novel))) notFound();
   const first = novel.volumes[0]?.chapters[0];
-  const chapterCount = novel.volumes.reduce((total, volume) => total + volume.chapters.length, 0);
+  const readingOrder = novel.volumes.flatMap((volume) => volume.chapters.map((chapter) => chapter.slug));
+  const chapterCount = readingOrder.length;
   const facts = [
     ["Titre original", novel.originalTitle],
     ["Auteur", novel.author],
@@ -157,7 +163,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               <ResumeButton
                 novelSlug={novel.slug}
                 firstSlug={first.slug}
-                chapters={novel.volumes.flatMap((volume) => volume.chapters.map((chapter) => chapter.slug))}
+                chapters={readingOrder}
               />
             ) : (
               <Button size="pill" className="w-full" disabled>
@@ -172,6 +178,13 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                 </div>
               ))}
             </dl>
+            {first && (
+              <p className="text-center text-xs text-muted-foreground">
+                <a href={novelFeed(novel.slug)} className="inline-flex items-center gap-1.5 font-semibold hover:text-primary hover:underline">
+                  <Rss className="size-3.5" /> Suivre les nouveaux chapitres (RSS)
+                </a>
+              </p>
+            )}
             <Suspense fallback={null}>
               <EditLink id={novel.id} />
             </Suspense>
@@ -197,6 +210,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
             {novel.volumes.length === 0 ? (
               <p className="text-muted-foreground">Aucun chapitre publié pour le moment.</p>
             ) : (
+              <ReadMarks novelSlug={novel.slug} chapters={readingOrder}>
               <div className="space-y-5">
                 {toc.map((group) => (
                   <VolumeLayout key={group.key} cover={group.cover} heading={group.heading} aligned={withCovers && group.heading !== null}>
@@ -275,8 +289,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                               >
                                 <span className="min-w-0 flex-1">
                                   <span className="block font-semibold group-hover:text-primary">
-                                    <span aria-hidden className="mr-1.5 text-primary">•</span>
-                                    {heading}
+                                    <ChapterTitle slug={chapter.slug}>{heading}</ChapterTitle>
                                     {isNew(chapter) && (
                                       <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 align-middle text-[0.7rem] font-bold text-primary">
                                         Nouveau
@@ -299,6 +312,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                   </VolumeLayout>
                 ))}
               </div>
+              </ReadMarks>
             )}
           </section>
         </div>

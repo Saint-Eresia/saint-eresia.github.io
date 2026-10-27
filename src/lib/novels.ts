@@ -154,6 +154,22 @@ export async function listNovels({ drafts = false }: { drafts?: boolean } = {}) 
   );
 }
 
+// Dernière sortie de chaque novel : le chapitre publié le plus récemment (pas `updatedAt`, qui change à la
+// moindre retouche de la fiche). Par identifiant de novel.
+export async function latestReleases() {
+  await connection();
+  const rows = await db
+    .prepare(
+      `SELECT novelId, label, title, date FROM (
+         SELECT novelId, label, title, COALESCE(publishedAt, createdAt) AS date,
+                ROW_NUMBER() OVER (PARTITION BY novelId ORDER BY COALESCE(publishedAt, createdAt) DESC, id DESC) AS rank
+         FROM chapter WHERE published = 1
+       ) WHERE rank = 1`,
+    )
+    .all<{ novelId: number; label: string; title: string; date: string }>();
+  return new Map(rows.map((row) => [Number(row.novelId), row]));
+}
+
 // Un brouillon n’est visible que par l’équipe : les pages publiques vérifient `canSeeNovel` avant d’afficher.
 export const isPublicNovel = (novel: Pick<Novel, "draft">) => Number(novel.draft) === 0;
 export async function canSeeNovel(novel: Pick<Novel, "draft">) {

@@ -4,7 +4,8 @@ import localFont from "next/font/local";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
-import { siteUrl } from "@/lib/site-url";
+import { VisitorStats } from "@/components/visitor-stats";
+import { SITE_FEED, siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // Florence Sans Black (la police du launcher) : seulement le titre « Saint Eresia » de l'en-tête ; elle rend mal
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   title: { default: "Saint Eresia — Light novels et patchs VN en français", template: "%s · Saint Eresia" },
   description: "Saint Eresia traduit des light novels, à lire en ligne, et publie des patchs français pour visual novels.",
   // Flux RSS (nouveaux chapitres et actualités), détecté par les lecteurs de flux.
-  alternates: { types: { "application/rss+xml": [{ url: "/feed.xml", title: "Saint Eresia — nouveautés" }] } },
+  alternates: { types: { "application/rss+xml": [SITE_FEED] } },
 };
 
 // Thème appliqué avant le premier affichage (pas de flash) : choix mémorisé sous la clé "theme" par le bouton
@@ -49,20 +50,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <footer data-site-chrome className="mt-20 border-t border-border">
-          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span className="font-semibold text-foreground">Saint Eresia</span>
-              <Link href="/a-propos" className="hover:text-foreground hover:underline">
-                À propos
-              </Link>
-              <Link href="/plus" className="hover:text-foreground hover:underline">
-                Outils
-              </Link>
-              <a href="/feed.xml" className="hover:text-foreground hover:underline">
-                Flux RSS
-              </a>
-            </p>
-            <p>Les œuvres originales appartiennent à leurs ayants droit. Nous encourageons leur achat.</p>
+          <div className="mx-auto max-w-6xl space-y-5 px-4 py-8 text-sm text-muted-foreground sm:px-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span className="font-semibold text-foreground">Saint Eresia</span>
+                <Link href="/a-propos" className="hover:text-foreground hover:underline">
+                  À propos
+                </Link>
+                <Link href="/plus" className="hover:text-foreground hover:underline">
+                  Outils
+                </Link>
+                <a href="/feed.xml" className="hover:text-foreground hover:underline">
+                  Flux RSS
+                </a>
+              </p>
+              <VisitorStats />
+            </div>
+            <div className="space-y-1 text-xs leading-relaxed">
+              <p>Saint-Eresia Traductions - © 2022 - 2026.</p>
+              <p>La reproduction partielle ou totale de ce site et de ses contenus est prohibée.</p>
+              <p>Re:Zero, CHAOS;CHILD et Ys sont des marques déposées appartenant à leurs ayants droit respectifs.</p>
+              <p>Saint-Eresia n’est ni affilié ni approuvé par les éditeurs et développeurs de ses projets.</p>
+            </div>
           </div>
         </footer>
         <Toaster position="bottom-center" />

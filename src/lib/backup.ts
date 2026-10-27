@@ -6,7 +6,8 @@ import { zip, type ZipEntry } from "@/lib/zip";
 // un fichier tables/<table>.jsonl par table (une ligne JSON par enregistrement, triées par rowid) et lignes.json.
 // Elle se recharge avec scripts/restaurer-sauvegarde.mjs. Les tables de connexion (comptes Discord, e-mails,
 // sessions, jetons) n'en font pas partie : chacun se reconnecte avec Discord après une restauration.
-const PRIVATE = new Set(["user", "session", "account", "verification"]);
+// Ni les tables de comptage du jour (site_visit, patch_download : empreintes de visiteurs, sans intérêt à restaurer).
+const PRIVATE = new Set(["user", "session", "account", "verification", "site_visit", "patch_download"]);
 
 // Les BLOB (s'il y en a un jour) passent en base64 pour rester dans du texte.
 const plain = (value: unknown) =>

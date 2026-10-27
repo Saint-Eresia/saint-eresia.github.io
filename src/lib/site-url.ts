@@ -8,6 +8,9 @@ export function siteUrl() {
   return "http://localhost:3000";
 }
 
+// Flux RSS du site (nouveaux chapitres et actualités), annoncé dans l’en-tête des pages.
+export const SITE_FEED = { url: "/feed.xml", title: "Saint Eresia — nouveautés" };
+
 // Aperçu d’une page partagée sur Discord, X, etc. (Open Graph et carte Twitter).
 // `large` : image paysage (arrière-plan) affichée en grand ; sinon vignette (couverture portrait).
 export function socialMetadata({

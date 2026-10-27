@@ -32,3 +32,39 @@ export async function announce({ title, path, description, image }: { title: str
     console.error("Annonce Discord impossible :", error);
   }
 }
+
+// Coquille signalée par un lecteur, envoyée au salon de l’équipe (webhook DISCORD_REPORT_WEBHOOK_URL, distinct de
+// celui des annonces). Renvoie false si l’envoi n’a pas pu se faire (webhook absent ou refus de Discord).
+export async function reportTypo({ title, path, passage, comment, name }: { title: string; path: string; passage: string; comment: string; name: string }) {
+  const webhook = process.env.DISCORD_REPORT_WEBHOOK_URL;
+  if (!webhook) return false;
+  const field = (fieldName: string, value: string) => ({ name: fieldName, value: value.slice(0, 1024) });
+  try {
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(10_000),
+      body: JSON.stringify({
+        username: "Saint Eresia — coquilles",
+        allowed_mentions: { parse: [] },
+        embeds: [
+          {
+            title: `Coquille signalée : ${title}`.slice(0, 256),
+            url: `${siteUrl()}${path}`,
+            color: 0xe43a44,
+            fields: [
+              ...(passage ? [field("Passage", passage)] : []),
+              field("Remarque", comment),
+              ...(name ? [field("Signalé par", name)] : []),
+            ],
+          },
+        ],
+      }),
+    });
+    if (!response.ok) console.error(`Signalement Discord refusé (${response.status}) : ${await response.text()}`);
+    return response.ok;
+  } catch (error) {
+    console.error("Signalement Discord impossible :", error);
+    return false;
+  }
+}

@@ -113,3 +113,26 @@ export async function listActivityActors() {
     )
     .all<{ actorId: string; actorName: string }>();
 }
+
+// Dernière modification de l’avancement d’un patch (fiche publique : « Dernière progression »). Seuls la date et les
+// pourcentages sont rendus, jamais l’auteur. L’avancement global d’abord, sinon la première étape modifiée.
+export async function lastProgressOf(patchId: number) {
+  await connection();
+  const row = await db
+    .prepare(
+      `SELECT at, changes FROM activity_log
+       WHERE entityType = 'patch' AND entityId = ? AND action = 'update' AND changes LIKE '%"field":"Avancement %'
+       ORDER BY at DESC, id DESC LIMIT 1`,
+    )
+    .get<{ at: string; changes: string }>(patchId);
+  if (!row) return null;
+  let changes: Change[] = [];
+  try {
+    changes = JSON.parse(String(row.changes));
+  } catch {}
+  const progress = changes.filter((change) => change.field.startsWith("Avancement "));
+  const change = progress.find((c) => c.field === "Avancement global") ?? progress[0];
+  if (!change) return null;
+  const step = change.field === "Avancement global" ? "" : change.field.slice("Avancement ".length);
+  return { at: String(row.at), step, before: change.before, after: change.after };
+}

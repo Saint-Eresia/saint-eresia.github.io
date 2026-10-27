@@ -7,7 +7,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@libsql/client";
 
-const PRIVATE = new Set(["user", "session", "account", "verification"]);
+// Ni les tables de comptage du jour (site_visit, patch_download : empreintes de visiteurs, sans intérêt à restaurer).
+const PRIVATE = new Set(["user", "session", "account", "verification", "site_visit", "patch_download"]);
 const out = process.argv[2];
 if (!out || !process.env.TURSO_DATABASE_URL) {
   console.error("usage : TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… node scripts/sauvegarde-db.mjs <dossier>");
