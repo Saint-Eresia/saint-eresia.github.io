@@ -56,9 +56,11 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
   const members = await listNovelTeam(novel.id);
-  const toc = tableOfContents(novel.volumes);
+  const groups = tableOfContents(novel.volumes);
   // Dès qu’un tome a sa couverture, les tomes sans couverture gardent la colonne vide : les sommaires restent alignés.
-  const withCovers = toc.some((group) => group.cover);
+  const withCovers = groups.some((group) => group.cover);
+  // La couverture du premier tome n’est pas répétée dans le sommaire : c’est celle de l’en-tête de la fiche.
+  const toc = groups.map((group, index) => (index === 0 ? { ...group, cover: undefined } : group));
   const layout = projectLayout(members.length > 0);
 
   return (
