@@ -1,9 +1,10 @@
-import { ArrowLeft, Download, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { Gallery } from "@/components/patch/gallery";
+import { GlliaButton } from "@/components/patch/gllia-button";
 import { Markdown } from "@/components/markdown";
 import { CountUp } from "@/components/lightswind/count-up";
 import { CoverPlaceholder, ProgressBar, StatusBadge } from "@/components/content-meta";
@@ -121,11 +122,7 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
               )}
             </div>
             {patch.downloadUrl ? (
-              <Button asChild size="pill" className="w-full">
-                <a href={patch.downloadUrl} target="_blank" rel="noopener noreferrer">
-                  <Download /> Télécharger le patch
-                </a>
-              </Button>
+              <GlliaButton slug={patch.slug} downloadUrl={patch.downloadUrl} />
             ) : (
               <Button size="pill" className="w-full" disabled>
                 Bientôt disponible

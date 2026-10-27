@@ -12,7 +12,7 @@ import { chapterHeading, NOVEL_STATUSES, uniqueChapterSlug, volumeHeading, type 
 import { slugify } from "@/lib/patches";
 import { isRoleKey, NOVEL_ROLE_KEYS, type RoleKey } from "@/lib/roles";
 import { setProjectTeam, type TeamEntry } from "@/lib/team";
-import { fileUrl, IMAGE_KIND_LABELS, removeFile } from "@/lib/uploads";
+import { fileUrl, IMAGE_KIND_LABELS, measureImage, removeFile } from "@/lib/uploads";
 
 export type { ActionResult };
 
@@ -283,14 +283,16 @@ export async function addVolume(novelId: number, input: VolumeInput): Promise<Ac
   if (!parsed.volume) return { error: parsed.error };
   const { number, label, title, note, image, imageCredit, reedit } = parsed.volume;
   const novel = await findNovel(novelId);
+  const size = await measureImage(image);
   if (!novel) return { error: "Novel introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ?").get(novelId, number)) {
     return { error: `Le tome ${number} existe déjà.` };
   }
   await db.batch([
     {
-      sql: "INSERT INTO volume (novelId, number, label, title, note, image, imageCredit, reedit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      args: [novelId, number, label, title, note, image, imageCredit, reedit],
+      sql: `INSERT INTO volume (novelId, number, label, title, note, image, imageCredit, imageWidth, imageHeight, reedit)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [novelId, number, label, title, note, image, imageCredit, size.width, size.height, reedit],
     },
     logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, parsed.volume), action: "create" }),
     touch(novelId),
@@ -311,13 +313,19 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
     return { error: `Le tome ${number} existe déjà.` };
   }
   const novel = (await findNovel(volume.novelId))!;
+  // Dimensions mesurées seulement quand l’image change (ou n’ont jamais été connues).
+  const size =
+    image === volume.image && Number(volume.imageWidth) > 0
+      ? { width: Number(volume.imageWidth), height: Number(volume.imageHeight) }
+      : await measureImage(image);
   await commit(
     actor,
     volume.novelId,
     [
       {
-        sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ?, image = ?, imageCredit = ?, reedit = ? WHERE id = ?",
-        args: [number, label, title, note, image, imageCredit, reedit, volumeId],
+        sql: `UPDATE volume SET number = ?, label = ?, title = ?, note = ?, image = ?, imageCredit = ?, imageWidth = ?, imageHeight = ?,
+                reedit = ? WHERE id = ?`,
+        args: [number, label, title, note, image, imageCredit, size.width, size.height, reedit, volumeId],
       },
     ],
     {

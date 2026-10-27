@@ -103,6 +103,9 @@ const SCHEMA = `
     -- Image en tête du tome dans le sommaire (URL ou fichier envoyé) et son crédit (Markdown), ex. « Illustration : X ».
     image TEXT NOT NULL DEFAULT '',
     imageCredit TEXT NOT NULL DEFAULT '',
+    -- Dimensions de l’image du tome (0 : inconnues) : en portrait, c’est une couverture affichée à côté du sommaire.
+    imageWidth INTEGER NOT NULL DEFAULT 0,
+    imageHeight INTEGER NOT NULL DEFAULT 0,
     -- 1 : tome traduit par une autre équipe et seulement ré-édité (harmonisé) par Saint Eresia : mention « Re:edit ».
     reedit INTEGER NOT NULL DEFAULT 0,
     UNIQUE (novelId, number)
@@ -376,6 +379,8 @@ export async function prepareSchema(client: Client) {
   if (!volumeColumns.includes("image")) await client.execute("ALTER TABLE volume ADD COLUMN image TEXT NOT NULL DEFAULT ''");
   if (!volumeColumns.includes("imageCredit")) await client.execute("ALTER TABLE volume ADD COLUMN imageCredit TEXT NOT NULL DEFAULT ''");
   if (!volumeColumns.includes("reedit")) await client.execute("ALTER TABLE volume ADD COLUMN reedit INTEGER NOT NULL DEFAULT 0");
+  if (!volumeColumns.includes("imageWidth")) await client.execute("ALTER TABLE volume ADD COLUMN imageWidth INTEGER NOT NULL DEFAULT 0");
+  if (!volumeColumns.includes("imageHeight")) await client.execute("ALTER TABLE volume ADD COLUMN imageHeight INTEGER NOT NULL DEFAULT 0");
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");

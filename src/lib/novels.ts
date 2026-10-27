@@ -44,6 +44,8 @@ export type Volume = {
   note: string;
   image: string;
   imageCredit: string;
+  imageWidth: number; // dimensions de l’image (0 : inconnues) ; en portrait, elle est affichée en couverture
+  imageHeight: number;
   reedit: number; // 1 : traduit par une autre équipe, ré-édité par Saint Eresia (mention « Re:edit »)
 };
 export type Chapter = {

@@ -111,3 +111,23 @@ export async function removeFile(file: string) {
   if (!FILE_PATTERN.test(file)) return;
   await fs.rm(path.join(UPLOAD_DIR, file), { force: true });
 }
+
+// Dimensions d’une image déjà envoyée (nom de fichier ou adresse Blob) ou d’une adresse externe.
+// Connues de la galerie si possible, sinon lues sur l’image ; 0 × 0 si elle est illisible.
+export async function measureImage(file: string): Promise<{ width: number; height: number }> {
+  if (!file) return { width: 0, height: 0 };
+  const known = await db.prepare("SELECT width, height FROM novel_image WHERE file = ?").get<{ width: number; height: number }>(file);
+  if (known) return { width: Number(known.width), height: Number(known.height) };
+  try {
+    const data = /^https?:\/\//.test(file)
+      ? Buffer.from(await (await fetch(file, { signal: AbortSignal.timeout(10_000) })).arrayBuffer())
+      : FILE_PATTERN.test(file)
+        ? await fs.readFile(path.join(UPLOAD_DIR, file))
+        : null;
+    if (!data) return { width: 0, height: 0 };
+    const { width = 0, height = 0 } = await sharp(data, { limitInputPixels: 100_000_000 }).metadata();
+    return { width, height };
+  } catch {
+    return { width: 0, height: 0 };
+  }
+}

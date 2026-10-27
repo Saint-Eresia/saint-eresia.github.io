@@ -2,7 +2,7 @@ import { ArrowLeft, ChevronRight, Download, Images, Pencil } from "lucide-react"
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { CoverPlaceholder, NOVEL_COVER, StatusBadge } from "@/components/content-meta";
 import { Markdown } from "@/components/markdown";
 import { projectLayout } from "@/components/project-layout";
@@ -56,6 +56,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
   const members = await listNovelTeam(novel.id);
+  const toc = tableOfContents(novel.volumes);
+  // Dès qu’un tome a sa couverture, les tomes sans couverture gardent la colonne vide : les sommaires restent alignés.
+  const withCovers = toc.some((group) => group.cover);
   const layout = projectLayout(members.length > 0);
 
   return (
@@ -190,8 +193,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               <p className="text-muted-foreground">Aucun chapitre publié pour le moment.</p>
             ) : (
               <div className="space-y-5">
-                {tableOfContents(novel.volumes).map((group) => (
-                  <div key={group.key} className="overflow-hidden rounded-2xl border border-border bg-card">
+                {toc.map((group) => (
+                  <VolumeLayout key={group.key} cover={group.cover} heading={group.heading} aligned={withCovers && group.heading !== null}>
+                  <div className="overflow-hidden rounded-2xl border border-border bg-card">
                     {group.heading && (
                       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-secondary px-5 py-3">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -222,9 +226,9 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                         </div>
                       </div>
                     )}
-                    {group.image && (
+                    {group.image && !group.cover && (
                       <figure className="border-b border-border bg-muted/40">
-                        {/* Bannière ou couverture : affichée entière, centrée, quelle que soit sa proportion. */}
+                        {/* Bannière (image en paysage) : affichée entière, centrée. */}
                         <img src={group.image} alt={`Illustration de ${group.heading}`} className="mx-auto block max-h-[30rem] w-auto max-w-full" />
                         {group.imageCredit && (
                           <figcaption className="px-5 py-2 text-xs text-muted-foreground">
@@ -287,6 +291,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                       </section>
                     ))}
                   </div>
+                  </VolumeLayout>
                 ))}
               </div>
             )}
@@ -294,6 +299,45 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
         </div>
       </div>
     </article>
+  );
+}
+
+// Tome dont l’image est une couverture (en portrait) : la couverture à gauche, collée en haut de l’écran
+// pendant qu’on parcourt ses chapitres, et le sommaire du tome à droite. Sur mobile, elle passe au-dessus.
+// aligned : tome sans couverture d’un novel qui en a ailleurs, décalé comme les autres (colonne vide).
+function VolumeLayout({
+  cover,
+  heading,
+  aligned,
+  children,
+}: {
+  cover?: { src: string; credit: string };
+  heading: string | null;
+  aligned: boolean;
+  children: ReactNode;
+}) {
+  const grid = "grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)] lg:grid-cols-[10rem_minmax(0,1fr)]";
+  if (!cover) {
+    if (!aligned) return children;
+    return (
+      <div className={grid}>
+        <div aria-hidden className="hidden sm:block" />
+        {children}
+      </div>
+    );
+  }
+  return (
+    <div className={grid}>
+      <figure className="w-32 self-start sm:sticky sm:top-24 sm:w-auto">
+        <img src={cover.src} alt={heading ? `Couverture de ${heading}` : "Couverture"} className="block h-auto w-full rounded-lg shadow-[0_12px_40px_var(--shadow)]" />
+        {cover.credit && (
+          <figcaption className="mt-2 text-xs text-muted-foreground">
+            <Markdown>{cover.credit}</Markdown>
+          </figcaption>
+        )}
+      </figure>
+      {children}
+    </div>
   );
 }
 
@@ -375,6 +419,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
     note?: string;
     image?: string; // image en tête du tome
     imageCredit?: string;
+    cover?: { src: string; credit: string }; // image en portrait (couverture du tome) : affichée à côté du sommaire
     reedit?: boolean; // traduction d’une autre équipe, ré-éditée : mention « Re:edit »
     translators?: string; // commun à tous les chapitres du tome : affiché une fois dans l’en-tête
     volumeNumber?: number; // tome téléchargeable en EPUB
@@ -391,6 +436,10 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
         note: volume.note,
         image: volume.image && fileUrl(volume.image),
         imageCredit: volume.imageCredit,
+        cover:
+          volume.image && Number(volume.imageHeight) > Number(volume.imageWidth)
+            ? { src: fileUrl(volume.image), credit: volume.imageCredit }
+            : undefined,
         reedit: Number(volume.reedit) === 1,
         translators: sharedTranslators(volume.chapters),
         volumeNumber: volume.number,
