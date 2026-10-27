@@ -61,7 +61,8 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
   const withCovers = toc.some((group) => group.cover);
   // Le premier tome a sa couverture dans le sommaire : l’en-tête ne la répète pas (le catalogue garde celle du novel).
   const headerCover = !toc[0]?.cover;
-  const layout = projectLayout(members.length > 0);
+  // Comme la maquette validée : la carte Équipe sous la carte principale, sans troisième colonne.
+  const layout = projectLayout(members.length > 0, { stacked: true });
 
   return (
     <article>
@@ -179,7 +180,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
 
         {members.length > 0 && (
           <aside className={layout.members}>
-            <ProjectMembers members={members} className="2xl:sticky 2xl:top-24" />
+            <ProjectMembers members={members} />
           </aside>
         )}
 
@@ -320,7 +321,7 @@ function VolumeLayout({
   aligned: boolean;
   children: ReactNode;
 }) {
-  const grid = "grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)] lg:grid-cols-[10rem_minmax(0,1fr)]";
+  const grid = "grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-6 lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-8";
   if (!cover) {
     if (!aligned) return children;
     return (

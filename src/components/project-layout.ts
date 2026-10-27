@@ -1,7 +1,8 @@
 // Mise en page des fiches patch et novel. La carte « Équipe » n’est rendue qu’une fois ; seule la grille
 // la place : sous la carte principale (lg), puis dans une troisième colonne sur très grand écran (2xl),
 // la fiche s’élargissant alors. Sur mobile : carte principale, carte Équipe, puis le contenu.
-export function projectLayout(withMembers: boolean) {
+// stacked : la carte Équipe reste sous la carte principale à toutes les tailles, sans élargir la fiche (novels).
+export function projectLayout(withMembers: boolean, { stacked = false }: { stacked?: boolean } = {}) {
   if (!withMembers) {
     return {
       hero: "mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6",
@@ -12,6 +13,17 @@ export function projectLayout(withMembers: boolean) {
       sticky: "lg:sticky lg:top-24",
       members: "hidden",
       content: "min-w-0 lg:col-start-1 lg:row-start-1",
+    };
+  }
+  if (stacked) {
+    return {
+      hero: "mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6",
+      container: "mx-auto max-w-6xl px-4 sm:px-6",
+      body: "mx-auto grid max-w-6xl gap-10 px-4 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]",
+      aside: "lg:col-start-2 lg:row-start-1",
+      sticky: "",
+      members: "self-start lg:col-start-2 lg:row-start-2",
+      content: "min-w-0 lg:col-start-1 lg:row-start-1 lg:row-span-2",
     };
   }
   return {
