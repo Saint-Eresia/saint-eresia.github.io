@@ -64,7 +64,7 @@ export async function saveNovel(_prev: ActionResult, formData: FormData): Promis
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
   if (!(NOVEL_STATUSES as readonly string[]).includes(fields.status)) return { error: "Statut invalide." };
   if (fields.synopsis.length > 20_000) return { error: "La présentation est trop longue (20 000 caractères maximum)." };
-  if (fields.quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
+  if (fields.quote.length > 121) return { error: "La citation est trop longue (121 caractères maximum)." };
   if (fields.quoteNote.length > 200) return { error: "Le commentaire de la citation est trop long (200 caractères maximum)." };
 
   const id = Number(formData.get("id")) || null;
@@ -250,7 +250,7 @@ export async function deleteIllustration(novelId: number, chapterSlug: string, s
 
 // ——— Tomes ———
 
-export type VolumeInput = { number: number; label: string; title: string; note: string; image: string; imageCredit: string };
+export type VolumeInput = { number: number; label: string; title: string; note: string; image: string; imageCredit: string; reedit: boolean };
 
 function readVolume(input: VolumeInput) {
   const { number } = input;
@@ -269,6 +269,7 @@ function readVolume(input: VolumeInput) {
       note: input.note.trim(),
       image: file,
       imageCredit: input.imageCredit.trim(),
+      reedit: input.reedit ? 1 : 0,
     },
   };
 }
@@ -280,7 +281,7 @@ export async function addVolume(novelId: number, input: VolumeInput): Promise<Ac
   if ("error" in actor) return actor;
   const parsed = readVolume(input);
   if (!parsed.volume) return { error: parsed.error };
-  const { number, label, title, note, image, imageCredit } = parsed.volume;
+  const { number, label, title, note, image, imageCredit, reedit } = parsed.volume;
   const novel = await findNovel(novelId);
   if (!novel) return { error: "Novel introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ?").get(novelId, number)) {
@@ -288,8 +289,8 @@ export async function addVolume(novelId: number, input: VolumeInput): Promise<Ac
   }
   await db.batch([
     {
-      sql: "INSERT INTO volume (novelId, number, label, title, note, image, imageCredit) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      args: [novelId, number, label, title, note, image, imageCredit],
+      sql: "INSERT INTO volume (novelId, number, label, title, note, image, imageCredit, reedit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [novelId, number, label, title, note, image, imageCredit, reedit],
     },
     logEntry(actor, { type: "volume", id: "last", label: volumeLabel(novel, parsed.volume), action: "create" }),
     touch(novelId),
@@ -303,7 +304,7 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
   if ("error" in actor) return actor;
   const parsed = readVolume(input);
   if (!parsed.volume) return { error: parsed.error };
-  const { number, label, title, note, image, imageCredit } = parsed.volume;
+  const { number, label, title, note, image, imageCredit, reedit } = parsed.volume;
   const volume = await findVolume(volumeId);
   if (!volume) return { error: "Tome introuvable." };
   if (await db.prepare("SELECT 1 FROM volume WHERE novelId = ? AND number = ? AND id != ?").get(volume.novelId, number, volumeId)) {
@@ -315,8 +316,8 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
     volume.novelId,
     [
       {
-        sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ?, image = ?, imageCredit = ? WHERE id = ?",
-        args: [number, label, title, note, image, imageCredit, volumeId],
+        sql: "UPDATE volume SET number = ?, label = ?, title = ?, note = ?, image = ?, imageCredit = ?, reedit = ? WHERE id = ?",
+        args: [number, label, title, note, image, imageCredit, reedit, volumeId],
       },
     ],
     {
@@ -331,6 +332,7 @@ export async function updateVolume(volumeId: number, input: VolumeInput): Promis
         { label: "Précision", before: volume.note, after: note, long: true },
         { label: "Image", before: volume.image, after: image },
         { label: "Crédit de l’image", before: volume.imageCredit, after: imageCredit },
+        { label: "Re:edit", before: volume.reedit ? "Oui" : "Non", after: reedit ? "Oui" : "Non" },
       ]),
     },
   );

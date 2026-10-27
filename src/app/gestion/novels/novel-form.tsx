@@ -155,7 +155,7 @@ export function NovelForm({ novel, statuses }: { novel: NovelFields; statuses: r
             <Input
               id="quote"
               name="quote"
-              maxLength={120}
+              maxLength={121}
               placeholder="Ex. Live Alive !"
               value={fields.quote}
               onChange={(e) => set("quote")(e.target.value)}

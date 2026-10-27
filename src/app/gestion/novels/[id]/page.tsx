@@ -154,6 +154,7 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
             note: volume.note,
             image: volume.image && fileUrl(volume.image),
             imageCredit: volume.imageCredit,
+            reedit: volume.reedit === 1,
             chapters: volume.chapters.map((c) => ({ id: c.id, heading: chapterHeading(c), published: c.published === 1 })),
           }))}
         />

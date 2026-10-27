@@ -20,6 +20,7 @@ export type ManagedVolume = {
   note: string;
   image: string; // adresse affichable de l’image du tome, vide sans image
   imageCredit: string;
+  reedit: boolean;
   chapters: { id: number; heading: string; published: boolean }[];
 };
 
@@ -45,7 +46,7 @@ export function VolumeManager({ novelId, volumes }: { novelId: number; volumes: 
       {volumes.length === 0 && <p className="text-muted-foreground">Aucun tome. Ajoutez-en un pour créer des chapitres.</p>}
       {volumes.map((volume) => (
         <VolumeCard
-          key={`${volume.id}-${volume.number}-${volume.label}-${volume.title}-${volume.note}-${volume.image}-${volume.imageCredit}`}
+          key={`${volume.id}-${volume.number}-${volume.label}-${volume.title}-${volume.note}-${volume.image}-${volume.imageCredit}-${volume.reedit}`}
           novelId={novelId}
           volume={volume}
           selected={chosen}
@@ -124,14 +125,15 @@ function MoveBar({
 }
 
 // Champs d’un tome, saisis en texte : le numéro est converti à l’envoi.
-type VolumeDraft = { number: string; label: string; title: string; note: string; image: string; imageCredit: string };
-const draftOf = (volume: Pick<ManagedVolume, "number" | "label" | "title" | "note" | "image" | "imageCredit">): VolumeDraft => ({
+type VolumeDraft = { number: string; label: string; title: string; note: string; image: string; imageCredit: string; reedit: boolean };
+const draftOf = (volume: Pick<ManagedVolume, "number" | "label" | "title" | "note" | "image" | "imageCredit" | "reedit">): VolumeDraft => ({
   number: String(volume.number),
   label: volume.label,
   title: volume.title,
   note: volume.note,
   image: volume.image,
   imageCredit: volume.imageCredit,
+  reedit: volume.reedit,
 });
 const inputOf = (draft: VolumeDraft): VolumeInput => ({ ...draft, number: Number(draft.number) });
 
@@ -207,6 +209,18 @@ function VolumeFields({ novelId, draft, onChange }: { novelId: number; draft: Vo
           aria-label="Crédit de l’image du tome"
         />
       </div>
+      <label
+        className="flex basis-full items-center gap-2 text-sm"
+        title="Mention « Re:edit » dans le sommaire : traduction d’une autre équipe, harmonisée par Saint Eresia."
+      >
+        <input
+          type="checkbox"
+          checked={draft.reedit}
+          onChange={(e) => onChange({ ...draft, reedit: e.target.checked })}
+          className="size-4 accent-[var(--primary)]"
+        />
+        Re:edit : traduit par une autre équipe, seulement harmonisé par Saint Eresia
+      </label>
     </>
   );
 }
@@ -310,7 +324,7 @@ function VolumeCard({
 }
 
 function AddVolume({ novelId, defaultNumber }: { novelId: number; defaultNumber: number }) {
-  const [draft, setDraft] = useState<VolumeDraft>({ number: String(defaultNumber), label: "", title: "", note: "", image: "", imageCredit: "" });
+  const [draft, setDraft] = useState<VolumeDraft>({ number: String(defaultNumber), label: "", title: "", note: "", image: "", imageCredit: "", reedit: false });
   const [pending, startTransition] = useTransition();
   return (
     <form

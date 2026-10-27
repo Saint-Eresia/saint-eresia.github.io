@@ -44,6 +44,7 @@ export type Volume = {
   note: string;
   image: string;
   imageCredit: string;
+  reedit: number; // 1 : traduit par une autre équipe, ré-édité par Saint Eresia (mention « Re:edit »)
 };
 export type Chapter = {
   id: number;

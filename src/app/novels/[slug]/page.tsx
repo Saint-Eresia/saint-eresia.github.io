@@ -7,6 +7,7 @@ import { CoverPlaceholder, NOVEL_COVER, StatusBadge } from "@/components/content
 import { Markdown } from "@/components/markdown";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
+import { ReeditBadge } from "@/components/reedit-badge";
 import { Button } from "@/components/ui/button";
 import { canSeeNovel, chapterHeading, getNovelBySlug, isPublicNovel, volumeHeading, type ChapterSummary, type VolumeWithChapters } from "@/lib/novels";
 import { fileUrl } from "@/lib/file-url";
@@ -193,7 +194,10 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                   <div key={group.key} className="overflow-hidden rounded-2xl border border-border bg-card">
                     {group.heading && (
                       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-secondary px-5 py-3">
-                        <h3 className="font-bold">{group.heading}</h3>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <h3 className="font-bold">{group.heading}</h3>
+                          {group.reedit && <ReeditBadge />}
+                        </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                           {group.translators && <p className="text-xs text-muted-foreground">Traduction : {group.translators}</p>}
                           {group.volumeNumber !== undefined && group.illustrationCount > 0 && (
@@ -371,6 +375,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
     note?: string;
     image?: string; // image en tête du tome
     imageCredit?: string;
+    reedit?: boolean; // traduction d’une autre équipe, ré-éditée : mention « Re:edit »
     translators?: string; // commun à tous les chapitres du tome : affiché une fois dans l’en-tête
     volumeNumber?: number; // tome téléchargeable en EPUB
     illustrationCount: number; // lien vers la page des illustrations du tome
@@ -386,6 +391,7 @@ function tableOfContents(volumes: VolumeWithChapters[]) {
         note: volume.note,
         image: volume.image && fileUrl(volume.image),
         imageCredit: volume.imageCredit,
+        reedit: Number(volume.reedit) === 1,
         translators: sharedTranslators(volume.chapters),
         volumeNumber: volume.number,
         illustrationCount: volume.illustrationCount,
