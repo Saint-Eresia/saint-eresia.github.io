@@ -2,6 +2,10 @@ import { Badge } from "@/components/lightswind/badge";
 import { Progress } from "@/components/lightswind/progress";
 import { cn } from "@/lib/utils";
 
+// Format par défaut d’une couverture de light novel ou de web novel (proche du format bunko) :
+// les listes l’imposent pour garder des cartes alignées ; la fiche montre la couverture dans ses proportions.
+export const NOVEL_COVER = "aspect-[2/3]";
+
 const TONES: Record<string, string> = {
   Terminé: "bg-success/15 text-success",
   Publiée: "bg-success/15 text-success",

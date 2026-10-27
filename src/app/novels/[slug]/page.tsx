@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CoverPlaceholder, StatusBadge } from "@/components/content-meta";
+import { CoverPlaceholder, NOVEL_COVER, StatusBadge } from "@/components/content-meta";
 import { Markdown } from "@/components/markdown";
 import { projectLayout } from "@/components/project-layout";
 import { ProjectMembers } from "@/components/project-members";
@@ -84,23 +84,25 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
             >
               <ArrowLeft className="size-4" /> Novels
             </Link>
-            {novel.quote && <HeroQuote quote={novel.quote} note={novel.quoteNote} />}
           </div>
         </div>
 
         <div className={layout.container}>
           <div className="flex gap-4 sm:gap-8">
-            <div className="relative z-10 -mt-24 aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-[0_24px_60px_var(--shadow)] sm:-mt-40 sm:w-44 lg:-mt-48 lg:w-52">
+            {/* Largeur fixe, hauteur selon les proportions de la couverture (sans recadrage). */}
+            <div className="relative z-10 -mt-24 w-28 shrink-0 self-start overflow-hidden rounded-lg bg-card shadow-[0_24px_60px_var(--shadow)] sm:-mt-40 sm:w-44 lg:-mt-48 lg:w-52">
               {novel.cover ? (
                 <img
                   src={imageUrl(novel.cover)}
                   alt={novel.cover.alt}
                   width={novel.cover.width}
                   height={novel.cover.height}
-                  className="h-full w-full object-cover"
+                  className="block h-auto w-full"
                 />
               ) : (
-                <CoverPlaceholder title={novel.title} />
+                <div className={NOVEL_COVER}>
+                  <CoverPlaceholder title={novel.title} />
+                </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
@@ -128,6 +130,7 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               </h1>
               {novel.author && <p className="mt-2 text-muted-foreground">par {novel.author}</p>}
               {novel.released && <p className="mt-1 text-sm text-muted-foreground sm:hidden">Sorti : {novel.released}</p>}
+              {novel.quote && <HeroQuote quote={novel.quote} note={novel.quoteNote} />}
               {!isPublicNovel(novel) && (
                 <p role="status" className="mt-4 w-fit rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
                   Brouillon : ce novel n’est visible que par l’équipe.
@@ -135,11 +138,6 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
               )}
             </div>
           </div>
-          {novel.quote && (
-            <blockquote className="mt-6 font-[Georgia,'Times_New_Roman',serif] text-lg leading-snug text-pretty text-foreground/90 sm:hidden">
-              « {novel.quote} »
-            </blockquote>
-          )}
         </div>
       </header>
 
@@ -266,12 +264,17 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
                                   <span className="block font-semibold group-hover:text-primary">
                                     <span aria-hidden className="mr-1.5 text-primary">•</span>
                                     {heading}
+                                    {isNew(chapter) && (
+                                      <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 align-middle text-[0.7rem] font-bold text-primary">
+                                        Nouveau
+                                      </span>
+                                    )}
                                   </span>
                                   {chapter.translators && !group.translators && !section.credit && (
                                     <span className="block text-xs text-muted-foreground">Traduction : {chapter.translators}</span>
                                   )}
                                 </span>
-                                <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(chapter.publishedAt ?? chapter.createdAt)}</span>
+                                <span className="hidden text-xs text-muted-foreground sm:block">{formatDate(releaseOf(chapter))}</span>
                                 <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary" />
                               </Link>
                             </li>
@@ -290,25 +293,24 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
   );
 }
 
-// Citation (ex. accroche de la couverture du light novel original) en bas à droite du bandeau,
-// en serif comme sur le livre, dans un encart sombre qui reste lisible sur n’importe quelle image.
+// Citation (ex. accroche de la couverture du light novel original) sous le titre, comme un sous-titre,
+// en serif italique comme sur le livre : elle ne masque rien de l’arrière-plan.
 // Son commentaire éventuel (ex. sa provenance) s’affiche dans une bulle au survol ou au focus.
-// Sur mobile, le bandeau est trop bas : la citation est reprise sous le titre.
 function HeroQuote({ quote, note }: { quote: string; note: string }) {
   return (
     <figure
       tabIndex={note ? 0 : undefined}
       aria-describedby={note ? "citation-commentaire" : undefined}
-      className={`group absolute right-4 bottom-12 hidden max-w-sm rounded-lg bg-black/70 px-5 py-4 text-white outline-none backdrop-blur-sm sm:right-6 sm:block ${note ? "cursor-help" : ""}`}
+      className={`group relative mt-4 w-fit max-w-2xl outline-none ${note ? "cursor-help" : ""}`}
     >
-      <blockquote className="text-right font-[Georgia,'Times_New_Roman',serif] text-base leading-snug text-pretty lg:text-lg">
+      <blockquote className="font-[Georgia,'Times_New_Roman',serif] text-base leading-snug text-pretty text-foreground/80 italic sm:text-lg">
         « {quote} »
       </blockquote>
       {note && (
         <figcaption
           id="citation-commentaire"
           role="tooltip"
-          className="pointer-events-none absolute bottom-full right-0 z-10 mb-3 w-max max-w-72 translate-y-1 rounded-lg border border-border bg-popover px-3 py-2 text-sm text-popover-foreground opacity-0 shadow-[0_12px_40px_var(--shadow)] transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+          className="pointer-events-none absolute bottom-full left-0 z-10 mb-3 w-max max-w-72 translate-y-1 rounded-lg border border-border bg-popover px-3 py-2 text-sm text-popover-foreground opacity-0 shadow-[0_12px_40px_var(--shadow)] transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
         >
           {note}
         </figcaption>
@@ -321,6 +323,15 @@ function HeroQuote({ quote, note }: { quote: string; note: string }) {
 function sharedTranslators(chapters: ChapterSummary[]) {
   const [first] = chapters;
   return chapters.length > 1 && first.translators && chapters.every((c) => c.translators === first.translators) ? first.translators : undefined;
+}
+
+// Date de sortie d’un chapitre (celle choisie, sinon sa création), au format de la base.
+const releaseOf = (chapter: ChapterSummary) => chapter.publishedAt ?? chapter.createdAt;
+const NEW_FOR_MS = 7 * 24 * 60 * 60 * 1000;
+// « Nouveau » : sorti il y a moins de 7 jours (et pas dans le futur).
+function isNew(chapter: ChapterSummary) {
+  const age = Date.now() - new Date(releaseOf(chapter).replace(" ", "T") + "Z").getTime();
+  return age >= 0 && age < NEW_FOR_MS;
 }
 
 // Équipe créditée pour toute une phase : traducteurs communs, ou équipe extérieure dont le lien

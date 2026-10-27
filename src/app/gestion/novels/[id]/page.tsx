@@ -81,7 +81,7 @@ async function EditNovel({ params, searchParams }: Pick<Props, "params" | "searc
               <img
                 src={imageUrl(novel.cover)}
                 alt={novel.cover.alt}
-                className="aspect-[3/4] w-40 rounded-lg border border-border object-cover"
+                className="h-auto w-40 rounded-lg"
               />
             )}
             <Dropzone

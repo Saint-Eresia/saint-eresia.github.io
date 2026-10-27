@@ -2,7 +2,7 @@ import { randomInt } from "node:crypto";
 import { ArrowRight, PenLine } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CoverPlaceholder, StatusBadge } from "@/components/content-meta";
+import { CoverPlaceholder, NOVEL_COVER, StatusBadge } from "@/components/content-meta";
 import { FeaturedCarousel, type FeaturedSlide } from "@/components/featured-carousel";
 import { PatchTile } from "@/components/home/patch-tile";
 import { EmptyState } from "@/components/page-intro";
@@ -223,7 +223,7 @@ async function CompactNovels() {
             href={`/novels/${novel.slug}`}
             className="group flex items-center gap-3.5 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
           >
-            <div className="aspect-[3/4] w-10 shrink-0 overflow-hidden rounded-md border border-border">
+            <div className={`${NOVEL_COVER} w-10 shrink-0 overflow-hidden rounded-md`}>
               {novel.cover ? (
                 <img src={imageUrl(novel.cover)} alt="" loading="lazy" className="h-full w-full object-cover" />
               ) : (
