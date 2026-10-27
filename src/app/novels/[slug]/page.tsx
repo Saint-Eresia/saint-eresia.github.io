@@ -56,17 +56,17 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
     ["Chapitres publiés", String(chapterCount)],
   ].filter(([, value]) => value);
   const members = await listNovelTeam(novel.id);
-  const groups = tableOfContents(novel.volumes);
+  const toc = tableOfContents(novel.volumes);
   // Dès qu’un tome a sa couverture, les tomes sans couverture gardent la colonne vide : les sommaires restent alignés.
-  const withCovers = groups.some((group) => group.cover);
-  // La couverture du premier tome n’est pas répétée dans le sommaire : c’est celle de l’en-tête de la fiche.
-  const toc = groups.map((group, index) => (index === 0 ? { ...group, cover: undefined } : group));
+  const withCovers = toc.some((group) => group.cover);
+  // Le premier tome a sa couverture dans le sommaire : l’en-tête ne la répète pas (le catalogue garde celle du novel).
+  const headerCover = !toc[0]?.cover;
   const layout = projectLayout(members.length > 0);
 
   return (
     <article>
-      {/* En-tête : bandeau (arrière-plan net, sinon couverture floutée), couverture à cheval sur son bord bas,
-          statut et format à côté d’elle dans le bandeau, titre en dessous, citation en haut à droite. */}
+      {/* En-tête : bandeau (arrière-plan net, sinon couverture floutée), couverture à cheval sur son bord bas
+          (sauf si le tome 1 a la sienne dans le sommaire), statut et format dans le bandeau, titre et citation en dessous. */}
       <header className="border-b border-border pb-8">
         <div className="relative isolate h-44 overflow-hidden sm:h-64 lg:h-80">
           {novel.background ? (
@@ -96,21 +96,23 @@ async function NovelDetail({ params }: { params: PageProps<"/novels/[slug]">["pa
         <div className={layout.container}>
           <div className="flex gap-4 sm:gap-8">
             {/* Largeur fixe, hauteur selon les proportions de la couverture (sans recadrage). */}
-            <div className="relative z-10 -mt-24 w-28 shrink-0 self-start overflow-hidden rounded-lg bg-card shadow-[0_24px_60px_var(--shadow)] sm:-mt-40 sm:w-44 lg:-mt-48 lg:w-52">
-              {novel.cover ? (
-                <img
-                  src={imageUrl(novel.cover)}
-                  alt={novel.cover.alt}
-                  width={novel.cover.width}
-                  height={novel.cover.height}
-                  className="block h-auto w-full"
-                />
-              ) : (
-                <div className={NOVEL_COVER}>
-                  <CoverPlaceholder title={novel.title} />
-                </div>
-              )}
-            </div>
+            {headerCover && (
+              <div className="relative z-10 -mt-24 w-28 shrink-0 self-start overflow-hidden rounded-lg bg-card shadow-[0_24px_60px_var(--shadow)] sm:-mt-40 sm:w-44 lg:-mt-48 lg:w-52">
+                {novel.cover ? (
+                  <img
+                    src={imageUrl(novel.cover)}
+                    alt={novel.cover.alt}
+                    width={novel.cover.width}
+                    height={novel.cover.height}
+                    className="block h-auto w-full"
+                  />
+                ) : (
+                  <div className={NOVEL_COVER}>
+                    <CoverPlaceholder title={novel.title} />
+                  </div>
+                )}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               {/* Remontés dans le bandeau ; la période de sortie chevauche son bord, à droite. */}
               <div className="-mt-16 flex h-16 items-end justify-between gap-4 pb-2">
