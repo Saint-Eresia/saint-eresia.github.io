@@ -1,15 +1,17 @@
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import { remarkRuby } from "@/lib/remark-ruby";
 import { cn } from "@/lib/utils";
 
 // Le HTML brut n’est pas interprété : seul le Markdown est rendu.
-// `reader` : mise en page de lecture des chapitres, où un retour à la ligne simple est conservé.
+// `reader` : mise en page de lecture des chapitres, où un retour à la ligne simple est conservé et où « {漢字|lecture} »
+// donne des furigana.
 export function Markdown({ children, reader = false }: { children: string; reader?: boolean }) {
   return (
     <div className={cn("prose-patch", reader && "prose-reader")}>
       <ReactMarkdown
-        remarkPlugins={reader ? [remarkGfm, remarkBreaks] : [remarkGfm]}
+        remarkPlugins={reader ? [remarkGfm, remarkBreaks, remarkRuby] : [remarkGfm]}
         components={{
           // Liens internes (« /novels/… ») dans le même onglet, liens externes dans un nouvel onglet.
           a: ({ href, children }) =>
