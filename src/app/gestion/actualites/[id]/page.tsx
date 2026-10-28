@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { ManageHeader, panel } from "@/components/manage-header";
 import { TeamGate } from "@/components/team-gate";
 import { Button } from "@/components/ui/button";
-import { getNewsById } from "@/lib/news";
+import { getNewsById, newsThumbnail } from "@/lib/news";
 import { formatDate } from "@/lib/patches";
 import { DeleteNewsButton } from "../delete-news-button";
 import { NewsForm } from "../news-form";
@@ -52,7 +52,7 @@ async function EditNews({ params, searchParams }: Pick<Props, "params" | "search
       </p>
 
       <div className={`mt-8 max-w-4xl ${panel}`}>
-        <NewsForm news={{ id: news.id, title: news.title, content: news.content, published: news.published === 1 }} />
+        <NewsForm news={{ id: news.id, title: news.title, content: news.content, thumbnail: newsThumbnail(news) ?? "", published: news.published === 1 }} />
       </div>
 
       <section className="mt-10 max-w-4xl rounded-2xl border border-destructive/30 p-6">

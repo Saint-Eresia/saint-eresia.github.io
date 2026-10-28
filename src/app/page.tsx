@@ -7,7 +7,7 @@ import { FeaturedCarousel, type FeaturedSlide } from "@/components/featured-caro
 import { PatchTile } from "@/components/home/patch-tile";
 import { EmptyState } from "@/components/page-intro";
 import { Button } from "@/components/ui/button";
-import { excerpt, listNews, newsDate } from "@/lib/news";
+import { excerpt, listNews, newsDate, newsThumbnail } from "@/lib/news";
 import { latestReleases, listFeaturedNovels, listNovels } from "@/lib/novels";
 import { PATCH_KINDS, patchHref, type PatchKind } from "@/lib/patch-kinds";
 import { formatDate, imageUrl, listFeaturedPatches, listPatches } from "@/lib/patches";
@@ -257,20 +257,26 @@ async function CompactNews() {
   }
   return (
     <ol className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
-      {news.map((item) => (
-        <li key={item.id}>
-          <Link
-            href={`/actualites/${item.slug}`}
-            className="group block px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
-          >
-            <time dateTime={newsDate(item)} className="text-xs font-semibold text-muted-foreground">
-              {formatDate(newsDate(item))}
-            </time>
-            <p className="mt-0.5 font-bold group-hover:text-primary">{item.title}</p>
-            <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{excerpt(item.content, 140)}</p>
-          </Link>
-        </li>
-      ))}
+      {news.map((item) => {
+        const thumbnail = newsThumbnail(item);
+        return (
+          <li key={item.id}>
+            <Link
+              href={`/actualites/${item.slug}`}
+              className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
+            >
+              {thumbnail && <img src={thumbnail} alt="" loading="lazy" className="aspect-video w-20 shrink-0 rounded-lg object-cover" />}
+              <div className="min-w-0">
+                <time dateTime={newsDate(item)} className="text-xs font-semibold text-muted-foreground">
+                  {formatDate(newsDate(item))}
+                </time>
+                <p className="mt-0.5 font-bold group-hover:text-primary">{item.title}</p>
+                <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{excerpt(item.content, 140)}</p>
+              </div>
+            </Link>
+          </li>
+        );
+      })}
     </ol>
   );
 }

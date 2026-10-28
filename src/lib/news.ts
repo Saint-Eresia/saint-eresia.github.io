@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
+import { fileUrl } from "@/lib/file-url";
 import { slugify } from "@/lib/patches";
 
 export type News = {
@@ -8,6 +9,7 @@ export type News = {
   slug: string;
   title: string;
   content: string;
+  thumbnail: string;
   author: string;
   published: number;
   publishedAt: string | null;
@@ -17,6 +19,9 @@ export type News = {
 
 // Date affichée : celle de la publication, sinon celle de la création (brouillon).
 export const newsDate = (news: Pick<News, "publishedAt" | "createdAt">) => news.publishedAt ?? news.createdAt;
+
+// Adresse affichable de la miniature, null sans miniature.
+export const newsThumbnail = (news: Pick<News, "thumbnail">) => (news.thumbnail ? fileUrl(news.thumbnail) : null);
 
 // Texte brut pour l’aperçu : sans images, liens réduits à leur texte, sans marques de mise en forme.
 export function excerpt(markdown: string, length = 180) {

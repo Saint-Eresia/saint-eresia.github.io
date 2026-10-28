@@ -156,11 +156,13 @@ const SCHEMA = `
     PRIMARY KEY (patchId, memberId)
   );
   -- Actualités de la page d’accueil. content : Markdown. publishedAt : date de la première publication.
+  -- thumbnail : miniature facultative (nom du fichier envoyé ou adresse http(s)), vide sans miniature.
   CREATE TABLE IF NOT EXISTS news (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
     content TEXT NOT NULL DEFAULT '',
+    thumbnail TEXT NOT NULL DEFAULT '',
     author TEXT NOT NULL DEFAULT '',
     published INTEGER NOT NULL DEFAULT 0,
     publishedAt TEXT,
@@ -407,6 +409,8 @@ export async function prepareSchema(client: Client) {
   if (!volumeColumns.includes("reedit")) await client.execute("ALTER TABLE volume ADD COLUMN reedit INTEGER NOT NULL DEFAULT 0");
   if (!volumeColumns.includes("imageWidth")) await client.execute("ALTER TABLE volume ADD COLUMN imageWidth INTEGER NOT NULL DEFAULT 0");
   if (!volumeColumns.includes("imageHeight")) await client.execute("ALTER TABLE volume ADD COLUMN imageHeight INTEGER NOT NULL DEFAULT 0");
+  const newsColumns = ((await client.execute("PRAGMA table_info(news)")).rows as unknown as { name: string }[]).map((c) => c.name);
+  if (!newsColumns.includes("thumbnail")) await client.execute("ALTER TABLE news ADD COLUMN thumbnail TEXT NOT NULL DEFAULT ''");
   const patchColumns = ((await client.execute("PRAGMA table_info(patch)")).rows as unknown as { name: string }[]).map((c) => c.name);
   if (!patchColumns.includes("quote")) await client.execute("ALTER TABLE patch ADD COLUMN quote TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("featured")) await client.execute("ALTER TABLE patch ADD COLUMN featured INTEGER NOT NULL DEFAULT 0");

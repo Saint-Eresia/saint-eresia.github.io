@@ -12,7 +12,7 @@ export default function NewNewsPage() {
       <TeamGate>
         <ManageHeader back={{ href: "/gestion?onglet=actualites", label: "Gestion" }} title="Nouvelle actualité" />
         <div className={`mt-8 max-w-4xl ${panel}`}>
-          <NewsForm news={{ title: "", content: "", published: false }} />
+          <NewsForm news={{ title: "", content: "", thumbnail: "", published: false }} />
         </div>
       </TeamGate>
     </Suspense>

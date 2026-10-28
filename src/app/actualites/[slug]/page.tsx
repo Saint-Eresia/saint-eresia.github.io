@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
-import { excerpt, getPublishedNews, newsDate } from "@/lib/news";
+import { excerpt, getPublishedNews, newsDate, newsThumbnail } from "@/lib/news";
 import { formatDate } from "@/lib/patches";
 import { socialMetadata } from "@/lib/site-url";
 import { getViewer } from "@/lib/viewer";
@@ -13,8 +13,8 @@ import { getViewer } from "@/lib/viewer";
 export async function generateMetadata({ params }: PageProps<"/actualites/[slug]">): Promise<Metadata> {
   const news = await getPublishedNews((await params).slug);
   if (!news) return { title: "Actualité introuvable" };
-  // Aperçu de partage : première image de l’article, s’il en a une.
-  const image = news.content.match(/!\[[^\]]*\]\(([^)\s]+)\)/)?.[1];
+  // Aperçu de partage : la miniature, sinon la première image de l’article, s’il en a une.
+  const image = newsThumbnail(news) ?? news.content.match(/!\[[^\]]*\]\(([^)\s]+)\)/)?.[1];
   return { title: news.title, ...socialMetadata({ title: news.title, description: excerpt(news.content, 160), image, large: !!image, type: "article" }) };
 }
 

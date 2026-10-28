@@ -97,6 +97,16 @@ export async function saveAvatar(input: Buffer) {
   return storeFile(data);
 }
 
+// Miniature d’une actualité : 1200 px de large au plus, en WebP. Renvoie la valeur à garder en base.
+export async function saveThumbnail(input: Buffer) {
+  const data = await sharp(input, { limitInputPixels: 100_000_000 })
+    .rotate()
+    .resize({ width: 1200, withoutEnlargement: true })
+    .webp({ quality: 85 })
+    .toBuffer();
+  return storeFile(data);
+}
+
 export async function removeFile(file: string) {
   if (!file) return;
   if (/^https?:\/\//.test(file)) {
