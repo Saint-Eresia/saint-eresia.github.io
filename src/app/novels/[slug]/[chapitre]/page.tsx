@@ -59,6 +59,12 @@ async function Reader({ params }: { params: Props["params"] }) {
     chapters: v.chapters.map((c) => ({ slug: c.slug, heading: chapterHeading(c) })),
   }));
 
+  const credits = chapter.credits ? (
+    <CreditLines text={chapter.credits} className="space-y-0.5" />
+  ) : (
+    chapter.translators && <p>Traduction : {chapter.translators}</p>
+  );
+
   return (
     <article className={`reader-article mx-auto max-w-3xl px-4 pt-10 sm:px-6 ${literata.variable}`}>
       <header className="text-center">
@@ -68,15 +74,27 @@ async function Reader({ params }: { params: Props["params"] }) {
         <p data-reader-chrome className="mt-1 text-sm text-muted-foreground">
           {volumeHeading(volume)}
         </p>
-        {/* En capitales, avec la police de lecture : « Chapitre 1 – « Titre » ». */}
-        <h1 className="mt-5 font-(family-name:--font-literata) text-2xl leading-snug font-normal tracking-wide text-pretty uppercase sm:text-4xl lg:-mx-8 sm:leading-snug">
-          {chapter.title && chapter.title !== chapter.label ? `${chapter.label} – « ${chapter.title} »` : chapter.label}
-        </h1>
-        {chapter.credits ? (
-          <CreditLines text={chapter.credits} className="mt-3 space-y-0.5 text-sm text-muted-foreground" />
-        ) : (
-          chapter.translators && <p className="mt-3 text-sm text-muted-foreground">Traduction : {chapter.translators}</p>
-        )}
+        {/* En capitales, avec la police de lecture : « Chapitre 1 – « Titre » ». Les traducteurs apparaissent au survol
+            du titre (au toucher sur mobile, qui lui donne le focus) ; la bulle touche le titre pour qu'on puisse y suivre un lien. */}
+        <div className="group relative mt-5 lg:-mx-8">
+          <h1
+            tabIndex={credits ? 0 : undefined}
+            aria-describedby={credits ? "chapter-credits" : undefined}
+            className={`font-(family-name:--font-literata) text-2xl leading-snug font-normal tracking-wide text-pretty uppercase outline-none sm:text-4xl sm:leading-snug ${credits ? "cursor-help" : ""}`}
+          >
+            {chapter.title && chapter.title !== chapter.label ? `${chapter.label} – « ${chapter.title} »` : chapter.label}
+          </h1>
+          {credits && (
+            <div
+              id="chapter-credits"
+              className="invisible absolute inset-x-0 top-full z-20 flex justify-center pt-2 opacity-0 transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+            >
+              <div className="max-w-xl rounded-xl border border-border bg-popover px-4 py-3 text-sm text-muted-foreground shadow-[0_12px_32px_var(--shadow)]">
+                {credits}
+              </div>
+            </div>
+          )}
+        </div>
         {chapter.downloadUrl && (
           <Button asChild variant="outline" size="pill" className="mt-5">
             <a href={chapter.downloadUrl} target="_blank" rel="noopener noreferrer">
