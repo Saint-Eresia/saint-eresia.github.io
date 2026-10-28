@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import localFont from "next/font/local";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { VisitorStats } from "@/components/visitor-stats";
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
         <Toaster position="bottom-center" />
+        <Analytics />
       </body>
     </html>
   );
