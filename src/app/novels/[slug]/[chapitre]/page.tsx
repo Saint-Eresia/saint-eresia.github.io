@@ -68,7 +68,10 @@ async function Reader({ params }: { params: Props["params"] }) {
         <p data-reader-chrome className="mt-1 text-sm text-muted-foreground">
           {volumeHeading(volume)}
         </p>
-        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">{chapterHeading(chapter)}</h1>
+        {/* En capitales, avec la police de lecture : « Chapitre 1 – « Titre » ». */}
+        <h1 className="mt-5 font-(family-name:--font-literata) text-2xl leading-snug font-normal tracking-wide text-pretty uppercase sm:text-4xl lg:-mx-8 sm:leading-snug">
+          {chapter.title && chapter.title !== chapter.label ? `${chapter.label} – « ${chapter.title} »` : chapter.label}
+        </h1>
         {chapter.credits ? (
           <CreditLines text={chapter.credits} className="mt-3 space-y-0.5 text-sm text-muted-foreground" />
         ) : (
