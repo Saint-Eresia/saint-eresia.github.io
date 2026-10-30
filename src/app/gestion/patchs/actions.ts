@@ -50,6 +50,13 @@ function readPatchForm(formData: FormData) {
   const vndbMatch = vndbRaw.match(/^(?:(?:https?:\/\/)?(?:www\.)?vndb\.org\/)?v?(\d{1,7})\/?$/i);
   if (vndbRaw && !vndbMatch) return { error: "L’identifiant VNDB doit avoir la forme v12345 (ou l’adresse de la fiche VNDB)." };
   const vndbId = vndbMatch ? `v${Number(vndbMatch[1])}` : "";
+  // YouTube : l’adresse de la vidéo (youtube.com/watch?v=…, youtu.be/…, /embed/…, /shorts/…) ou son identifiant.
+  const youtubeRaw = String(formData.get("youtubeId") ?? "").trim();
+  const youtubeMatch = youtubeRaw.match(
+    /^(?:(?:https?:\/\/)?(?:www\.|m\.)?(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)))?([\w-]{11})(?:[?&#/].*)?$/i,
+  );
+  if (youtubeRaw && !youtubeMatch) return { error: "La vidéo YouTube doit être l’adresse d’une vidéo (ou son identifiant)." };
+  const youtubeId = youtubeMatch ? youtubeMatch[1] : "";
   if (quote.length > 120) return { error: "La citation est trop longue (120 caractères maximum)." };
 
   if (!title || title.length > 180) return { error: "Le titre est requis (180 caractères maximum)." };
@@ -71,7 +78,7 @@ function readPatchForm(formData: FormData) {
   }
   const progress = steps.length ? averageProgress(steps) : manualProgress;
 
-  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, draft, kind, steamAppId, gogId, vndbId } };
+  return { data: { title, description, status, progress, downloadUrl, steps, progressSteps: JSON.stringify(steps), quote, featured, draft, kind, steamAppId, gogId, vndbId, youtubeId } };
 }
 
 // Étapes d’avancement : « Avancement Traduction : 90 % → 100 % », étape ajoutée ou retirée.
@@ -92,14 +99,15 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
 
   const parsed = readPatchForm(formData);
   if (parsed.error) return { error: parsed.error };
-  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId } = parsed.data!;
+  const { title, description, status, progress, downloadUrl, steps, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, youtubeId } =
+    parsed.data!;
   const id = Number(formData.get("id")) || null;
 
   if (id === null) {
     const [created] = await db.batch([
       {
-        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId],
+        sql: "INSERT INTO patch (slug, title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, youtubeId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [await uniqueSlug(title), title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, youtubeId],
       },
       logEntry(actor, { type: "patch", id: "last", label: title, action: "create" }),
     ]);
@@ -122,6 +130,7 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
       { label: "Steam App ID", before: before.steamAppId ?? "", after: steamAppId ?? "" },
       { label: "ID GOG", before: before.gogId ?? "", after: gogId ?? "" },
       { label: "ID VNDB", before: before.vndbId ?? "", after: vndbId },
+      { label: "Vidéo YouTube", before: before.youtubeId ?? "", after: youtubeId },
       { label: "Citation", before: before.quote, after: quote },
       { label: "Recommandé sur l’accueil", before: before.featured ? "Oui" : "Non", after: featured ? "Oui" : "Non" },
       { label: "Description", before: before.description, after: description, long: true },
@@ -132,8 +141,8 @@ export async function savePatch(_prev: ActionResult, formData: FormData): Promis
     { id, title },
     [
       {
-        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, draft = ?, kind = ?, steamAppId = ?, gogId = ?, vndbId = ? WHERE id = ?",
-        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, id],
+        sql: "UPDATE patch SET title = ?, description = ?, status = ?, progress = ?, downloadUrl = ?, progressSteps = ?, quote = ?, featured = ?, draft = ?, kind = ?, steamAppId = ?, gogId = ?, vndbId = ?, youtubeId = ? WHERE id = ?",
+        args: [title, description, status, progress, downloadUrl, progressSteps, quote, featured, draft, kind, steamAppId, gogId, vndbId, youtubeId, id],
       },
     ],
     changes,

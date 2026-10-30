@@ -43,6 +43,8 @@ const SCHEMA = `
     gogId INTEGER,
     -- Identifiant VNDB (« v12345 ») ; vide si inconnu.
     vndbId TEXT NOT NULL DEFAULT '',
+    -- Vidéo YouTube (opening, bande-annonce…) affichée sous les captures : identifiant de la vidéo, ou vide.
+    youtubeId TEXT NOT NULL DEFAULT '',
     -- Téléchargements depuis la fiche (un par visiteur et par jour, voir patch_download).
     downloads INTEGER NOT NULL DEFAULT 0,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
@@ -418,6 +420,7 @@ export async function prepareSchema(client: Client) {
   if (!patchColumns.includes("steamAppId")) await client.execute("ALTER TABLE patch ADD COLUMN steamAppId INTEGER");
   if (!patchColumns.includes("gogId")) await client.execute("ALTER TABLE patch ADD COLUMN gogId INTEGER");
   if (!patchColumns.includes("vndbId")) await client.execute("ALTER TABLE patch ADD COLUMN vndbId TEXT NOT NULL DEFAULT ''");
+  if (!patchColumns.includes("youtubeId")) await client.execute("ALTER TABLE patch ADD COLUMN youtubeId TEXT NOT NULL DEFAULT ''");
   if (!patchColumns.includes("downloads")) await client.execute("ALTER TABLE patch ADD COLUMN downloads INTEGER NOT NULL DEFAULT 0");
   if (!patchColumns.includes("kind")) {
     await client.execute("ALTER TABLE patch ADD COLUMN kind TEXT NOT NULL DEFAULT 'vn' CHECK (kind IN ('vn', 'jeu'))");

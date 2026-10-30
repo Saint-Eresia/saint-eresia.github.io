@@ -180,6 +180,22 @@ async function PatchDetail({ params, kind }: { params: Promise<{ slug: string }>
               />
             </section>
           )}
+          {patch.youtubeId && (
+            <section>
+              <h2 className="mb-5 text-xl font-extrabold tracking-tight">Vidéo</h2>
+              <div className="aspect-video overflow-hidden rounded-2xl border border-border bg-black">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${patch.youtubeId}`}
+                  title={`${patch.title} : vidéo`}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </article>

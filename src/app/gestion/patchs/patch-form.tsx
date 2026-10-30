@@ -23,6 +23,7 @@ type PatchFields = {
   steamAppId: number | null;
   gogId: number | null;
   vndbId: string;
+  youtubeId: string; // vidéo sous les captures de la fiche
   steps: ProgressStep[];
   quote: string;
   featured: boolean; // recommandé sur l’accueil
@@ -44,6 +45,7 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
   const [steamAppId, setSteamAppId] = useState(patch.steamAppId === null ? "" : String(patch.steamAppId));
   const [gogId, setGogId] = useState(patch.gogId === null ? "" : String(patch.gogId));
   const [vndbId, setVndbId] = useState(patch.vndbId);
+  const [youtubeId, setYoutubeId] = useState(patch.youtubeId && `https://youtu.be/${patch.youtubeId}`);
   const [description, setDescription] = useState(patch.description);
   const [steps, setSteps] = useState(patch.steps);
   const [quote, setQuote] = useState(patch.quote);
@@ -252,6 +254,18 @@ export function PatchForm({ patch, statuses }: { patch: PatchFields; statuses: r
           de la page du jeu sur le Store (store.steampowered.com/app/<strong>970570</strong>/…). VNDB : l’identifiant de la fiche
           (vndb.org/<strong>v12345</strong>) ; son adresse complète est acceptée aussi.
         </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="youtubeId">Vidéo YouTube</Label>
+        <Input
+          id="youtubeId"
+          name="youtubeId"
+          placeholder="https://youtu.be/…"
+          value={youtubeId}
+          onChange={(e) => setYoutubeId(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">Facultatif. Opening, bande-annonce… : affichée sous les captures d’écran de la fiche.</p>
       </div>
 
       <div className="space-y-2">

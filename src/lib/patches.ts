@@ -35,6 +35,7 @@ export type Patch = {
   steamAppId: number | null; // pour le launcher : détection du jeu installé
   gogId: number | null;
   vndbId: string; // « v12345 », ou vide
+  youtubeId: string; // vidéo affichée sous les captures (opening, bande-annonce…), ou vide
   downloads: number; // téléchargements depuis la fiche (src/lib/stats.ts)
   createdAt: string;
   updatedAt: string;
